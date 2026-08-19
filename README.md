@@ -1,0 +1,141 @@
+# `.agentic`
+
+An orchestrated agent network for the repos under `C:\projects\investments\`.
+Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+```
+.agentic/
+├─ ARCHITECTURE.md
+├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
+├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
+│  ├─ .claude-plugin/plugin.json
+│  ├─ commands/feature.md                 ← /agentic-core:feature "..."
+│  ├─ skills/
+│  │  ├─ orchestrate-feature/SKILL.md     ← the router; runs in the main session
+│  │  └─ agentic-protocol/SKILL.md        ← work-order + report contracts
+│  └─ agents/
+│     ├─ producer.md              roadmap · epics · stories · sequencing
+│     ├─ quant-analyst.md         formulas · trust classes · financial gate
+│     ├─ scout.md                 read-only recon
+│     ├─ tech-lead.md             design pass + integration gate
+│     ├─ backend-engineer.md
+│     ├─ frontend-engineer.md
+│     ├─ test-engineer.md
+│     ├─ docs-engineer.md
+│     └─ reviewer.md              acceptance gate
+├─ projects/portfolio/                    ← project-SPECIFIC layer
+│  ├─ project.md                          ← the binding profile
+│  └─ capabilities/
+│     ├─ product.md               for the producer
+│     ├─ quant.md                 for the quant analyst
+│     ├─ architecture.md          for the tech lead
+│     ├─ backend.md · frontend.md · testing.md · docs.md
+└─ _repo-patch/.agentic.json              ← copy this into the repo root
+```
+
+## Install
+
+**1. Drop the pointer file into the repo.**
+
+```
+copy .agentic\_repo-patch\.agentic.json C:\projects\investments\portfolio\.agentic.json
+```
+
+This one file is the entire binding. Commit it — it is how any agent, in any
+session, finds its context pack.
+
+**2. Register the marketplace and install the plugin.** From Claude Code with
+`C:\projects\investments\portfolio` open:
+
+```
+/plugin marketplace add C:\projects\investments\.agentic
+/plugin install agentic-core@agentic
+```
+
+**3. Verify.** Run `/plugin` — `agentic-core` should show as installed. (`/agents` no longer lists them; ask Claude "which subagents do you have?" instead.) `/plugin` should show
+`agentic-core` enabled.
+
+While iterating on the network itself: edits to a `SKILL.md` take effect
+immediately, but changes under `agents/`, `commands/` or `.mcp.json` need
+`/reload-plugins` or a restart.
+
+### Fallback wiring
+
+If the marketplace route gives you trouble on Windows, a directory junction
+works and needs no plugin machinery at all:
+
+```
+mklink /J C:\projects\investments\portfolio\.claude\agents C:\projects\investments\.agentic\plugins\agentic-core\agents
+```
+
+Same for `skills`. You lose namespacing and versioning; you keep everything
+else. Fine for evaluating whether the design earns its keep.
+
+## Use
+
+```
+/agentic-core:feature add a per-sector drawdown breakdown to the Risk tab
+```
+
+Or just describe what you want — `orchestrate-feature`'s description is written
+to trigger on ordinary phrasing.
+
+What happens:
+
+1. The orchestrator binds to the project via `.agentic.json`.
+2. **Producer** reads the roadmap and returns a delivery brief: already shipped,
+   fits an active story, new story, new epic, or decline. You approve it.
+3. If new stories are needed, you run the repo's story-authoring skill. This is
+   a deliberate human gate — acceptance criteria are the contract everything
+   downstream is measured against.
+4. **Quant analyst (research)**, if the substance is mathematical, establishes
+   the formulas, trust classes and metrics inventory *before* the story is
+   written — so the acceptance criteria are groundable.
+5. **Tech lead (design)** settles the contract, the reuse, and the lane split
+   before any engineer starts. You approve the lane plan.
+6. **Engineers** run one order at a time, each in its own context. Contract
+   notes route forward between lanes.
+7. **Quant analyst (audit)** independently recomputes any changed number.
+8. **Tech lead (integration)** gates the engineering; change requests are
+   relayed verbatim to the owning lane.
+9. **Reviewer** gates acceptance against the story.
+10. You run the suite and commit. No agent commits.
+
+## What is deliberately not automated
+
+**Story authoring.** A vertical slice with no ticketed story stops the
+orchestrator. That gate exists to catch bad acceptance criteria before code, and
+automating past it would remove the only cheap place to catch them.
+
+**Commits.** The repo's `pre_commit_gate.py` hook and CI are the real authority.
+The network never touches that boundary.
+
+**The final test run.** The reviewer agent is a cheap pre-check for things a
+green suite cannot see — a missing acceptance criterion, a lagging contract doc.
+It is not a substitute for `python scripts/run_all_tests.py`.
+
+## Current state (v0.2.1)
+
+All nine roles live, each with a capability pack for `portfolio`.
+
+The one thing not yet validated: **no real story has been through this end to
+end.** The work-order, report and change-request shapes are considered guesses
+until something real passes through them. Running one small slice and correcting
+where the protocol chafes is worth more than adding another role.
+
+Roadmap in `ARCHITECTURE.md` §7.
+
+## Extending
+
+Adding a project: create `projects/<name>/project.md` + capability packs, drop
+`.agentic.json` in that repo. The `plugins/` layer is untouched — that is the
+whole reason for the split.
+
+Adding an agent: agent files carry **zero** repo specifics. If you are writing
+`pytest` into an agent file, that line belongs in a capability pack. See
+`agentic-protocol` § "Authoring rules".
+
+Keeping a pack honest: when a run surfaces something the pack failed to warn
+about, the agent reports it in `risks`. Those entries are the pack's maintenance
+backlog — fold them in, or the pack decays into a document that describes the
+repo as it was.

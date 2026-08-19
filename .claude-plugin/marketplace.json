@@ -1,0 +1,11 @@
+{
+  "name": "agentic",
+  "owner": { "name": "movie-clip" },
+  "plugins": [
+    {
+      "name": "agentic-core",
+      "source": "./plugins/agentic-core",
+      "description": "Project-agnostic agent network: orchestrator skill + specialist subagent roster (test, backend, frontend, docs, review). Binds to a per-project context pack at runtime."
+    }
+  ]
+}

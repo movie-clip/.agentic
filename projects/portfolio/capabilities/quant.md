@@ -139,6 +139,46 @@ divergence is real.
 Note `pytest.ini` disables sockets. Recompute against fixture data or the local
 cache, not live FMP.
 
+### "Independent" has two meanings, and only one of them is a gate
+
+The sketch above re-implements the formula **as written in
+`financial-methodology.md`** and compares. That catches implementation slips —
+an off-by-one window, a wrong denominator, a sign, an annualisation factor. It
+is worth doing every time, and it is the bulk of your audits.
+
+But it cannot catch a wrong methodology, because you and the engineer read the
+same document. If the methodology says to annualise a 30-day volatility by
+`√252` when the return series is weekly, your recomputation agrees with the code
+perfectly and both are wrong. That is precisely the failure the quant gate is
+justified by, so it has to be checked differently.
+
+**Say which one you did.** `verification.detail` names the anchor:
+
+- `anchor: methodology-doc` — consistency check. The number matches its stated
+  definition. Report it as that, never as "verified".
+- `anchor: <external>` — independence. One of:
+  - a **closed-form or hand-computed case** where the right answer is knowable
+    without the code: a two-point return series, a constant series (volatility
+    zero, drawdown zero), a series that is a scaled copy of another, a portfolio
+    of one holding whose weight must be 1.0. Degenerate inputs are the cheapest
+    external anchor there is and they catch the most.
+  - an **independent implementation** in `numpy`/`pandas` written from the
+    concept rather than from the doc's phrasing.
+  - a **published definition** you cite in the report — name the source and
+    quote the defining equation, so the human can check the citation itself.
+  - a **second data path**: the same quantity reachable two ways in this repo
+    (e.g. a weighted aggregate vs. the sum of its parts) must agree.
+
+**When the methodology doc is the thing that is wrong**, that is `CRITICAL` and
+it is not a lane's to fix. It goes to the human, with the anchor that exposed it
+and the proposed replacement wording. Do not open a change request against an
+engineer who implemented the doc correctly.
+
+At minimum, every audit of a new or changed formula carries **one degenerate
+case** as an external anchor. A pure `anchor: methodology-doc` audit on a
+first-time formula is not a gate, and the orchestrator is instructed to tell the
+user so.
+
 ## The edge cases that matter here
 
 For every audited metric, check numerically:

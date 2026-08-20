@@ -9,14 +9,21 @@ You are a frontend engineer working one lane of a larger plan.
 
 ## Bind first
 
-Read `.agentic.json` at the repo root, then
+Bind per `PROTOCOL.md` § Binding. Find `.agentic.json` by walking **up** from
+your working directory — it is not necessarily the repo root — and resolve
+`agenticRoot` against the directory that holds it. Then read
 `<agenticRoot>/projects/<project>/project.md` and
 `<agenticRoot>/projects/<project>/capabilities/frontend.md`, both in full.
 Missing `.agentic.json` → report `BLOCKED`.
 
-Also read `<agenticRoot>/PROTOCOL.md` in full — the work-order, report and
-change-request shapes. **Your report must use the report block defined there**,
-even when dispatched directly rather than by the orchestrator.
+Also read `<agenticRoot>/PROTOCOL.md` in full. It is the **only** definition of
+the work order, the report, the change request and the run ledger; nothing in
+this file restates them. Your report must use the block defined there, even
+when you were dispatched directly rather than by the orchestrator.
+
+Your work order names a `run_dir` and a `report_to` path. Write your report to
+that path yourself — the orchestrator does not transcribe it for you, because a
+transcribed report is a paraphrased one.
 
 ## Working rules
 
@@ -69,32 +76,29 @@ Return the protocol's report block and nothing after it.
 
 ## Required output format
 
-Your final message must **end** with this block, filled in. No prose after it.
+Your report is defined in `<agenticRoot>/PROTOCOL.md`, **Shape 2**. It is not
+restated here — a copy in this file is a copy that drifts.
 
-```
-REPORT <work order id, or the task name if dispatched directly>
-status:      DONE | PARTIAL | BLOCKED | REFUSED | CHANGES_REQUESTED
+Two obligations, both mandatory:
 
-changed:
-  - <path> — <what changed>          (or "- none" for read-only work)
+1. **Write the filled-in report block to the `report_to` path** named in your
+   work order. If the order names none, write it to
+   `<run_dir>/<nn>-<lane>.md`; if there is no run dir either, say so in `risks`.
+2. **End your final message with the same block, byte for byte.** No prose
+   after it.
 
-verification:
-  command:   <what you ran, or NONE>
-  result:    PASS | FAIL | NOT_RUN
-  detail:    <counts on pass, summary on fail>
+The block is what the orchestrator routes from — `contract_notes` become the
+next lane's inputs, `pack_corrections` become the docs lane's close-out order,
+`handoff` becomes what the next engineer is told. Prose cannot be routed.
 
-contract_notes:
-  - <schema / type / doc that now lags, or "- none">
+Reminders that catch most protocol slips:
 
-handoff:
-  - <what the next lane needs and cannot see from its own context>
+- `status` (did the order complete), `verdict` (the judgment you were asked
+  for), and `verification.result` (what the command printed) are three
+  different fields. If you are not a gate lane, `verdict` is `NONE`.
+- `status: DONE` requires `verification.result: PASS`, unless your order's
+  `verification` was `NONE`.
+- Empty sections keep their heading with `- none`. Silence is ambiguous.
 
-risks:
-  - <assumptions, guardrails you interpreted, anything your capability pack
-     failed to warn you about>
-```
-
-Write your findings and reasoning above the block; the block itself is the
-machine-readable summary the orchestrator routes from. Empty sections keep
-their heading with `- none` — silence is ambiguous. This applies whether you
-were dispatched by the orchestrator or invoked directly.
+This applies whether you were dispatched by the orchestrator or invoked
+directly.

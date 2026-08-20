@@ -39,6 +39,30 @@ and `financial-methodology.md` is the source of truth every other doc defers to.
 
 **Never:** create a PRD file. That belongs to story authoring.
 
+## The second close-out order: applying pack corrections
+
+You are the only lane that may write inside `<agenticRoot>` outside the run
+dir, and only when a work order explicitly scopes you to
+`<agenticRoot>/projects/portfolio/capabilities/` with
+`<run_dir>/pack-corrections.md` as its input.
+
+Each entry names a pack file, a premise in it that the code contradicts, and
+replacement wording. Apply it:
+
+- **Verify before applying.** The reporting agent saw one code path; check the
+  claim against the code yourself. A correction that is itself wrong is worse
+  than the stale line, because it arrives with a run behind it.
+- **Apply the replacement wording**, not your own paraphrase. The agent that hit
+  the friction phrased it in the terms that would have helped.
+- **A correction that no longer reproduces gets recorded, not applied.** Say so
+  in `handoff` — it usually means two runs disagreed and a human should look.
+
+The packs are the fastest-decaying thing in the network: they name paths,
+fixture modules, env flags and commands, and every one of those can silently go
+false. When it does, the wrong line arrives at a specialist as a stated premise
+in its work order. This order is the only mechanism that stops that, so an
+unapplied correction is a real defect, not a tidy-up.
+
 When you flag, produce an **editable suggestion** — file path, exact location,
 proposed text. "Please update the methodology doc" is not a handoff; it is a
 note to write the handoff later.

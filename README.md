@@ -6,16 +6,19 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 ```
 .agentic/
 ├─ ARCHITECTURE.md
+├─ PROTOCOL.md                            ← THE contract. Single copy, by design.
+├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
 │  ├─ commands/feature.md                 ← /agentic-core:feature "..."
 │  ├─ skills/
 │  │  ├─ orchestrate-feature/SKILL.md     ← the router; runs in the main session
-│  │  └─ agentic-protocol/SKILL.md        ← work-order + report contracts
+│  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
 │     ├─ producer.md              roadmap · epics · stories · sequencing
 │     ├─ quant-analyst.md         formulas · trust classes · financial gate
+│     ├─ story-author.md          drafts the ticketed story (human approves)
 │     ├─ scout.md                 read-only recon
 │     ├─ tech-lead.md             design pass + integration gate
 │     ├─ backend-engineer.md
@@ -28,6 +31,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  └─ capabilities/
 │     ├─ product.md               for the producer
 │     ├─ quant.md                 for the quant analyst
+│     ├─ story.md                 for the story author
 │     ├─ architecture.md          for the tech lead
 │     ├─ backend.md · frontend.md · testing.md · docs.md
 └─ _repo-patch/.agentic.json              ← copy this into the repo root
@@ -114,16 +118,35 @@ The network never touches that boundary.
 green suite cannot see — a missing acceptance criterion, a lagging contract doc.
 It is not a substitute for `python scripts/run_all_tests.py`.
 
-## Current state (v0.2.1)
+## Current state (v0.3)
 
-All nine roles live, each with a capability pack for `portfolio`.
+All ten roles live, each with a capability pack for `portfolio`.
 
-The one thing not yet validated: **no real story has been through this end to
-end.** The work-order, report and change-request shapes are considered guesses
-until something real passes through them. Running one small slice and correcting
-where the protocol chafes is worth more than adding another role.
+v0.3 is the design review's structural pass — run ledger, relay by path, one
+copy of the protocol, the express lane, separated status/verdict fields, pack
+corrections with an owner, and `build-story` retired. Details in
+`ARCHITECTURE.md` §7.
 
-Roadmap in `ARCHITECTURE.md` §7.
+**Still not validated: no real story has been through this end to end.** Every
+shape here remains a guess until something real passes through it, and v0.3
+changed the shapes rather than testing them. The next move is one *small* slice,
+chosen so the cost model in `orchestrate-feature` § Step 1 gets measured instead
+of asserted — then correct the protocol where it chafed.
+
+### Not yet mechanical
+
+Honest list of what is still enforced by asking an agent nicely:
+
+| Rule | Backed by |
+|---|---|
+| No agent commits | **hook** — `pre_commit_gate.py`. Real. |
+| Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
+| `scope` fences a work order | prose only. v0.5. |
+| Reports use the protocol shape | prose only; nothing parses them. |
+| The express lane isn't abused | prose only — but it self-voids on any contract note. |
+
+Knowing which line is which is the point of the table. A rule you believe is
+enforced, and isn't, is worse than one you know is on trust.
 
 ## Extending
 

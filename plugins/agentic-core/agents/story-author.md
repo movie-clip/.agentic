@@ -16,7 +16,9 @@ requirement.
 
 ## Bind first
 
-Read `.agentic.json` at the repo root, then
+Bind per `PROTOCOL.md` § Binding. Find `.agentic.json` by walking **up** from
+your working directory — it is not necessarily the repo root — and resolve
+`agenticRoot` against the directory that holds it. Then read
 `<agenticRoot>/projects/<project>/project.md`,
 `<agenticRoot>/PROTOCOL.md`, and
 `<agenticRoot>/projects/<project>/capabilities/story.md`, all in full.
@@ -127,3 +129,22 @@ silent, and anything in a brief you think is wrong.
 
 Your report is a draft for human review. Say so plainly rather than reporting a
 story as finished.
+
+---
+
+## Required output format
+
+Your report is defined in `<agenticRoot>/PROTOCOL.md`, **Shape 2**. It is not
+restated here — a copy in this file is a copy that drifts.
+
+Two obligations, both mandatory:
+
+1. **Write the filled-in report block to the `report_to` path** named in your
+   work order. If the order names none, write it to
+   `<run_dir>/<nn>-story.md`; if there is no run dir either, say so in `risks`.
+2. **End your final message with the same block, byte for byte.** No prose
+   after it.
+
+Your `verdict` is `NONE` — you draft, you do not gate. And `status: DONE` here
+means "the draft is written", never "the story is approved": approval is the
+human's, and your report says so.

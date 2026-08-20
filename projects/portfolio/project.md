@@ -107,18 +107,38 @@ approve it. The human approves; the network never self-approves a story.
 | backend | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test) |
 | frontend | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test) |
 | test | `test-engineer` | `testing.md` | `app/tests/**`, `src/**/*.test.{ts,tsx}`, `src/test/**` |
-| docs | `docs-engineer` | `docs.md` | `docs/**` |
+| docs | `docs-engineer` | `docs.md` | `docs/**`, and — at close-out only — `<agenticRoot>/projects/portfolio/capabilities/**` when applying `pack-corrections.md` |
 | quant-audit | `quant-analyst` (AUDIT) | `quant.md` | **financial gate**: independently recomputes, checks trust honesty |
 | integration | `tech-lead` (INTEGRATION) | `architecture.md` | engineering gate: PASS / CHANGES_REQUESTED |
 | review | `reviewer` | — | acceptance gate: PASS / FAIL |
 
-All ten roles are live. Three gates, each checking something the others cannot
-see: `quant-analyst` gates the mathematics, `tech-lead` gates engineering
-coherence, `reviewer` gates acceptance against the story.
+All **ten** roles are live (`plugins/agentic-core/agents/` is the authority on
+that count). Three gates, each checking something the others cannot see:
+`quant-analyst` gates the mathematics, `tech-lead` gates engineering coherence,
+`reviewer` gates acceptance against the story.
 
 **Any change touching `analytics/`, a formula, a weighting, a return basis, or a
 trust classification must go through the quant lane** — in research mode before,
-audit mode after. That is guardrail one made operational.
+audit mode after. That is guardrail one made operational. It is also the
+hardest express-lane disqualifier: mathematics never takes the short route.
+
+### The express lane in this repo
+
+`orchestrate-feature` § "The express lane" defines the gate. What it means here:
+
+**Eligible.** A failing or flaky test (`test` lane). A doc reconciliation the
+reviewer or a contract note already identified (`docs` lane). A rename or a
+dead-code removal that `detect_deadcode.py` flags. A defect in shipped behaviour
+whose fix is inside one lane and changes no schema.
+
+**Not eligible, no matter how small it looks.** Anything under
+`services/quant-engine/app/schemas/` — that is the contract source of truth and
+the schema hook exists because changes there never stay in one lane. Anything
+under `analytics/`. Anything that adds or removes a field visible in
+`docs/contracts/<area>-fields.md`. Anything a user would see as new.
+
+Express still ends the same way: `python scripts/run_all_tests.py`, green, then
+the human commits. The short route skips planning, never verification.
 
 ## Repo skills agents may invoke
 
@@ -134,6 +154,22 @@ reference; they are not replaced by this network.
 | `write-story` | `story-author` — for its drafting conventions only; its workflow (roadmap edits, epic placement, `build-story` handoff) is superseded by this network |
 | `verify-story` | `reviewer` (its checklist becomes the gate) |
 | `update-docs` | `docs-engineer` |
+| `build-story` | **nobody. Superseded — do not invoke.** See below. |
+
+### `build-story` is superseded and must not run
+
+`build-story` implements the old linear pipeline: it works tickets in order in
+one context, self-invokes `write-tests` / `verify-story` / `update-docs`, and
+**commits**. Every one of those is now owned by a lane or by the human.
+
+Its description still triggers on *"build US-X.Y"*, *"pick up ticket T-..."*,
+*"implement the next story"* — the same phrasing that should reach
+`orchestrate-feature`. Until its description is narrowed in the repo, two
+architectures compete for the same request and which one answers is a coin flip.
+
+**If `build-story` loads for a request that belongs to this network, stop and
+route to `orchestrate-feature` instead.** A slice built through it has no run
+ledger, no gate verdicts, no contract notes, and ends with an agent commit.
 
 ## Commands
 
@@ -150,10 +186,16 @@ python scripts/manage_cache.py      # FMP cache
 ## Mechanical gates — never bypass
 
 - **CI** runs `run_all_tests.py` on every PR and push to `main`. Network-free.
-- **Commit gate hook** (`scripts/hooks/pre_commit_gate.py`, PreToolUse) blocks
-  `git commit` unless `.claude/.last-test-pass` exists and is fresher than every
-  changed non-`.md` file. Only a fully green suite writes that marker. **A
-  blocked commit means re-run the suite — never work around the hook.**
+- **Commit gate hook**, two layers checking the same thing (marker exists,
+  fresher than every changed non-`.md` file; only a fully green suite writes
+  it). The **git-level** `scripts/githooks/pre-commit` (wired via
+  `core.hooksPath`, calling `scripts/hooks/git_pre_commit.py`) is the actual
+  boundary — fires on every `git commit` regardless of invoking tool. The
+  **Claude Code** `scripts/hooks/pre_commit_gate.py` (PreToolUse, matched on
+  Bash) is a faster-feedback duplicate inside agent sessions, not the
+  boundary — a commit through another tool used to walk past it (fixed
+  2026-08-20). **A blocked commit means re-run the suite — never work around
+  either hook.**
 - **Schema hook** (`schema_edit_reminder.py`, PostToolUse) fires after edits
   under `app/schemas/`, reminding that TS types and
   `docs/contracts/<area>-fields.md` must change in the same pass.

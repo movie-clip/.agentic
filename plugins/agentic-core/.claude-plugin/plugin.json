@@ -1,6 +1,8 @@
 {
   "name": "agentic-core",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Orchestrated agent network for vertical-slice delivery: routes a feature request into work orders and dispatches focused specialist subagents with review gates.",
-  "author": { "name": "movie-clip" }
+  "author": {
+    "name": "movie-clip"
+  }
 }

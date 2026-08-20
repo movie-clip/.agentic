@@ -135,6 +135,21 @@ load-bearing. Do not weaken an admission gate to make a number appear. Epic 34
 is largely a record of what happens when a number is published on a basis it
 cannot support — read that PRD before touching a trust classification.
 
+## Gotchas that will bite you
+
+**Windows checkouts: `core.filemode=false` silently strips the executable
+bit on `git add`.** A plain `git add` on a newly-created executable script
+(e.g. a `.sh`/POSIX hook wrapper under `scripts/`) records it in the git
+index as mode `100644` (non-executable) even though the file has `chmod +x`
+on disk — verified directly via `git ls-files --stage` (Epic 36 / US-36.1,
+`scripts/githooks/pre-commit`). Since `git checkout` applies the **stored**
+index mode on every clone regardless of that clone's own `core.filemode`
+setting, this silently ships a non-executable script that a Linux git-hook
+runner (no `sh`-fallback the way Git for Windows has) skips without error —
+the "wiring exists but is inert" failure class, at the file-mode layer. Fix:
+stage any new executable file added from a Windows dev box with
+`git add --chmod=+x <path>`, not a plain `git add`.
+
 ## Dead-code gate
 
 `run_all_tests.py` runs `detect_deadcode.py --strict` (ruff + vulture + knip,

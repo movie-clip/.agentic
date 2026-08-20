@@ -186,14 +186,21 @@ python scripts/manage_cache.py      # FMP cache
 ## Mechanical gates — never bypass
 
 - **CI** runs `run_all_tests.py` on every PR and push to `main`. Network-free.
-- **Commit gate hook** — today, only the **Claude Code**
-  `scripts/hooks/pre_commit_gate.py` exists (PreToolUse, matched on `Bash`
-  only). It checks that `.claude/.last-test-pass` exists and is fresher than
-  every changed non-`.md` file, written only by a fully green suite run. It
-  does not fire for a `git commit` issued through a non-Bash tool (e.g.
-  PowerShell) — there is no equivalent enforcement at the git level in this
-  repo. That gap is **open**, tracked under Epic 36 (F-R1). **A blocked commit
-  means re-run the suite — never work around the hook.**
+- **Commit gate hook** — enforced at two layers, both checking the same
+  thing (`.claude/.last-test-pass` exists and is fresher than every changed
+  non-`.md` file, written only by a fully green suite run). The **git-level**
+  `scripts/githooks/pre-commit` (wired via `git config core.hooksPath
+  scripts/githooks`, execing `scripts/hooks/git_pre_commit.py`) is the actual
+  enforcement boundary — it fires on every `git commit` regardless of which
+  tool or terminal invoked git, since it runs inside git itself rather than
+  inside a tool's interception layer. `core.hooksPath` is local git config,
+  not committed; `scripts/run_all_tests.py` idempotently sets it early in
+  every run, so a dev/agent session that has run the suite at least once has
+  it wired — a clone that has never run the suite yet does not. The
+  **Claude Code** `scripts/hooks/pre_commit_gate.py` (PreToolUse, matched on
+  `Bash` only) remains as a faster-feedback duplicate inside agent sessions,
+  not the boundary itself. **A blocked commit means re-run the suite — never
+  work around either hook.**
 - **Schema hook** (`schema_edit_reminder.py`, PostToolUse) fires after edits
   under `app/schemas/`, reminding that TS types and
   `docs/contracts/<area>-fields.md` must change in the same pass.

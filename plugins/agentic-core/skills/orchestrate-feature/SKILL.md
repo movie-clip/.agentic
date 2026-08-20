@@ -10,8 +10,10 @@ source files, and you do not make the calls that belong to the producer or the
 tech lead — you carry their output between lanes.
 
 Load `agentic-protocol` before anything else. It will send you to
-`<agenticRoot>/PROTOCOL.md`, which defines the three message shapes, the run
-ledger and the relay rule. Read it. Everything below assumes it.
+`<agenticRoot>/PROTOCOL.md` — the core contract everyone reads — and to
+`<agenticRoot>/protocol/orchestrator.md`, the extension that is yours: the run
+ledger, the relay rule, and the reading discipline that decides whether this
+session survives its own run. Read both. Everything below assumes them.
 
 ---
 
@@ -50,13 +52,10 @@ and dispatch. An urgent finding is still a finding.
 
 ---
 
-**The relay rule is the one you will be tempted to break.** Subagents cannot
-spawn subagents, so the producer's brief, the tech lead's plan and every change
-request reach their destination only because you carry them — and under context
-pressure, carrying degrades into summarising. That is why every artifact is
-written to the run dir by the agent that produced it, and why your `inputs`
-lines name **paths, not quotations**. If you find yourself typing a specialist's
-conclusion into a work order, stop and type the path instead.
+**The relay rule (`protocol/orchestrator.md` § 3) is the one you will be tempted
+to break.** Under context pressure, carrying a specialist's conclusion degrades
+into summarising it. If you find yourself typing a specialist's conclusion into
+a work order, stop and type the path instead.
 
 ---
 
@@ -84,16 +83,21 @@ ran at all, and which one.
    to it. Do not re-derive it per work order — repeated relative-path arithmetic
    is how a run ends up dispatching against `C:\projects\investments.agentic\...`,
    one separator from correct and wrong in a way nothing reports.
-2. Read `<agenticRoot>/projects/<project>/project.md`. It names the lanes, which
-   agents are live, and the guardrails no plan may violate.
-3. **Check for an unfinished run before starting a new one.** List
+2. Read `<agenticRoot>/PROTOCOL.md` (the core) and
+   `<agenticRoot>/protocol/orchestrator.md` (your extension — the ledger, the
+   relay rule, and the reading discipline that keeps this session alive). No
+   other extension is yours; `gates.md` and `packs.md` belong to the lanes.
+3. Read `<agenticRoot>/projects/<project>/project.md` — the `## Index` block
+   first, then the always-read sections. It names the lanes, which agents are
+   live, and the guardrails no plan may violate.
+4. **Check for an unfinished run before starting a new one.** List
    `<agenticRoot>/runs/`. If a `run.md` has `status:` other than `CLOSED` and
    its request matches what the user is asking about, read it and resume from
    its Artifacts table rather than re-dispatching work that already completed.
    This is the whole point of the ledger — a compacted session or a restart
    loses your memory, not the run.
-4. Otherwise create `<agenticRoot>/runs/<YYYY-MM-DD>-<slug>/run.md` from the
-   template in `PROTOCOL.md`, with the user's request **verbatim** and the
+5. Otherwise create `<agenticRoot>/runs/<YYYY-MM-DD>-<slug>/run.md` from the
+   template in `protocol/orchestrator.md`, with the request **verbatim** and the
    resolved `agentic_root`. `status:` takes the bare enum and nothing else —
    a reason goes on `blocked_on:`, not inside the status value.
 
@@ -103,6 +107,20 @@ time this session compacts.
 ---
 
 ## Step 1 — Decide what this run costs, before you spend it
+
+**Cost has two terms, and you control both.** The route decides *how many*
+dispatches; the model decides *what each one costs*. Every agent file pins a
+model — `sonnet` for almost everything, `opus` only for `quant-analyst`, `haiku`
+for `scout` (the reasoning is in `protocol/authoring.md` § "Choosing a model").
+Take those defaults. Override for a single dispatch only when this run has
+produced evidence the lane is out of its depth:
+
+- a lane returned `BLOCKED` on something that is not a missing input, or
+- a finding reaches its **second** change-request round.
+
+Record any override in the `model` column as `opus↑` and explain it in **Cost**
+at close-out. A pre-emptive escalation is just an expensive default with extra
+steps — escalate on what the run showed you, not on how hard the work looks.
 
 The full flow is ten-plus dispatches and four blocking human stops. That is
 correct for a vertical slice and absurd for a one-line fix. Choosing wrong in
@@ -142,11 +160,12 @@ answer is no:
   handful, express is void.
 
 Express flow: open the ledger with `express: yes`, dispatch the one order with a
-real `verification` command, read the report, hand back. No gates — the lane's
-own verification plus the repo's mechanical gates are the check.
+real `verification` command, validate the artifact, read the head, hand back. No
+gates — the lane's own verification plus the repo's mechanical gates are the
+check.
 
-**The express lane voids itself.** If the returned report carries any
-`contract_notes` entry, or `status` is anything but `DONE`, or the agent reports
+**The express lane voids itself.** If the returned head carries a non-zero
+`contract_notes` count, or `status` is anything but `DONE`, or the agent reports
 it had to touch a second lane — express was the wrong call. Say so, mark
 `express: no` in the ledger, and escalate to the full flow from Step 2. Do not
 patch around it with a second express order; that is how a slice gets built
@@ -289,39 +308,99 @@ correcting six agents' output costs the session.
 Send each work order verbatim. Default order: contracts before consumers,
 implementation before tests, everything before docs.
 
-After each report:
+**An agent returns a `REPORT HEAD`, not a report.** The full report is a file at
+the `report_to` path you named. The head carries `status`, `verdict`,
+`verification`, and a count for each routable section. Route from the counts;
+open the artifact only for a section whose count says there is something in it.
 
-1. **Validate the artifact before reading it.**
+After each head:
+
+1. **Validate the artifact against its head. Always, and before reading either.**
+
+   Save the returned head to `<run_dir>/<nn>-head.txt` and run:
 
    ```bash
-   python <agentic_root>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --lane <lane>
+   python <agentic_root>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --lane <lane> --head <run_dir>/<nn>-head.txt
    ```
 
-   Non-zero exit means the report is not routable — send it back with the
-   script's output as the input, and do not route `contract_notes` out of a
-   report that failed the check. This is a mechanism, not a courtesy; it is
-   the only part of the report contract that does not depend on everyone
-   remembering it.
-2. **Then read the status honestly.** `PARTIAL` and `BLOCKED` are information.
-   Do not proceed as though a lane succeeded because the next lane is ready to
-   start. The validator catches `DONE` + `NOT_RUN`; it cannot catch `DONE` on
-   work that ran a command and misread the output. That one is yours.
-3. **Update `run.md`** — the Artifacts row, and anything new under **Open**.
-   Do this *before* dispatching the next order, not at the end. A ledger updated
-   at the end is a ledger that does not survive the thing it exists for.
-4. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
-   and list them under **Open** until a downstream order absorbs one. An
-   unabsorbed contract note is shipped inconsistency. If no downstream order
-   exists to absorb one, create it.
-5. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
+   Non-zero exit means the report is not routable, or the head misdescribes it.
+   Send it back with the script's output as the input, and do not route
+   `contract_notes` out of a report that failed the check.
+
+   **The `--head` half is not optional.** Without it you are trusting a summary
+   the agent wrote about its own work, which is the thing this network exists
+   not to do. It is the only defence against a head that undercounts — and an
+   undercount does not fail loudly, it silently drops work you never learn
+   existed. If a lane returned no head, that lane is not closed: re-dispatch it,
+   or read the artifact in full and say in the ledger that you did.
+
+2. **Read the status and the `detail` honestly.** `PARTIAL` and `BLOCKED` are
+   information. Do not proceed as though a lane succeeded because the next lane
+   is ready to start.
+
+   The validator catches `DONE` + `NOT_RUN`. It cannot catch `DONE` on work that
+   ran a command and misread its own output — that one is yours, and `detail` in
+   the head is what you make it with. `PASS` is the lane's claim; `detail` is
+   the evidence. "802 passed" and "802 passed, 4 skipped" are different results
+   and only one of them is in the verdict field. When they disagree with what
+   the order asked for, open the artifact.
+
+3. **Open only the sections the counts point at.** A head reading
+   `contract_notes: 2, pack_corrections: 0, handoff: 1` means you read two
+   sections of one file and skip the rest of it — permanently, not until later.
+
+   ```bash
+   sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/<nn>-<lane>.md
+   ```
+
+   A head whose counts are all zero, with a `detail` that matches what the order
+   asked for, needs no read at all. Record it and move on.
+
+4. **Update `run.md`** — the Artifacts row (**including the `model` column**,
+   which is the model that dispatch actually ran on), and a typed row under
+   **Open** for anything unabsorbed. Do this *before* dispatching the next order, not at the
+   end. A ledger updated at the end is a ledger that does not survive the thing
+   it exists for. `Open` is a table, not prose: one row per item, `one-line`
+   under 120 characters, detail left in the artifact the row points at.
+
+5. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
+   naming the path and the section. Keep each one under **Open** with
+   `state: OPEN` until a downstream order absorbs it, then flip it to
+   `ABSORBED`. An unabsorbed contract note is shipped inconsistency. If no
+   downstream order exists to absorb one, create it.
+
+6. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
    arrive. They are the docs lane's close-out order.
-6. **Route `handoff` forward** — fixture names, prop shapes, route paths.
-7. **Re-plan when reality disagrees.** Show the user the change; don't improvise
+
+7. **Route `handoff` forward** — fixture names, prop shapes, route paths.
+
+8. **Re-plan when reality disagrees.** Show the user the change; don't improvise
    silently.
-8. **Stop on `REFUSED`.** An agent refusing on a guardrail is the system
+
+9. **Stop on `REFUSED`.** An agent refusing on a guardrail is the system
    working. Surface it; never re-dispatch with softer wording.
 
----
+### Planning lanes return documents — read their brief, not the document
+
+`product`, `design`, `story` and `quant` RESEARCH produce artifacts far longer
+than the report block. Every such artifact opens with a `## Orchestrator brief`
+of at most 15 lines, and the validator enforces it.
+
+**Read the brief. Read a named section if you need it. Do not read the
+document.** In the first full run, `04-stories.md` and `05-technical-plan.md`
+came to 1,000 lines — half of all artifact volume — and were read end to end to
+extract about thirty lines of routing decisions.
+
+This is safe only because the brief is checked for **completeness**, not just
+length: `check_report.py` fails an artifact whose brief does not name every
+section below it. Reading 546 lines is what used to guarantee you saw every
+story; the check is what guarantees it now. If you ever route from a brief the
+validator has not passed, you have neither guarantee.
+
+The sections you skip are not lost. They reach the lane that needs them as an
+`inputs` path with a `§ section` suffix, which is what the relay rule is for:
+you can name a section of a plan you have not read yourself, and the engineer
+who needs it reads the tech lead's own words rather than your summary of them.
 
 ## Step 7 — Quant audit, before the engineering gate
 
@@ -409,6 +488,26 @@ If the routing table names an agent for a job, that agent does the job.
 
 ---
 
+### Close the cost record
+
+Fill the ledger's **Cost** block from the Artifacts and Rounds tables, then
+check it:
+
+```bash
+python <agentic_root>/scripts/run_cost.py <run_dir>
+```
+
+Exit 0 means your tally matches the rows. Non-zero means it does not, or a
+dispatch never recorded its model — either way the run is not closed, because
+an unrecorded model makes the run unmeasurable and a wrong tally is worse than
+no tally at all.
+
+Report the line to the human alongside `dispatched: <n>`. Two runs of the same
+route with very different costs is the most useful signal this network
+produces about itself: it is how the route table's cost model stops being an
+assertion, and how you find out whether a cheaper model on a lane bought
+anything or just paid for extra change-request rounds.
+
 ## Degrading gracefully
 
 Some agents may be stubs. If a plan needs a stub lane, say so and offer the two
@@ -418,6 +517,13 @@ and build the agent first. Never present a stub's output as a specialist's.
 ## What your own context is for
 
 You hold the plan, the ledger's current state, and the routing decisions. You do
-not hold the artifacts — they are on disk, and re-reading one costs less than
-carrying nine of them badly. If you notice yourself summarising a report to save
-room, that is the signal to write the ledger and read from it, not to compress.
+not hold the artifacts — they are on disk, and re-reading one section costs less
+than carrying nine whole reports badly.
+
+This is why lanes return a head and not a report. The choice of what enters your
+context stops being a judgment you make under pressure, at the moment you are
+least able to make it well, and becomes a property of the contract: you receive
+ten lines, and you go get the rest only when a count tells you there is a reason
+to. Summarising a report to save room is the failure this replaces — if you
+notice yourself doing it, the artifact is on disk and the ledger is where the
+decision belongs.

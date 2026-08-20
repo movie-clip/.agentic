@@ -5,10 +5,18 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ```
 .agentic/
-├─ ARCHITECTURE.md
-├─ PROTOCOL.md                            ← THE contract. Single copy, by design.
+├─ ARCHITECTURE.md                        ← design rationale + provenance (human-facing)
+├─ PROTOCOL.md                            ← THE contract, core. Everyone reads this.
+├─ protocol/                              ← role-scoped extensions. Read exactly one.
+│  ├─ orchestrator.md      ledger · relay rule · reading discipline
+│  ├─ gates.md             verdicts · gate independence · change requests
+│  ├─ packs.md             applying pack_corrections at close-out
+│  └─ authoring.md         rules for writing agents, packs and protocol
 ├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
-├─ scripts/check_report.py                ← validates a report against Shape 2
+├─ scripts/check_report.py                ← validates an artifact, and its head
+├─ scripts/test_check_report.py           ← pins the validator's own behaviour
+├─ scripts/run_cost.py                    ← derives a run's cost from its ledger
+├─ scripts/test_run_cost.py
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
@@ -17,16 +25,16 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  │  ├─ orchestrate-feature/SKILL.md     ← the router; runs in the main session
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
-│     ├─ producer.md              roadmap · epics · stories · sequencing
-│     ├─ quant-analyst.md         formulas · trust classes · financial gate
-│     ├─ story-author.md          drafts the ticketed story (human approves)
-│     ├─ scout.md                 read-only recon
-│     ├─ tech-lead.md             design pass + integration gate
-│     ├─ backend-engineer.md
-│     ├─ frontend-engineer.md
-│     ├─ test-engineer.md
-│     ├─ docs-engineer.md
-│     └─ reviewer.md              acceptance gate
+│     ├─ producer.md        sonnet  roadmap · epics · stories · sequencing
+│     ├─ quant-analyst.md   OPUS    formulas · trust classes · financial gate
+│     ├─ story-author.md    sonnet  drafts the ticketed story (human approves)
+│     ├─ scout.md           haiku   read-only recon
+│     ├─ tech-lead.md       sonnet  design pass + integration gate
+│     ├─ backend-engineer.md   sonnet
+│     ├─ frontend-engineer.md  sonnet
+│     ├─ test-engineer.md      sonnet
+│     ├─ docs-engineer.md      sonnet
+│     └─ reviewer.md        sonnet  acceptance gate
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
 │  ├─ project.md                          ← the binding profile
 │  └─ capabilities/
@@ -156,7 +164,7 @@ The network never touches that boundary.
 green suite cannot see — a missing acceptance criterion, a lagging contract doc.
 It is not a substitute for `python scripts/run_all_tests.py`.
 
-## Current state (v0.3.2)
+## Current state (v0.4.1)
 
 All ten roles live, each with a capability pack for `portfolio`.
 
@@ -189,6 +197,12 @@ Honest list of what is still enforced by asking an agent nicely:
 |---|---|
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
 | Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
+| A run's cost tally matches its rows | **script** — `scripts/run_cost.py`. Real. Catches a Cost block that disagrees with the Artifacts table, and a dispatch with no model. |
+| Every lane runs on a chosen model | **agent frontmatter** — all ten pinned explicitly, no `inherit`. Real. |
+| A report head's counts match its artifact | **script** — `check_report.py --head`, and `--emit-head` derives the head so it cannot disagree. Real. |
+| Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
+| An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
+| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 23 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only. v0.5. |
@@ -206,7 +220,14 @@ whole reason for the split.
 
 Adding an agent: agent files carry **zero** repo specifics. If you are writing
 `pytest` into an agent file, that line belongs in a capability pack. See
-`agentic-protocol` § "Authoring rules".
+`protocol/authoring.md`.
+
+Keeping a pack indexed: every pack opens with `## Index` naming its always-read
+sections and a "read it when" row for the rest, and every section must appear
+there exactly once. A section is conditional **only** if an agent can evaluate
+the condition before reading it — see `protocol/authoring.md`. Never rewrite an
+index with a pattern that also matches the pack's own tables; that mistake
+duplicated content into four packs during v0.4.
 
 Keeping a pack honest: when a run surfaces something the pack failed to warn
 about, the agent reports it in `risks`. Those entries are the pack's maintenance

@@ -5,6 +5,26 @@ work.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Where the plan lives** · **Guardrails you must respect when briefing** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Story lifecycle | you are placing work against existing stories |
+| The house pattern: findings-first epics | the request is a review, an audit or a findings fold-in |
+| Epics get created mid-flight | nothing on the roadmap fits the request |
+| What is a story here, and what is not | you are deciding whether this is one story or several |
+| Where findings live | the request cites a findings document |
+| Epic inflation | you are about to propose a new epic |
+| Sequencing conventions | your brief orders more than one story |
+
+---
+
 ## Where the plan lives
 
 | Doc | Role |

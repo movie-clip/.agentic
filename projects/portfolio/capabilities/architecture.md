@@ -9,6 +9,22 @@ reviewing against them.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **The seams** · **Escalate rather than decide**
+
+| Section | Read it when |
+|---|---|
+| Design pass: what to settle before the engineers start | your mode is DESIGN |
+| Integration review: the checks only you can make | your mode is INTEGRATION |
+| Severity calls | your mode is INTEGRATION and you are writing a change request |
+
+---
+
 ## The seams
 
 ```

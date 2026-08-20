@@ -10,6 +10,22 @@ prose, read it when this pack is thin on your case) and
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Running tests** · **Gotchas that will bite you** · **Shared fixtures — mandatory, do not re-implement** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Where things live | you are adding a test file |
+| Assertion conventions (backend + frontend) | you are writing assertions |
+| Trust-state discipline in tests | your test touches trust or availability state |
+
+---
+
 ## Where things live
 
 | Path | Purpose |

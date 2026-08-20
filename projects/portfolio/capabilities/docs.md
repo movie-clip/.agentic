@@ -11,6 +11,26 @@ claims into the project's sources of truth, which is worse than no docs at all.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Auto-update vs flag-for-human** · **What not to do** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Where things live | you are looking for which doc owns a fact |
+| The second close-out order: applying pack corrections | your order is a close-out pack-corrections order |
+| Step 1 — Read the story and the diff | your order is a story close-out |
+| Step 2 — Never tick an unsatisfied box | your order is a story close-out |
+| You own the roadmap and the index — nobody upstream does | your order is a story close-out |
+| Step 3 — The slice log | your order is a story close-out |
+| Step 4 — Contract docs | your order changes a contract doc |
+
+---
+
 ## Where things live
 
 | Path | What lives there |

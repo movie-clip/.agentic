@@ -9,6 +9,24 @@ Companion sources: `portfolio/CLAUDE.md`,
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Guardrails, in code terms** · **Gotchas that will bite you** · **Reuse — do not re-derive these** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Layout | you are adding a file, or looking for where one lives |
+| The four-file rhythm | your order adds or changes an endpoint |
+| Dead-code gate | your verification command includes the dead-code gate |
+| Contract notes you must emit | your order changes a schema or a response shape |
+| Changing a published contract | the shape you are changing has already shipped |
+
+---
+
 ## Layout
 
 ```

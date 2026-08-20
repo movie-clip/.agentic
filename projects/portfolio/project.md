@@ -10,6 +10,25 @@ wins and this file needs updating.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Hard guardrails — no plan or lane may violate these** · **Stack** · **Layout** · **Sources of truth (check before assuming)** · **Mechanical gates — never bypass**
+
+| Section | Read it when |
+|---|---|
+| What the product is | this is your first order in this repo |
+| Delivery model | you are the orchestrator or the producer |
+| Lane routing | you are choosing which lane owns a piece of work |
+| Repo skills agents may invoke | your order names a repo skill, or you are the orchestrator |
+| Commands | your order names a `verification` command |
+| PR convention | your order asks you to open or describe a PR |
+
+---
+
 ## What the product is
 
 A local-first, deterministic, auditable decision-support platform for systematic

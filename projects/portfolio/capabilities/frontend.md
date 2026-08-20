@@ -12,6 +12,22 @@ Contract doc: `docs/contracts/ui-design-system.md`.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Tokens — never a literal** · **Guardrails, in UI terms** · **Do not opportunistically migrate** · **The five audit checks** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Layout | you are adding a file, or looking for where one lives |
+| The eight primitives | your order builds or changes any UI |
+| The canonical card pattern | your order adds or changes a card |
+
+---
+
 ## Layout
 
 ```

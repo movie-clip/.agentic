@@ -17,6 +17,22 @@ When they conflict, this pack wins.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Files** · **Status values** · **Guardrails as they show up in acceptance criteria** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| Read the nearest sibling story first | always, before drafting — it is one file |
+| Sizing | you are deciding whether this is one story or several |
+| Common failure modes here | before you report — read it as a checklist |
+
+---
+
 ## Files
 
 | Path | Your relationship to it |

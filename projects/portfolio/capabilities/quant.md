@@ -7,6 +7,23 @@ research mode for the full brief template.
 
 ---
 
+## Index
+
+Read this block first. You are not expected to read this file end to end — read
+what your order touches. Reading one extra section is cheap; acting on a
+convention you never read is not.
+
+**Always read:** **Sources of truth** · **Project-standard constants — never re-derive** · **The truth classes** · **Units, signs, annualisation** · **The edge cases that matter here** · **Definition of done for this lane**
+
+| Section | Read it when |
+|---|---|
+| The analytics modules | your order touches any of them |
+| Known deliberate withholdings | your order touches trust or availability state |
+| Audit mode: recomputing independently | your mode is AUDIT |
+| Research mode: brief sections | your mode is RESEARCH |
+
+---
+
 ## Sources of truth
 
 | Doc | Role |

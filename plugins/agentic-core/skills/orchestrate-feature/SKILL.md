@@ -13,6 +13,43 @@ Load `agentic-protocol` before anything else. It will send you to
 `<agenticRoot>/PROTOCOL.md`, which defines the three message shapes, the run
 ledger and the relay rule. Read it. Everything below assumes it.
 
+---
+
+## The failure mode this skill actually has
+
+Not a bad plan. **A no-op.** You read the request, it seems tractable, you do it
+yourself in the main session, and you produce a good answer — with no ledger, no
+lane isolation, no gate, no record of why. It looks like success. It is the
+architecture silently not running, and it is what happened on the first real
+invocation of this network.
+
+Three self-checks, and none of them is optional:
+
+**Before your first `Edit` or `Write` to any file in the bound repo — stop.**
+That edit belongs to a lane. There is no size below which this stops being true;
+"it is only one line in a doc" is exactly how the first no-op justified itself.
+The only files you write are `run.md` and `pack-corrections.md` in the run dir.
+
+**Before stating a conclusion, ask whose it is.** "This is one epic, not three."
+"These four are duplicates of what's already tracked." "This doesn't need a
+story." Those are the **producer's** verdicts. If you are about to say one, you
+have replaced the network with yourself — dispatch instead. The same goes for
+the contract (`tech-lead`) and acceptance (`reviewer`).
+
+**Report `dispatched: <n>` at close-out, always.** If it is zero on anything but
+pure recon, do not present the result as though the network produced it. Say:
+*"dispatched: 0 — I answered this in the main session without lane isolation or
+gates."* Let the user decide whether that was acceptable. A no-op you disclose
+is a judgment call; a no-op you hide is the system failing quietly.
+
+**Urgency is the usual trigger.** When you find something alarming mid-run — a
+doc asserting something false, a broken gate, a security hole — the pull to fix
+it immediately is strong and feels responsible. It is the moment the record
+matters most and the moment you are most likely to skip it. Surface it, stop,
+and dispatch. An urgent finding is still a finding.
+
+---
+
 **The relay rule is the one you will be tempted to break.** Subagents cannot
 spawn subagents, so the producer's brief, the tech lead's plan and every change
 request reach their destination only because you carry them — and under context
@@ -23,7 +60,23 @@ conclusion into a work order, stop and type the path instead.
 
 ---
 
-## Step 0 — Bind and open the run
+## Step 0 — Bind, announce, and open the run
+
+**Announce the binding as your first output, before anything else:**
+
+```
+agentic-core v<version> · project <name> · route <recon|express|audit|story|full>
+```
+
+The version comes from `<agenticRoot>/plugins/agentic-core/.claude-plugin/plugin.json`.
+If you are running from an installed plugin cache rather than the working
+directory, say which — those can differ by several versions, and a run that
+silently executes a stale copy produces plausible output that answers a question
+nobody asked. If you cannot determine the version, print `version UNKNOWN` and
+say so in your first sentence.
+
+This line is not decoration. It is the only signal the user has that the network
+ran at all, and which one.
 
 1. Find `.agentic.json` by walking up from the working directory; resolve
    `agenticRoot` against the directory holding it. Missing → stop and say so.
@@ -299,6 +352,9 @@ Dispatch the `docs` lane twice, or once with both inputs:
 
 Then set `run.md` `status: CLOSED` and report to the user:
 
+- `agentic-core v<version> · dispatched: <n>` — the same banner you opened with,
+  now with the count. Zero dispatches on anything but recon gets the explicit
+  disclosure from "The failure mode this skill actually has".
 - what changed, by lane
 - every gate verdict that ran, and **which gates did not run and why**
 - anything still open: `PARTIAL` lanes, `SHOULD_FIX` items, unabsorbed contract

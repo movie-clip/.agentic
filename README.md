@@ -56,12 +56,49 @@ session, finds its context pack.
 /plugin install agentic-core@agentic
 ```
 
-**3. Verify.** Run `/plugin` — `agentic-core` should show as installed. (`/agents` no longer lists them; ask Claude "which subagents do you have?" instead.) `/plugin` should show
-`agentic-core` enabled.
+**3. Verify — and this step is not optional.** Run `/plugin`; `agentic-core`
+should show as installed. (`/agents` no longer lists them; ask Claude "which
+subagents do you have?" instead.)
 
-While iterating on the network itself: edits to a `SKILL.md` take effect
-immediately, but changes under `agents/`, `commands/` or `.mcp.json` need
-`/reload-plugins` or a restart.
+Then check **which copy is actually installed**:
+
+```bash
+cat ~/.claude/plugins/installed_plugins.json
+```
+
+Read three fields: `version`, `installPath`, and the marketplace `source` in
+`known_marketplaces.json`.
+
+### The version trap
+
+`/plugin marketplace add <local path>` and `/plugin marketplace add <git url>`
+produce marketplaces that look identical in `/plugin` and behave completely
+differently:
+
+| Source | Where the code comes from | Effect of editing this directory |
+|---|---|---|
+| **local path** | this working directory | live after `/reload-plugins` |
+| **git url** | a clone under `~/.claude/plugins/marketplaces/` | **none.** Edits do nothing until committed *and pushed*, then re-installed. |
+
+If a git-sourced marketplace is registered, `/reload-plugins` reloads the clone,
+not your work. This bit us on the first real run: `v0.2.3` from a stale GitHub
+clone answered a request while `v0.3.0` sat uncommitted on disk, and nothing in
+the output revealed the mismatch — it just produced a plausible answer to a
+question the current architecture would have handled differently.
+
+**Which is why the orchestrator now announces its version as its first line of
+output.** If you do not see
+
+```
+agentic-core v<version> · project <name> · route <...>
+```
+
+then either the skill did not load or you are on a pre-0.3 copy. Either way,
+stop and check before trusting anything that follows.
+
+**While iterating on the network**, use the local path source. Edits to a
+`SKILL.md` take effect immediately; changes under `agents/`, `commands/` or
+`.mcp.json` need `/reload-plugins` or a restart.
 
 ### Fallback wiring
 

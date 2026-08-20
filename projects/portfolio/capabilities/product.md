@@ -104,6 +104,17 @@ decisions specifically:
   the brief must name it as a trust-model change, because that is what it is,
   and it needs the owner's decision.
 
+## Epic inflation
+
+A one-story epic needs a reason beyond "this request needs somewhere to live".
+Epic 16 justified itself as a *quick win* — small, self-contained, no open
+design questions. If the story you are proposing is small-to-medium with an
+unresolved design decision, that precedent does not apply, and "Backlog until it
+has siblings" is often the more honest verdict.
+
+When you do propose a new epic, say who decides. Epic placement is the owner's
+call, and a brief that presents a new epic as settled removes them from it.
+
 ## Sequencing conventions
 
 - **Recommended order is stated explicitly** at the end of each epic's story
@@ -118,7 +129,9 @@ decisions specifically:
 
 - [ ] Roadmap, active PRD, story index and shipped-state inventory all actually read
 - [ ] Checked whether the request is already shipped, already storied, or deliberately open
-- [ ] Verdict stated plainly, including "already covered" or "decline" when true
+- [ ] Verdict stated plainly, including "already covered", "defer to Backlog" or "decline" when true
+- [ ] Value claim checked against real project data where the repo contains it, not asserted
+- [ ] Mathematical uncertainty routed to quant research, not deferred to the tech lead
 - [ ] Proposed stories are vertical slices with a one-sentence user-visible outcome
 - [ ] Audit-first applied where the cause is not yet named
 - [ ] Dependencies named with the reason for each edge

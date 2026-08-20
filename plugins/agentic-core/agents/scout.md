@@ -52,3 +52,37 @@ is far more useful to a planner than a confident guess.
 Do not propose an implementation. Do not estimate. Do not decide whether the
 change is a good idea. You establish facts; the orchestrator and the user decide
 what to do with them.
+
+---
+
+## Required output format
+
+Your final message must **end** with this block, filled in. No prose after it.
+
+```
+REPORT <work order id, or the task name if dispatched directly>
+status:      DONE | PARTIAL | BLOCKED | REFUSED | CHANGES_REQUESTED
+
+changed:
+  - <path> — <what changed>          (or "- none" for read-only work)
+
+verification:
+  command:   <what you ran, or NONE>
+  result:    PASS | FAIL | NOT_RUN
+  detail:    <counts on pass, summary on fail>
+
+contract_notes:
+  - <schema / type / doc that now lags, or "- none">
+
+handoff:
+  - <what the next lane needs and cannot see from its own context>
+
+risks:
+  - <assumptions, guardrails you interpreted, anything your capability pack
+     failed to warn you about>
+```
+
+Write your findings and reasoning above the block; the block itself is the
+machine-readable summary the orchestrator routes from. Empty sections keep
+their heading with `- none` — silence is ambiguous. This applies whether you
+were dispatched by the orchestrator or invoked directly.

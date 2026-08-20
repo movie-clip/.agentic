@@ -19,6 +19,12 @@ Every specialist agent, as its **first action**, before reading any source file:
    capability pack. Read it fully.
 4. Only then start work.
 
+Your capability pack and the repo's own docs (`CLAUDE.md`, `docs/`) will often
+cover the same ground. The pack is agent-facing and carries the friction the
+repo docs do not record; the repo docs are richer and more current on the code
+itself. Read the pack first, and when they disagree on a *fact about the code*,
+trust the code — then report the discrepancy so the pack can be corrected.
+
 If `.agentic.json` is missing, **stop and report `BLOCKED`**. Do not guess the
 project layout — a specialist working from inference is exactly the failure mode
 this network exists to prevent.
@@ -150,6 +156,14 @@ It contains: the role, the binding steps above, tool discipline, report shape.
 It must contain **zero** paths, framework names, or conventions from any
 specific repo. If you are tempted to write `pytest` in an agent file, that line
 belongs in a capability pack.
+
+**The pack can be wrong, and the work order can inherit its error.** A stale
+pack entry propagates into the orchestrator's `inputs` and arrives at the
+specialist as a stated premise. So an agent that finds its own pack — or its
+order's premise — contradicted by the code reports that as a finding, in
+`handoff`, with the exact replacement wording. Do not silently work around it:
+the next dispatch will repeat the same false framing. Correcting the premise is
+a legitimate and often the most valuable outcome of an order.
 
 **Capability pack** (`projects/<project>/capabilities/<lane>.md`) is where all
 repo specifics live: paths, frameworks, fixtures, gotchas, commands, the

@@ -100,6 +100,7 @@ orchestrator stops and asks for `write-story` first.
 |---|---|---|---|
 | product | `producer` | `product.md` | roadmap placement, epic/story shaping, sequencing. **Entry point.** |
 | quant | `quant-analyst` (RESEARCH) | `quant.md` | research brief: formulas, grounding, trust-class analysis |
+| story | `story-author` | `story.md` | drafts the ticketed story. **Human approves before dispatch.** |
 | recon | `scout` | — | read-only exploration |
 | design | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, lane split |
 | backend | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test) |
@@ -110,7 +111,7 @@ orchestrator stops and asks for `write-story` first.
 | integration | `tech-lead` (INTEGRATION) | `architecture.md` | engineering gate: PASS / CHANGES_REQUESTED |
 | review | `reviewer` | — | acceptance gate: PASS / FAIL |
 
-All nine roles are live. Three gates, each checking something the others cannot
+All ten roles are live. Three gates, each checking something the others cannot
 see: `quant-analyst` gates the mathematics, `tech-lead` gates engineering
 coherence, `reviewer` gates acceptance against the story.
 
@@ -129,7 +130,7 @@ reference; they are not replaced by this network.
 | `ui-polish` | `frontend-engineer` — mandatory for any card work; a design-system audit test enforces it |
 | `fmp-data` | any lane touching market data, symbol resolution or the cache |
 | `quant-research` | `quant-analyst` in RESEARCH mode (its brief template is mirrored into `capabilities/quant.md`) |
-| `write-story` | the human, before a vertical slice is dispatched |
+| `write-story` | `story-author` — for its drafting conventions only; its workflow (roadmap edits, epic placement, `build-story` handoff) is superseded by this network |
 | `verify-story` | `reviewer` (its checklist becomes the gate) |
 | `update-docs` | `docs-engineer` |
 

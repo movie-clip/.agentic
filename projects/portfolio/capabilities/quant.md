@@ -82,10 +82,33 @@ product's central promise.
 
 ## Known deliberate withholdings
 
-Do not "fix" these without the owner's decision. Each was a considered call:
+Do not "fix" these without the owner's decision. Each was a considered call.
 
-- **Dashboard-history `max_drawdown_pct`** — withheld pending price-basis
-  verification (US-34.7).
+**Check the gate before believing the stated reason.** The entry below was
+recorded in this pack for two versions with the wrong justification, and the
+same wrong framing then propagated into a dispatched work order. A withholding's
+*reason* drifts more easily than the withholding itself, because the code keeps
+enforcing it correctly while the explanation ages. When a request touches a
+withheld field, read the gate function — not just the note here or the story
+that introduced it.
+
+- **Dashboard-history `max_drawdown_pct`** — withheld under the **categorical
+  investor-economics policy**: `drawdown_family ∈
+  investor_economics_partial_unlock.withheld_families` (Epic 34 F-10).
+  **Not conditioned on price or return basis.** That justification was
+  investigated and found false for this surface — the replay chains
+  `portfolio_value` over imported ledger states, and dividends and withholding
+  land in the replayed cash, so the chain is already total-return-like
+  (US-34.7 / Epic 34 F-11). The unadjusted-close concern belongs to the
+  synthetic Risk-tab path (F-12), not here.
+
+  The gate is `_allow_dashboard_drawdown_outputs` in
+  `dashboard_history_engine.py:237-262`. It takes `benchmark_rows` and
+  `symbol_price_histories` — which look like a data-quality check — and reads
+  neither, returning `False` unconditionally. **No amount of data-quality work
+  un-gates this field.** F-10 was partially resolved 2026-08-17, scoped to the
+  benchmark leg only; the drawdown family stays withheld. Unlocking it requires
+  a fresh owner decision extending that unlock, not a verification task.
 - **Epic 34's open findings** — F-1a, part of F-10, F-12 were closed as
   will-not-fix: structurally unreachable, or bounded and immaterial. The reasons
   are in the epic's PRD.

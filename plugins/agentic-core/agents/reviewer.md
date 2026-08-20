@@ -65,3 +65,37 @@ that asserts the implementation rather than the requirement.
 Style preferences. Refactors you would have done differently. Scope the story
 explicitly excluded. Findings outside the story's scope go in `risks` as
 observations, never in the verdict.
+
+---
+
+## Required output format
+
+Your final message must **end** with this block, filled in. No prose after it.
+
+```
+REPORT <work order id, or the task name if dispatched directly>
+status:      DONE | PARTIAL | BLOCKED | REFUSED | CHANGES_REQUESTED
+
+changed:
+  - <path> — <what changed>          (or "- none" for read-only work)
+
+verification:
+  command:   <what you ran, or NONE>
+  result:    PASS | FAIL | NOT_RUN
+  detail:    <counts on pass, summary on fail>
+
+contract_notes:
+  - <schema / type / doc that now lags, or "- none">
+
+handoff:
+  - <what the next lane needs and cannot see from its own context>
+
+risks:
+  - <assumptions, guardrails you interpreted, anything your capability pack
+     failed to warn you about>
+```
+
+Write your findings and reasoning above the block; the block itself is the
+machine-readable summary the orchestrator routes from. Empty sections keep
+their heading with `- none` — silence is ambiguous. This applies whether you
+were dispatched by the orchestrator or invoked directly.

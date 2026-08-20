@@ -159,6 +159,12 @@ It must contain **zero** paths, framework names, or conventions from any
 specific repo. If you are tempted to write `pytest` in an agent file, that line
 belongs in a capability pack.
 
+**The pack can be wrong, and the work order can inherit its error.** A stale
+pack entry propagates into the orchestrator's `inputs` and arrives at the
+specialist as a stated premise. An agent that finds its own pack — or its
+order's premise — contradicted by the code reports that in `handoff` with exact
+replacement wording, rather than working around it silently.
+
 **Capability pack** (`projects/<project>/capabilities/<lane>.md`) is where all
 repo specifics live: paths, frameworks, fixtures, gotchas, commands, the
 "things that bit us before" list. This is the file that goes stale — treat it

@@ -67,19 +67,26 @@ lanes have already built toward it.
 The brief's metrics inventory feeds directly into the tech lead's contract, so
 relay it whole.
 
-## Step 3 — Story authoring is the human's gate
+## Step 3 — Story authoring, then the human's gate
 
-If the approved brief proposes new stories, **stop and tell the user to run the
-project's story-authoring skill.** Do not infer tickets. Do not dispatch.
+If the approved brief proposes new stories, dispatch `story-author` with the
+producer's delivery brief and, where one exists, the quant research brief —
+**verbatim, not summarised**. A story drafted without them repeats the analysis
+badly or skips it, which is the whole reason those lanes ran.
 
-This is the one hard stop in the flow, and it is deliberate. Acceptance criteria
-are the contract everything downstream is measured against; a slice built from
-criteria nobody reviewed cannot be verified, only described.
+**Then stop and hand the draft to the user.** This is the one hard stop in the
+flow. Acceptance criteria are the contract everything downstream is measured
+against; a slice built from criteria nobody reviewed cannot be verified, only
+described. The agent drafts — the human approves.
 
-**The brief must reach the story author.** Relay the producer's delivery brief
-and, where one exists, the quant research brief — verbatim, not summarised. A
-story written without them repeats the analysis badly or skips it, which is the
-whole reason those two lanes ran.
+Do not dispatch further until the user has approved the story and it is
+ticketed. In particular, **every open decision the producer escalated must be
+resolved by the user first.** The story author reproduces them as open; if you
+proceed while one is unresolved, you have made the decision by omission.
+
+Epic placement is always the user's call, never the network's. Nothing writes to
+the roadmap or the story index at this stage — those record what shipped, and
+the docs lane reconciles them at close-out.
 
 ## Step 4 — Tech lead: design pass
 

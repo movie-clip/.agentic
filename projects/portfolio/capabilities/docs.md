@@ -69,6 +69,21 @@ If the reviewer marked any AC as `GAP` or `DRIFTED`, **abort and report**. The
 story is not done, and ticking its boxes makes it permanently look done. This is
 the one place where a docs error is unrecoverable by later inspection.
 
+## You own the roadmap and the index — nobody upstream does
+
+The story author does not touch `epic-roadmap.md` or `stories/README.md`, and
+neither does the producer. Those files record what **shipped**, so they are
+written here, at close-out, from the diff.
+
+If you arrive and find a roadmap entry already exists for this story, that is a
+finding: someone upstream wrote an intention into a state record. Report it in
+`risks` and reconcile the entry against what actually shipped rather than
+assuming it is correct.
+
+Watch for two specific corruptions this causes: an epic marked `Active` while
+its only story is still `Next phase`, and two epics marked active at once
+because a new section was inserted above a closed one without flipping it.
+
 ## Step 3 — The slice log
 
 `epic-roadmap.md` slice entries in this project carry real narrative weight —

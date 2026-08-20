@@ -65,7 +65,7 @@ conclusion into a work order, stop and type the path instead.
 **Announce the binding as your first output, before anything else:**
 
 ```
-agentic-core v<version> · project <name> · route <recon|express|audit|story|full>
+agentic-core v<version> · project <name> · route <recon|express|audit|review|story|full>
 ```
 
 The version comes from `<agenticRoot>/plugins/agentic-core/.claude-plugin/plugin.json`.
@@ -80,6 +80,10 @@ ran at all, and which one.
 
 1. Find `.agentic.json` by walking up from the working directory; resolve
    `agenticRoot` against the directory holding it. Missing → stop and say so.
+   **Record the resolved absolute path** and build every later path by appending
+   to it. Do not re-derive it per work order — repeated relative-path arithmetic
+   is how a run ends up dispatching against `C:\projects\investments.agentic\...`,
+   one separator from correct and wrong in a way nothing reports.
 2. Read `<agenticRoot>/projects/<project>/project.md`. It names the lanes, which
    agents are live, and the guardrails no plan may violate.
 3. **Check for an unfinished run before starting a new one.** List
@@ -89,7 +93,9 @@ ran at all, and which one.
    This is the whole point of the ledger — a compacted session or a restart
    loses your memory, not the run.
 4. Otherwise create `<agenticRoot>/runs/<YYYY-MM-DD>-<slug>/run.md` from the
-   template in `PROTOCOL.md`, with the user's request **verbatim**.
+   template in `PROTOCOL.md`, with the user's request **verbatim** and the
+   resolved `agentic_root`. `status:` takes the bare enum and nothing else —
+   a reason goes on `blocked_on:`, not inside the status value.
 
 Creating the ledger costs one file write. Skipping it costs the slice the next
 time this session compacts.
@@ -109,6 +115,7 @@ the roadmap.
 | **Recon** | "where does X live", "how does Y work" | 1 (`scout`) | 0 |
 | **Express** | see the gate below | 1–2 | 1 (the suite) |
 | **Audit** | "is this number right" | 1 (`quant-analyst` AUDIT) | 0–1 |
+| **Review** | a health review / findings fold-in — see Step 1b | 2–4 | 1 |
 | **Story pickup** | an approved ticketed story exists | 5–9 | 2 |
 | **Full** | new user-visible scope | 8–12 | 4 |
 
@@ -157,12 +164,27 @@ cheaper than a slice with no place in the roadmap.
 
 ---
 
-## Step 1b — Health reviews are audits, and this project has a pattern for them
+## Step 1b — Health reviews take the `review` route
 
-An open-ended "review the project and tell me what's wrong" is not a feature
-request and not recon. It is an **audit**, and the project profile will usually
-name a house pattern for how audits are recorded. Follow it rather than
-inventing an artifact.
+An open-ended "review the project and tell me what's wrong", or a "fold these
+findings into the roadmap", is not a feature request and not recon. Announce it
+as `route review` — **not `audit`**, which is the quant lane's single-dispatch
+route for "is this number right". The project profile will usually name a house
+pattern for how reviews are recorded; follow it rather than inventing an
+artifact.
+
+**Findings are claims until verified.** A findings document — including one this
+network produced, including its own "disposition" or "already fixed" section —
+is an input to be checked, never a premise to build on. The first real `review`
+run found that a findings doc asserted six items were logged in the debt
+register when the register contained none of them, and that one finding was
+false on its face: the field it claimed was undocumented was documented. Both
+were caught by dispatching `scout` to establish ground truth *before* the
+producer placed anything.
+
+So the shape of this route is: verify state → `scout` for per-finding ground
+truth → `producer` for placement and dedupe against that ground truth, never
+against the document's own claims.
 
 Two things this gets wrong when improvised:
 
@@ -269,23 +291,34 @@ implementation before tests, everything before docs.
 
 After each report:
 
-1. **Read the status honestly.** `PARTIAL` and `BLOCKED` are information. Do not
-   proceed as though a lane succeeded because the next lane is ready to start.
-   `status: DONE` with `verification.result: NOT_RUN` on an order that named a
-   command is not a pass — send it back.
-2. **Update `run.md`** — the Artifacts row, and anything new under **Open**.
+1. **Validate the artifact before reading it.**
+
+   ```bash
+   python <agentic_root>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --lane <lane>
+   ```
+
+   Non-zero exit means the report is not routable — send it back with the
+   script's output as the input, and do not route `contract_notes` out of a
+   report that failed the check. This is a mechanism, not a courtesy; it is
+   the only part of the report contract that does not depend on everyone
+   remembering it.
+2. **Then read the status honestly.** `PARTIAL` and `BLOCKED` are information.
+   Do not proceed as though a lane succeeded because the next lane is ready to
+   start. The validator catches `DONE` + `NOT_RUN`; it cannot catch `DONE` on
+   work that ran a command and misread the output. That one is yours.
+3. **Update `run.md`** — the Artifacts row, and anything new under **Open**.
    Do this *before* dispatching the next order, not at the end. A ledger updated
    at the end is a ledger that does not survive the thing it exists for.
-3. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
+4. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
    and list them under **Open** until a downstream order absorbs one. An
    unabsorbed contract note is shipped inconsistency. If no downstream order
    exists to absorb one, create it.
-4. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
+5. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
    arrive. They are the docs lane's close-out order.
-5. **Route `handoff` forward** — fixture names, prop shapes, route paths.
-6. **Re-plan when reality disagrees.** Show the user the change; don't improvise
+6. **Route `handoff` forward** — fixture names, prop shapes, route paths.
+7. **Re-plan when reality disagrees.** Show the user the change; don't improvise
    silently.
-7. **Stop on `REFUSED`.** An agent refusing on a guardrail is the system
+8. **Stop on `REFUSED`.** An agent refusing on a guardrail is the system
    working. Surface it; never re-dispatch with softer wording.
 
 ---

@@ -186,16 +186,14 @@ python scripts/manage_cache.py      # FMP cache
 ## Mechanical gates — never bypass
 
 - **CI** runs `run_all_tests.py` on every PR and push to `main`. Network-free.
-- **Commit gate hook**, two layers checking the same thing (marker exists,
-  fresher than every changed non-`.md` file; only a fully green suite writes
-  it). The **git-level** `scripts/githooks/pre-commit` (wired via
-  `core.hooksPath`, calling `scripts/hooks/git_pre_commit.py`) is the actual
-  boundary — fires on every `git commit` regardless of invoking tool. The
-  **Claude Code** `scripts/hooks/pre_commit_gate.py` (PreToolUse, matched on
-  Bash) is a faster-feedback duplicate inside agent sessions, not the
-  boundary — a commit through another tool used to walk past it (fixed
-  2026-08-20). **A blocked commit means re-run the suite — never work around
-  either hook.**
+- **Commit gate hook** — today, only the **Claude Code**
+  `scripts/hooks/pre_commit_gate.py` exists (PreToolUse, matched on `Bash`
+  only). It checks that `.claude/.last-test-pass` exists and is fresher than
+  every changed non-`.md` file, written only by a fully green suite run. It
+  does not fire for a `git commit` issued through a non-Bash tool (e.g.
+  PowerShell) — there is no equivalent enforcement at the git level in this
+  repo. That gap is **open**, tracked under Epic 36 (F-R1). **A blocked commit
+  means re-run the suite — never work around the hook.**
 - **Schema hook** (`schema_edit_reminder.py`, PostToolUse) fires after edits
   under `app/schemas/`, reminding that TS types and
   `docs/contracts/<area>-fields.md` must change in the same pass.

@@ -148,3 +148,11 @@ Two obligations, both mandatory:
 Your `verdict` is `NONE` — you draft, you do not gate. And `status: DONE` here
 means "the draft is written", never "the story is approved": approval is the
 human's, and your report says so.
+
+**Check your own report before returning it:**
+
+```bash
+python <agenticRoot>/scripts/check_report.py <your report_to path> --lane story
+```
+
+Exit 0 means it is routable. Non-zero prints exactly what is wrong.

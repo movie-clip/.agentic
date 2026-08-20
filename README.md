@@ -8,6 +8,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 ├─ ARCHITECTURE.md
 ├─ PROTOCOL.md                            ← THE contract. Single copy, by design.
 ├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
+├─ scripts/check_report.py                ← validates a report against Shape 2
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
@@ -155,20 +156,30 @@ The network never touches that boundary.
 green suite cannot see — a missing acceptance criterion, a lagging contract doc.
 It is not a substitute for `python scripts/run_all_tests.py`.
 
-## Current state (v0.3)
+## Current state (v0.3.2)
 
 All ten roles live, each with a capability pack for `portfolio`.
 
-v0.3 is the design review's structural pass — run ledger, relay by path, one
-copy of the protocol, the express lane, separated status/verdict fields, pack
-corrections with an owner, and `build-story` retired. Details in
-`ARCHITECTURE.md` §7.
+**One route is validated.** A `review` run (health-review fold-in) went through
+end to end on 2026-08-20: skill loaded, banner printed, ledger written, two
+lanes dispatched, zero repo edits by the orchestrator, both artifacts conforming
+to Shape 2 on first contact, stopped correctly at the human gate. Its ledger and
+artifacts are in `runs/2026-08-20-health-review-fold-in/` — read them before
+changing the protocol, they are the only ground truth this design has.
 
-**Still not validated: no real story has been through this end to end.** Every
-shape here remains a guess until something real passes through it, and v0.3
-changed the shapes rather than testing them. The next move is one *small* slice,
-chosen so the cost model in `orchestrate-feature` § Step 1 gets measured instead
-of asserted — then correct the protocol where it chafed.
+That run also produced the argument for the whole thing. The same request run
+*without* the network (v0.2.3, which silently no-op'd) took **25 minutes**,
+edited four repo files directly, left no record, and propagated a false finding
+— it logged a debt item asserting a field was undocumented that is documented at
+`dashboard-fields.md:289`. The orchestrated run took **10 minutes**, dispatched
+two lanes, touched nothing, and caught both that false finding and a second-order
+one the first run had introduced. Faster *and* more accurate; the ceremony was
+not the cost.
+
+**Still not validated: the implementation lanes.** No story has been through
+`backend → frontend → test → docs` with the three gates. Everything about the
+work order, the change request and the gate handshake remains a guess. The next
+move is one *small* slice.
 
 ### Not yet mechanical
 
@@ -177,10 +188,12 @@ Honest list of what is still enforced by asking an agent nicely:
 | Rule | Backed by |
 |---|---|
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
+| Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
+| A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only. v0.5. |
-| Reports use the protocol shape | prose only; nothing parses them. |
 | The express lane isn't abused | prose only — but it self-voids on any contract note. |
+| A report's *contents* are true | nothing, and nothing can. The validator checks routability, not honesty — that is what the three gates and your own reading are for. |
 
 Knowing which line is which is the point of the table. A rule you believe is
 enforced, and isn't, is worse than one you know is on trust.

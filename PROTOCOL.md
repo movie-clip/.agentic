@@ -66,10 +66,13 @@ after every report. It is the file that lets a fresh session resume:
 
 ```markdown
 # RUN <run-id>
-request:   <the user's original words, verbatim>
-story:     <path, or NONE>
-status:    PLANNING | DISPATCHING | GATING | BLOCKED | CLOSED
-express:   yes | no        (see "The express lane" in orchestrate-feature)
+request:      <the user's original words, verbatim>
+agentic_root: <the RESOLVED ABSOLUTE path — see below>
+story:        <path, or NONE>
+status:       PLANNING | DISPATCHING | GATING | BLOCKED | CLOSED
+blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
+route:        recon | express | audit | review | story | full
+express:      yes | no        (see "The express lane" in orchestrate-feature)
 
 ## Artifacts
 | # | lane | mode | agent | artifact | status | verdict |
@@ -84,6 +87,21 @@ express:   yes | no        (see "The express lane" in orchestrate-feature)
 ## Rounds
 - CR-1 (backend): round 1 of 2
 ```
+
+**`status` takes the bare enum value and nothing else.** Not
+`BLOCKED (awaiting the human's epic decision)` — that is `status: BLOCKED` plus
+`blocked_on: awaiting the human's epic decision`. A field that sometimes holds
+an enum and sometimes holds a sentence cannot be read by anything, including a
+future session of yourself resuming this run.
+
+**`agentic_root` is written once, resolved and absolute.** Resolve
+`agenticRoot` against the directory containing `.agentic.json` and record the
+result — `C:\projects\investments\.agentic`, not `../.agentic`. Every
+`run_dir`, `report_to` and `inputs` path in every work order is then built by
+appending to that recorded string, never by re-joining a relative fragment.
+Relative-path arithmetic repeated across a dozen work orders is how a run ends
+up dispatching against `C:\projects\investments.agentic\...` — a path that is
+one missing separator from correct and silently wrong.
 
 **Every agent writes its own artifact.** The work order carries a `report_to:`
 path; the agent writes its full report there itself and *also* returns the
@@ -216,6 +234,24 @@ the thing it judged did not.
 Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
 `reviewer`, `tech-lead` and `quant-analyst` in `AUDIT` mode may emit `PASS` or
 `FAIL`. Every other lane writes `verdict: NONE`.
+
+### The report is checked, not trusted
+
+```bash
+python <agenticRoot>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --lane <lane>
+```
+
+The orchestrator runs this on every artifact as it arrives, before routing
+anything out of it. Exit 0 or the lane is not closed.
+
+It checks what prose could not: the enums are real values, every section is
+present, an empty section says `- none`, `status: DONE` is not paired with
+`verification.result: NOT_RUN` on an order that named a command, and a
+non-gate lane has not issued a verdict. It does **not** check whether the
+content is true — no script can. It checks that the report is routable.
+
+An agent may run it on its own artifact before returning. That is cheaper than
+being sent back, and the failures it reports are unambiguous.
 
 ### Field discipline
 

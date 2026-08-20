@@ -194,6 +194,16 @@ The block is what the orchestrator routes from — `contract_notes` become the
 next lane's inputs, `pack_corrections` become the docs lane's close-out order,
 `handoff` becomes what the next engineer is told. Prose cannot be routed.
 
+**Check your own report before returning it:**
+
+```bash
+python <agenticRoot>/scripts/check_report.py <your report_to path> --lane <your lane>
+```
+
+Exit 0 means it is routable. Non-zero prints exactly what is wrong. The
+orchestrator runs this anyway — running it yourself is strictly cheaper than
+being sent back for a missing `- none`.
+
 Reminders that catch most protocol slips:
 
 - `status` (did the order complete), `verdict` (the judgment you were asked

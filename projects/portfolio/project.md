@@ -92,7 +92,8 @@ docs/
 **PRD → User Story → Ticket.** A story is a vertical slice delivering
 user-visible value, carrying acceptance criteria, a test plan, and
 `T-<epic>.<story>.<n>` tickets. Vertical slice with no ticketed story → the
-orchestrator stops and asks for `write-story` first.
+orchestrator dispatches `story-author` for a draft, then stops for the human to
+approve it. The human approves; the network never self-approves a story.
 
 ## Lane routing
 

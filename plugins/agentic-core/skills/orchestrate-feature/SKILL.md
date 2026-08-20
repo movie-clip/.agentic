@@ -53,6 +53,34 @@ says the thing already exists, or was deliberately left open with a recorded
 reason, that is usually the whole answer and nothing further should be
 dispatched.
 
+## Step 1b — Health reviews are audits, and this project has a pattern for them
+
+An open-ended "review the project and tell me what's wrong" is not a feature
+request and not recon. It is an **audit**, and the project profile will usually
+name a house pattern for how audits are recorded. Follow it rather than
+inventing an artifact.
+
+Two things this gets wrong when improvised:
+
+**Findings need a home the rest of the project already reads.** A standalone
+findings file with its own numbering is invisible to every later story, and to
+the producer next time it checks whether something is already known. If the
+project records findings inside an epic PRD, that is where they go.
+
+**Findings must be dispatched, not improvised.** Split the review by lane and
+send each to the specialist that owns it — contract drift to `tech-lead`,
+anything touching a formula or a trust label to `quant-analyst`, code layout
+and prior art to `scout`. A generic subagent with a hand-written prompt has
+none of the capability packs, so it re-derives what the packs already know and
+gets no benefit from the guardrails.
+
+Then dispatch `producer` with the collected findings, so placement, sequencing
+and the "already known / deliberately open" check happen where they belong.
+
+**Verification is separate from review.** "Is the project in a working state" is
+answered by running the project's canonical test entrypoint, not by an audit.
+Do that first, report it plainly, and keep it out of the findings.
+
 ## Step 2 — Quant research, when the substance is mathematical
 
 If the approved work introduces or changes a metric, formula, weighting, return
@@ -181,6 +209,15 @@ Report to the user:
 - the exact command they should run before committing
 
 **You never commit.** The repo's mechanical gates own that boundary.
+
+**And you never offer to do a lane's work yourself.** When a brief resolves into
+"write two debt-register entries" or "reconcile four docs", those are `docs`
+lane orders — dispatch them. Offering to do it directly is how the isolation
+erodes: it always looks cheaper in the moment, and the work lands without a
+pack, without a scope fence, and without a report anything downstream can read.
+
+The same applies to reaching for a repo skill the profile marks as superseded.
+If the routing table names an agent for a job, that agent does the job.
 
 ## Degrading gracefully
 

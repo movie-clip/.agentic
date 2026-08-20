@@ -104,6 +104,20 @@ decisions specifically:
   the brief must name it as a trust-model change, because that is what it is,
   and it needs the owner's decision.
 
+## Where findings live
+
+Findings from an audit or health review belong **in the epic PRD** as `F-1`,
+`F-2`, … — that is the findings-first pattern above, and it is what makes them
+discoverable to later stories and to your own "already covered" check.
+
+Do not accept a standalone findings file with its own numbering scheme as the
+record. If one exists (a review was run outside the epic structure), your job is
+to fold its findings into a proper epic PRD, deduplicating against what is
+already recorded in the tech-debt register and in prior epics' open findings.
+
+A finding that duplicates a known-open item is not a new finding — say so, and
+point at the existing record.
+
 ## Epic inflation
 
 A one-story epic needs a reason beyond "this request needs somewhere to live".

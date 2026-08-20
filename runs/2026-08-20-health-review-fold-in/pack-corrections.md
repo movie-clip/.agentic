@@ -23,3 +23,16 @@
 routing scope — this correction is dispatched as an explicit, human-approved exception due to
 urgency (both files are live misinformation read by every future agent/human session that binds
 to this project), not a routing change. See run.md for the approval record.
+
+- **New learning (not a false-premise correction, but worth adding to `capabilities/backend.md`
+  or `project.md`), from order 06 (T-36.1.1):** this checkout has `core.filemode=false`. A plain
+  `git add` on a newly-created executable script (e.g. a `.sh`/POSIX hook wrapper) silently
+  records it in the git index as mode `100644` (non-executable) even though the file has `chmod
+  +x` on disk — verified directly via `git ls-files --stage`. Since git checkout applies the
+  *stored* index mode on every clone regardless of that clone's own `core.filemode` setting, this
+  silently ships a non-executable script that Linux's git hook runner (no `sh`-fallback the way
+  Git-for-Windows has) skips without error — the exact "wiring exists but is inert" failure class
+  Epic 36 exists to close, just at the file-mode layer. Fix: stage with
+  `git add --chmod=+x <path>` for any new executable file added from a Windows dev box in this
+  repo. Recommend adding this as a standing gotcha in the backend capability pack, not just this
+  run's ledger, since it will recur the next time any script needs the executable bit.

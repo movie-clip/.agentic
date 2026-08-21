@@ -2,6 +2,7 @@
 """Derive what a run cost from its ledger, and check the Cost block agrees.
 
     python scripts/run_cost.py runs/<run-id>/          # one run
+    python scripts/run_cost.py runs/<run-id>/run.md    # the same run
     python scripts/run_cost.py runs/                   # every run, newest last
 
 Exit 0 = the ledger's Cost block matches the Artifacts and Rounds tables.
@@ -147,9 +148,18 @@ def main(argv: list[str]) -> int:
         print(f"no such path: {target}")
         return 2
 
-    runs = ([target] if (target / "run.md").is_file()
-            else sorted(p for p in target.iterdir()
-                        if p.is_dir() and (p / "run.md").is_file()))
+    # Three shapes are all natural to type: the ledger itself, the run dir that
+    # holds it, or the parent that holds many runs. Only the last needs a scan.
+    if target.is_file():
+        if target.name != "run.md":
+            print(f"not a run ledger: {target}")
+            return 2
+        runs = [target.parent]
+    elif (target / "run.md").is_file():
+        runs = [target]
+    else:
+        runs = sorted(p for p in target.iterdir()
+                      if p.is_dir() and (p / "run.md").is_file())
     if not runs:
         print(f"no run ledgers under {target}")
         return 2

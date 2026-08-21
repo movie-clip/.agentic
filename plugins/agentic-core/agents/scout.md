@@ -2,7 +2,7 @@
 name: scout
 description: Use this agent for read-only reconnaissance before any plan is written - "where does X live", "what already exists for Y", "what would this change touch", or to localise a bug before anyone attempts a fix. It explores broadly and returns a compact map, so the orchestrator can plan without burning main-session context on file-by-file exploration. Never edits anything.
 tools: Read, Write, Glob, Grep
-model: haiku
+model: sonnet
 effort: medium
 ---
 

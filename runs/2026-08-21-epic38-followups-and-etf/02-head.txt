@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/02
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\02-delivery-brief.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only placement brief
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     5
+risks:       2
+headline:    Propose Epic 38 (2 stories: ETF look-through, cache diagnostics) for 4 verified Epic 37 carried findings; no duplicates found.

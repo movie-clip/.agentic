@@ -7,7 +7,7 @@ request:      Address the remaining, non-ETF-look-through findings surfaced duri
               excludes ETF look-through (F-B) and both epic-24 tech-debt entries.
 agentic_root: C:\projects\investments\.agentic
 story:        docs/product/stories/US-37.2-sector-classification-followups.md
-status:       DISPATCHING
+status:       CLOSED
 route:        story (lighter weight — no design pass, no quant-audit/integration gate per human's explicit approval)
 express:      no
 
@@ -20,6 +20,11 @@ express:      no
 | 04 | backend | T-37.2.2 | backend-engineer | sonnet | 04-backend.md | DONE | — |
 | 05 | test | T-37.2.3 | test-engineer | sonnet | 05-test.md | DONE | — |
 | 06 | test | T-37.2.4 | test-engineer | sonnet | 06-test.md | DONE | — |
+| 07 | review | — | reviewer | sonnet | 07-review.md | DONE | PASS |
+| 08 | docs | close-out | docs-engineer | sonnet | 08-docs-closeout.md | DONE | — |
+| 09 | docs | close-out (fmt fix) | docs-engineer | sonnet | 08-docs-closeout.md | DONE | — |
+| 10 | docs | close-out (fmt fix) | docs-engineer | sonnet | 08-docs-closeout.md | DONE | — |
+| 11 | docs | close-out (slice log) | docs-engineer | sonnet | 11-docs-slicelog.md | DONE | — |
 
 ## Open
 | kind | from | ref | one-line | state |
@@ -33,6 +38,9 @@ express:      no
 | infra | dispatch 01 | (report format) | check_report.py failed on `command: NONE — <trailing text>`; fixed by dispatch 02 (bare NONE required) | ABSORBED |
 | should_fix | 04-backend | § risks | cache-flag fix re-derives fmp.py's internal cache-key formula from outside (scope excluded fmp.py); clean fix belongs in fmp.py itself — future small follow-up | CARRIED |
 | risk | 04-backend | § risks | edge case: miss-then-failed-fetch-falls-back-to-stale-cache still reports cached:False though data was cache-served — not in AC3/AC4's primary path | CARRIED |
+| risk | 07-review | § Dead-code note | fixtures.py's DEFAULT_COMPANY_PROFILE unreferenced by executable code, silent at gate's 80% confidence threshold — worth an eyeball only if threshold tightens | CARRIED |
+| open_decision | 08-docs-closeout | § Handoff detail: slice-log draft | slice-log one-liner — human approved, written verbatim by 11-docs-slicelog | ABSORBED |
+| infra | dispatch 08 | (report format) | check_report.py failed: 4 bullets over 400-char hard limit; fixed by 09, which then needed 10 to add missing Orchestrator brief header | ABSORBED |
 
 ## Rounds
 | finding | lane | round | of |
@@ -41,9 +49,9 @@ express:      no
 ## Cost
 | metric | value |
 |---|---|
-| dispatches | 6 |
+| dispatches | 11 |
 | rounds | 0 |
-| by model | sonnet 6 |
+| by model | sonnet 11 |
 | escalations | none |
 
 ## Cost note

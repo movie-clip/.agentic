@@ -185,6 +185,50 @@ justified by, so it has to be checked differently.
     quote the defining equation, so the human can check the citation itself.
   - a **second data path**: the same quantity reachable two ways in this repo
     (e.g. a weighted aggregate vs. the sum of its parts) must agree.
+  - a **second provider**, for values that came from a market-data vendor
+    rather than from a formula — see below.
+
+### A provider-sourced value needs a second provider, not a fresher call
+
+The anchors above all assume the number came out of a *formula*. Some do not:
+sector and industry classification, currency, exchange, security identity — these
+are **fetched**, and re-fetching them proves only that the vendor is
+self-consistent.
+
+Re-calling FMP with a fresh ticker sample is not an external anchor for a
+FMP-sourced value. It is the same class of mistake as recomputing from the
+methodology doc: if FMP's taxonomy assignment is wrong, the code and the audit
+inherit the error together and every gate passes. The US-37.1 sector audit
+(`runs/2026-08-21-dynamic-sector-classification/10-quant-audit.md` § log item 1)
+labelled exactly this `anchor: external`. It was a good check of **map
+coverage** — that every FMP sector string the map claims to handle really is one
+FMP emits — and it should keep being run under that name. It was not evidence
+that any security is classified *correctly*.
+
+**The second provider this repo already ships is Yahoo, via `yfinance==0.2.66`**
+(`services/quant-engine/requirements.txt:9`). Read the mechanics before
+planning around it:
+
+- `app/clients/yfinance_client.py` exposes **only**
+  `get_historical_price_light`. There is no profile/sector method on it. For a
+  classification anchor you call the library directly in your own throwaway
+  script — `yf.Ticker(sym).info` carries `sector` and `industry` — or you record
+  that a `get_company_profile` counterpart is engineering work and say so.
+- `pytest.ini` runs `--disable-socket`. A live comparison is an ad-hoc script,
+  or a test marked `live_data` (deselected by default, run with
+  `pytest -m live_data`). Never weaken the default suite to reach a provider.
+- **Yahoo's taxonomy is not FMP's.** The sector *strings* differ, and so
+  occasionally does the assignment. So this anchor is a corroboration, not an
+  equality assertion: map both onto the repo's own taxonomy, report agreements
+  and divergences as counts with the divergent tickers named, and let a
+  disagreement be a finding to escalate — not an automatic FAIL on the code.
+- Yahoo can be wrong too. Two providers agreeing is stronger than one; it is
+  still not ground truth. Say which providers, on which tickers, on which date.
+
+State it as `anchor: second-provider (yfinance/Yahoo, N tickers, <date>)`. A
+provider-sourced audit whose only anchor is another call to the same provider is
+`anchor: provider-self-consistent` — report it as that, and the orchestrator is
+instructed to tell the user the classification itself is unverified.
 
 **When the methodology doc is the thing that is wrong**, that is `CRITICAL` and
 it is not a lane's to fix. It goes to the human, with the anchor that exposed it
@@ -259,6 +303,8 @@ Do not draft tickets. That is story authoring.
 - [ ] Code checked against the methodology doc, in that direction
 - [ ] Grepped for duplicate implementations of the formula
 - [ ] Trust classification checked against the basis it actually rests on
+- [ ] Provider-sourced values (sector, identity, currency) anchored against a
+      *second* provider, or explicitly reported as provider-self-consistent
 - [ ] Every edge case in the table above exercised numerically
 - [ ] Units, signs, annualisation verified
 - [ ] Anything unreproducible stated as unreproducible, not passed

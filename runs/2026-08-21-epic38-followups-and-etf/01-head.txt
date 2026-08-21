@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/01
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\01-scout.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only exploration
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     4
+risks:       3
+headline:    Four Epic 37 carried findings verified: hardcoded cached flags (5 methods), cache-key coupling, ETF look-through unaddressed, methodology shipped final.

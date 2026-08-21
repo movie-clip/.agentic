@@ -102,6 +102,34 @@ integration gate. Recording both is what makes the model policy in
 Fill Cost even on a one-dispatch express run. A cost record that only exists for
 big runs cannot show you that the small ones were the expensive habit.
 
+**Mid-flight, the unfilled metrics are `—`, not `0`.** `0` is a claim that no
+dispatch happened, and `run_cost.py` will correctly call it a mismatch against
+the rows; `—` says the tally is not written yet, which is the truth until
+close-out.
+
+### The row is written when the head returns, not when you are done with it
+
+A head coming back is the ledger event. **Before you read the artifact, before
+you summarise anything to the human, write the Artifacts row** — number, lane,
+mode, agent, `model`, artifact, `status`, `verdict` — and rewrite `next:` in the
+same edit. Two fields, one action, no gap between them.
+
+The order matters because the two natural stopping points both come *after* the
+head and both feel like completion. You read the brief and you now know what to
+do next, so you go do it; or you tell the human what came back and the turn
+ends. Either way the dispatch happened, the artifact is on disk, and the ledger
+does not know. It happened in `2026-08-21-epic38-followups-and-etf`: the
+producer returned, the orchestrator validated its head, read its brief and
+reported it — and the Artifacts table still showed one row, `next:` still said
+`awaiting 02-delivery-brief.md from producer`, and `run_cost.py` exited 1.
+
+That failure is quiet in a way the others are not. The artifact is fine; the
+work is fine; only the record is wrong, so nothing downstream complains until a
+resume re-dispatches a lane that already ran, or the close-out tally is
+assembled from a table that is missing rows. **Updating the ledger before a
+dispatch does not discharge this** — a pre-dispatch edit records intent, and
+intent is exactly what a stale ledger already has too much of.
+
 ### `next:` is what makes a run resumable
 
 `status: DISPATCHING` says a run is mid-flight. It does not say *what to

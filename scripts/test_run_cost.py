@@ -100,6 +100,17 @@ check("no run.md is an error", any("no run.md" in x for x in p))
 check("nonexistent path exits 2", rc.main(["run_cost.py", "nope"]) == 2)
 check("no args exits 2", rc.main(["run_cost.py"]) == 2)
 
+print("the ledger path is accepted, not just the directory holding it")
+_d = Path(tempfile.mkdtemp()) / "2026-01-01-a-run"
+_d.mkdir()
+(_d / "run.md").write_text(HEADER + ROUNDS + COST, encoding="utf-8")
+check("run dir exits 0", rc.main(["run_cost.py", str(_d)]) == 0)
+check("run.md exits 0 too", rc.main(["run_cost.py", str(_d / "run.md")]) == 0)
+check("parent of runs exits 0", rc.main(["run_cost.py", str(_d.parent)]) == 0)
+(_d / "01-scout.md").write_text("not a ledger", encoding="utf-8")
+check("some other file exits 2, does not traceback",
+      rc.main(["run_cost.py", str(_d / "01-scout.md")]) == 2)
+
 n_fail = results.count(False)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

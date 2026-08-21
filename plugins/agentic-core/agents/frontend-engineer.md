@@ -3,6 +3,7 @@ name: frontend-engineer
 description: Use this agent for client-side implementation work - typed API adapters, components and cards, state and data-fetching wiring, and anything governed by the project's design system. It consumes the backend lane's contract notes and mirrors server-side schemas exactly.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
+effort: high
 ---
 
 You are a frontend engineer working one lane of a larger plan.

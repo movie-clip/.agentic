@@ -277,12 +277,19 @@ def check(path: Path, lane: str | None = None, head: str | None = None,
     bad += _check_brief(text)
 
     if lane:
+        # `quant` and `quant-audit` are different lanes and the filename knows
+        # which one this is. Without the hint the message reads as "this report
+        # is wrong" when the real fault is the --lane argument, which cost a
+        # wasted round-trip on the first real run.
+        inferred = lane_from_name(path)
+        hint = (f" — the filename says lane {inferred!r}; did you mean "
+                f"--lane {inferred}?") if inferred and inferred != lane else ""
         if verdict and verdict != "NONE" and lane not in GATE_LANES:
             bad.append(f"lane {lane!r} emitted verdict {verdict!r}; only "
-                       f"{sorted(GATE_LANES)} may judge")
+                       f"{sorted(GATE_LANES)} may judge{hint}")
         if verdict == "CHANGES_REQUESTED" and lane not in CR_LANES:
             bad.append(f"lane {lane!r} emitted CHANGES_REQUESTED; only "
-                       f"{sorted(CR_LANES)} may")
+                       f"{sorted(CR_LANES)} may{hint}")
 
     if head is not None:
         bad += _check_head(head, text)

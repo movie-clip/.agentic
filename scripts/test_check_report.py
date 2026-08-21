@@ -162,6 +162,13 @@ check("warns about none-with-commentary", any("trailing commentary" in x for x i
 check("still counts it as an entry (never undercount)",
       cr.counts(nd)["contract_notes"] == 1)
 
+print("R5 - a wrong --lane on a gate artifact suggests the right one")
+gp = d / "13-quant-audit.md"
+gp.write_text(BLOCK.replace("verdict:     NONE", "verdict:     FAIL"), encoding="utf-8")
+probs = cr.check(gp, "quant")
+check("suggests the filename lane", any("did you mean --lane quant-audit" in x for x in probs), str(probs))
+check("correct lane passes", cr.check(gp, "quant-audit") == [], str(cr.check(gp, "quant-audit")))
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

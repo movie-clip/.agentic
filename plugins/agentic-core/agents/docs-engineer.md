@@ -3,6 +3,7 @@ name: docs-engineer
 description: Use this agent to reconcile documentation with what was actually implemented - contract and field-inventory docs, methodology docs, shipped-state inventories, roadmap and slice logs. Dispatch it at close-out of a slice, driven by the contract notes the implementation lanes emitted.
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
+effort: medium
 ---
 
 You are a documentation engineer working the close-out lane of a plan.

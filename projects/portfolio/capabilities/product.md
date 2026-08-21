@@ -39,6 +39,46 @@ convention you never read is not.
 Read the roadmap **first**, every time. It states which epic is active and lists
 open items that were deliberately left open.
 
+### Navigating the roadmap without reading 1,700 lines
+
+`epic-roadmap.md` is ~1,721 lines and roughly nine tenths of it is completed-epic
+history. Reading it end to end is the single most expensive habit available to
+this lane, and it buys almost nothing — the part that changes is at the top.
+
+Its shape, which is stable:
+
+| Lines | What is there |
+|---|---|
+| ~1–69 | the **live snapshot** — active epic, story snapshot table, slice log, open items |
+| ~70 onward | one section per epic, **newest first**, headed `## Completed Epic: Epic <n> — <name>` |
+
+So:
+
+1. **Read the snapshot** (roughly the first 70 lines). Always. This is the part
+   that is authoritative about *now*.
+2. **Locate the epics you actually need** rather than scrolling to them:
+   ```bash
+   grep -n "^## .*Epic " docs/product/epic-roadmap.md   # every epic, with line numbers
+   ```
+3. **Read only those sections**, by line range.
+
+A brief that cites the snapshot plus two named precedent epics is doing the job.
+A brief that read all 1,721 lines is doing the same job having paid twenty times
+for it.
+
+### Finding the precedent epic
+
+Placement here is **precedent-driven** — this project has strong house patterns
+(findings-first epics, doc-hygiene epics, mechanical-gate stories) and the right
+question is almost always *"which existing epic is this a sibling of?"* rather
+than *"is this a new kind of thing?"*.
+
+The epic-heading grep above is how you answer it: the titles are descriptive
+enough to shortlist candidates, and then you read one or two sections to check
+the shape matches. Name that precedent in your brief's `## Placement`. An epic
+proposed with no stated precedent is usually epic inflation, and saying which
+epic it resembles is the cheapest check against that.
+
 ## Story lifecycle
 
 | Status | Meaning |

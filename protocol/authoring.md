@@ -62,6 +62,60 @@ frequency is the profile that earns Opus.
 | `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | `scout` | Read-only retrieval — glob, grep, read, report `file:line`. Every claim it makes is cheap to verify by opening the file it cites. |
 
+### Effort is the second dial, and it is not the model
+
+`model` decides which model runs; **`effort` decides how hard it works.** They
+are independent frontmatter fields, and a lane that pins one and inherits the
+other is only half-configured.
+
+**Claude Code's implicit default is `xhigh`** — the second-highest of five. So
+an agent with no `effort:` line is not running "normally", it is running near
+the top of the range. All ten lanes were doing exactly that until v0.4.4.
+
+**`medium` is this network's baseline.** Two levels are in use:
+
+| Effort | Lanes | Why |
+|---|---|---|
+| `high` | `producer`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the contract is, whether it is acceptable, and the two that write the code the contract describes. |
+| `medium` | `quant-analyst`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed. |
+
+`quant-analyst` sits at `medium` **on the model tier, not on the effort dial**:
+it is the one lane on Opus, and the tier is what buys its judgment. This is a
+deliberate trade — see the caveat below.
+
+`low` and `max` are not defaults anywhere. `max` is the escalation for a lane
+the run has shown to be struggling, on the same evidence rule as a model
+escalation: a `BLOCKED` that is not a missing input, or a second change-request
+round.
+
+**Lower effort is not just cheaper, it is different.** It produces fewer and
+more-consolidated tool calls, less preamble, and terser confirmations. That is
+usually an improvement for a lane whose output is a structured report, but it
+changes what those lanes do, not only what they cost.
+
+**Two things to watch on the next full run**, because both are untested at these
+settings:
+
+- **`quant-analyst` at `medium`.** It found the run's one MATERIAL defect at
+  `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing the work —
+  but the gate that has no downstream check is the worst place for a silent
+  regression. If an audit passes something a later gate catches, raise it.
+- **`scout` at `medium`.** Retrieval is the canonical `low` task, so this is
+  the one lane deliberately running above the cheapest setting that would do.
+  Judge it on whether `file:line` citations stay complete, not on cost.
+
+### Two things `effort` does not control
+
+**Extended thinking is inherited, not per-agent.** A subagent takes the main
+session's thinking configuration: on if your session has it on, off if not.
+There is no per-agent override, so this is a property of how *you* run the
+orchestrator, not something the network can set for a lane.
+
+**`maxTurns` is a separate ceiling** and is also unset here. It caps agentic
+turns rather than depth. Leave it unset unless a lane demonstrably runs away —
+a turn cap that fires mid-task produces a truncated report, which is worse than
+an expensive one, and `status: PARTIAL` will not always catch it.
+
 ### Why the gates are on Sonnet
 
 Because v0.4 moved their load-bearing checks off the model and onto mechanisms.

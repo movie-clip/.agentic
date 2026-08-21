@@ -25,16 +25,16 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  │  ├─ orchestrate-feature/SKILL.md     ← the router; runs in the main session
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
-│     ├─ producer.md        sonnet  roadmap · epics · stories · sequencing
-│     ├─ quant-analyst.md   OPUS    formulas · trust classes · financial gate
-│     ├─ story-author.md    sonnet  drafts the ticketed story (human approves)
-│     ├─ scout.md           haiku   read-only recon
-│     ├─ tech-lead.md       sonnet  design pass + integration gate
-│     ├─ backend-engineer.md   sonnet
-│     ├─ frontend-engineer.md  sonnet
-│     ├─ test-engineer.md      sonnet
-│     ├─ docs-engineer.md      sonnet
-│     └─ reviewer.md        sonnet  acceptance gate
+│     ├─ producer.md        sonnet/high  roadmap · epics · stories · sequencing
+│     ├─ quant-analyst.md   OPUS/medium    formulas · trust classes · financial gate
+│     ├─ story-author.md    sonnet/medium  drafts the ticketed story (human approves)
+│     ├─ scout.md           haiku/medium   read-only recon
+│     ├─ tech-lead.md       sonnet/high  design pass + integration gate
+│     ├─ backend-engineer.md   sonnet/high
+│     ├─ frontend-engineer.md  sonnet/high
+│     ├─ test-engineer.md      sonnet/medium
+│     ├─ docs-engineer.md      sonnet/medium
+│     └─ reviewer.md        sonnet/high  acceptance gate
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
 │  ├─ project.md                          ← the binding profile
 │  └─ capabilities/
@@ -199,6 +199,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
 | A run's cost tally matches its rows | **script** — `scripts/run_cost.py`. Real. Catches a Cost block that disagrees with the Artifacts table, and a dispatch with no model. |
 | Every lane runs on a chosen model | **agent frontmatter** — all ten pinned explicitly, no `inherit`. Real. |
+| Every lane runs at a chosen effort | **agent frontmatter** — all ten pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
 | A report head's counts match its artifact | **script** — `check_report.py --head`, and `--emit-head` derives the head so it cannot disagree. Real. |
 | Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |

@@ -150,6 +150,37 @@ same rule, and it is what keeps the section from being invisible to routing.
 
 ---
 
+### When the order and your capability pack disagree
+
+Your order is written by the orchestrator, which has less domain context than
+your pack. So:
+
+- **A numbered project guardrail wins, always.** An order that requires breaking
+  one gets `status: REFUSED` naming the guardrail. This is not a judgment call.
+- **A pack *convention* does not block the order.** Do what the order says, set
+  `status: PARTIAL`, and name the conflict in `risks`: which pack rule, what the
+  order asked, and what you did. The human decides which was right.
+
+Silently following the order is the failure to avoid. It happened on the first
+real run: a pack said a brand-new methodology section is flag-for-human, an
+order said write it, and the lane wrote it — correctly flagging the conflict,
+but reporting `DONE`, so nothing downstream treated the doc as provisional.
+
+### You cannot delete or rename files
+
+No lane has a delete tool, deliberately — deletion is the one repo edit with no
+diff to review. A rename is a create plus a delete, so **you can only do half of
+one.** Do the half you can (write the new file), leave the old one in place, and
+report the other half as a `should_fix` naming the exact command:
+
+```
+handoff:
+  - rename incomplete — run: git rm docs/product/stories/US-24.12-<slug>.md
+```
+
+Do not leave a tombstone file that redirects to the new one without saying so:
+a stub nobody was told about is indistinguishable from a duplicate.
+
 ## 4. Shape 2H — the report head (what you *return*)
 
 **Your final message is not the report.** It is the head: a fixed-size summary

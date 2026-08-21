@@ -37,6 +37,7 @@ agentic_root: <the RESOLVED ABSOLUTE path>
 story:        <path, or NONE>
 status:       PLANNING | DISPATCHING | GATING | BLOCKED | CLOSED
 blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
+next:         <the single next action, always current — see below>
 route:        recon | express | audit | review | story | full
 express:      yes | no
 
@@ -48,7 +49,9 @@ express:      yes | no
 | 03 | backend | — | backend-engineer | opus↑ | 03-backend.md | DONE | — |
 
 `model` is the model the dispatch **actually ran on** — the agent file's default,
-or the override if you escalated. Mark an escalation with `↑` and say why in
+or the override if you escalated. Record an effort override the same way
+(`sonnet/max↑`); an unoverridden dispatch needs only the model, since the agent
+file pins its effort. Mark an escalation with `↑` and say why in
 **Cost** below. Writing the default from memory rather than from the agent file
 is how this column becomes fiction; read it if you are unsure.
 
@@ -58,6 +61,11 @@ is how this column becomes fiction; read it if you are unsure.
 | contract_note | 04-backend | schemas/holding.py | sector field now nullable, client type lags | OPEN |
 | should_fix | CR-2 | cr/CR-2.md | rename-entry parsing untested | CARRIED |
 | partial | 06-frontend | 06-frontend.md | exposure card left unwired | OPEN |
+
+## Closed
+| kind | from | absorbed by | one-line |
+|---|---|---|---|
+| contract_note | 03-design | 06-backend | client type updated to match nullable sector |
 
 ## Rounds
 | finding | lane | round | of |
@@ -93,6 +101,42 @@ integration gate. Recording both is what makes the model policy in
 
 Fill Cost even on a one-dispatch express run. A cost record that only exists for
 big runs cannot show you that the small ones were the expensive habit.
+
+### `next:` is what makes a run resumable
+
+`status: DISPATCHING` says a run is mid-flight. It does not say *what to
+dispatch*, so resuming means reconstructing intent from twelve artifact rows —
+and the first real end-to-end run ended exactly there, stopped by a session
+limit at dispatch 12 with the ledger saying only `DISPATCHING`.
+
+So `next:` carries the one action a fresh session would take, rewritten every
+time you update the ledger:
+
+```
+next:         re-dispatch quant-audit to confirm CR-1's fix, then integration
+```
+
+One line, always current. When the run closes it becomes `next: none — CLOSED`.
+The cost is a line per update; the alternative is re-deriving the plan from the
+artifacts, which is the failure the ledger exists to prevent.
+
+### `Open` holds what is still open
+
+**A row leaves `Open` when it is absorbed.** Move it to `## Closed` with the
+dispatch that absorbed it, and drop the `state` column — being in `Closed` *is*
+the state. `CARRIED` and `OPEN` rows stay in `Open` until close-out.
+
+This is a correction to how v0.4.1 stated the rule ("nothing leaves the table by
+being deleted; it changes state"). That preserved the audit trail and let the
+working table grow without bound: the first real run finished with **57 rows in
+`Open`, 20 of them already `ABSORBED`**, all re-read on every ledger update. The
+audit trail is preserved either way — `Closed` keeps it, and the artifact the
+row points at holds the detail.
+
+**One fact, one row.** That run recorded the same tombstone twice, once from the
+lane that hit it and once from a later pass that noticed it again. Before adding
+a row, check whether `ref` already appears; if it does, update that row rather
+than appending a second account of the same fact.
 
 ### Why `Open` and `Rounds` are tables
 

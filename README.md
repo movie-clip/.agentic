@@ -34,7 +34,8 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │     ├─ frontend-engineer.md  sonnet/high
 │     ├─ test-engineer.md      sonnet/medium
 │     ├─ docs-engineer.md      sonnet/medium
-│     └─ reviewer.md        sonnet/high  acceptance gate
+│     ├─ reviewer.md        sonnet/high  acceptance gate
+│     └─ protocol-linter.md opus/medium   authoring gate — network files vs authoring.md
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
 │  ├─ project.md                          ← the binding profile
 │  └─ capabilities/

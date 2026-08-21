@@ -1,4 +1,5 @@
-<!-- Extension: GATE LANES only — tech-lead, reviewer, quant-analyst.
+<!-- Extension: GATE LANES only — tech-lead, reviewer, quant-analyst,
+     protocol-linter.
      Read after PROTOCOL.md core. Not restated anywhere else. -->
 
 # Protocol extension — gates
@@ -10,13 +11,14 @@ other lane may fill, and it is what the run turns on.
 
 ## 1. What each gate checks
 
-Three gates, in order, checking different things:
+Four gates, checking different things:
 
 | Gate | Judges | Fails on |
 |---|---|---|
 | `quant-analyst` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
+| `protocol-linter` | the **network's own files** | an agent, pack or protocol section that breaks `authoring.md` |
 
 They are not substitutes. A wrong formula can be engineered perfectly, tested
 thoroughly, and satisfy every acceptance criterion — and every gate but the

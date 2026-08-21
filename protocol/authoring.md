@@ -58,7 +58,7 @@ frequency is the profile that earns Opus.
 
 | Model | Lanes | Why |
 |---|---|---|
-| `opus` | `quant-analyst` | A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion, and passes every other gate. **There is no downstream check.** It is also the rarest lane — it runs only when the substance is mathematical. |
+| `opus` | `quant-analyst`, `protocol-linter` | **Neither has a downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
 | `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | `scout` | Read-only retrieval — glob, grep, read, report `file:line`. Every claim it makes is cheap to verify by opening the file it cites. |
 
@@ -77,11 +77,11 @@ the top of the range. All ten lanes were doing exactly that until v0.4.4.
 | Effort | Lanes | Why |
 |---|---|---|
 | `high` | `producer`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the contract is, whether it is acceptable, and the two that write the code the contract describes. |
-| `medium` | `quant-analyst`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed. |
+| `medium` | `quant-analyst`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
 
-`quant-analyst` sits at `medium` **on the model tier, not on the effort dial**:
-it is the one lane on Opus, and the tier is what buys its judgment. This is a
-deliberate trade — see the caveat below.
+`quant-analyst` and `protocol-linter` sit at `medium` **on the model tier, not
+on the effort dial**: they are the two lanes on Opus, and the tier is what buys
+their judgment. This is a deliberate trade — see the caveat below.
 
 `low` and `max` are not defaults anywhere. `max` is the escalation for a lane
 the run has shown to be struggling, on the same evidence rule as a model
@@ -103,6 +103,11 @@ settings:
 - **`scout` at `medium`.** Retrieval is the canonical `low` task, so this is
   the one lane deliberately running above the cheapest setting that would do.
   Judge it on whether `file:line` citations stay complete, not on cost.
+- **`protocol-linter` at all.** It has never run. It is the second Opus lane and
+  the second gate with no downstream check, so a wrong `PASS` from it is as
+  invisible as a wrong audit. Judge its first dispatches on whether every `FAIL`
+  cites a rule, a file and a line — a finding missing any of the three is the
+  lane drifting into style review.
 
 ### Two things `effort` does not control
 

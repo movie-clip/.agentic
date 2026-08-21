@@ -38,9 +38,10 @@ SECTIONS = ["changed", "verification", "contract_notes",
 COUNTED = ["changed", "contract_notes", "pack_corrections", "handoff", "risks"]
 
 LANES = {"product", "quant", "recon", "story", "design", "backend", "frontend",
-         "test", "docs", "quant-audit", "integration", "review"}
+         "test", "docs", "quant-audit", "integration", "review",
+         "protocol-lint"}
 # Lanes permitted to render a judgment. Everyone else writes verdict: NONE.
-GATE_LANES = {"integration", "review", "quant-audit"}
+GATE_LANES = {"integration", "review", "quant-audit", "protocol-lint"}
 # Only the tech lead's integration pass may request changes.
 CR_LANES = {"integration"}
 

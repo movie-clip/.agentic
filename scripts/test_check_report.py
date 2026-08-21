@@ -169,6 +169,24 @@ probs = cr.check(gp, "quant")
 check("suggests the filename lane", any("did you mean --lane quant-audit" in x for x in probs), str(probs))
 check("correct lane passes", cr.check(gp, "quant-audit") == [], str(cr.check(gp, "quant-audit")))
 
+print("R6 - protocol-lint is a gate lane and may judge")
+pl = d / "14-protocol-lint.md"
+pl.write_text(BLOCK.replace("verdict:     NONE", "verdict:     FAIL"), encoding="utf-8")
+check("two-part lane parsed from the filename",
+      cr.lane_from_name(pl) == "protocol-lint", str(cr.lane_from_name(pl)))
+check("its FAIL verdict is allowed", cr.check(pl, "protocol-lint") == [],
+      str(cr.check(pl, "protocol-lint")))
+check("it still may not request changes",
+      any("CHANGES_REQUESTED" in x for x in
+          cr.check(pl, "protocol-lint")) is False)
+cr2 = d / "15-protocol-lint.md"
+cr2.write_text(BLOCK.replace("verdict:     NONE", "verdict:     CHANGES_REQUESTED"),
+               encoding="utf-8")
+check("CHANGES_REQUESTED from protocol-lint is rejected",
+      any("may" in x and "CHANGES_REQUESTED" in x
+          for x in cr.check(cr2, "protocol-lint")),
+      str(cr.check(cr2, "protocol-lint")))
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

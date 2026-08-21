@@ -204,6 +204,23 @@ which one a section is, it is always-read: the cost of one extra section is a
 few hundred tokens, and the cost of the other mistake is a wrong number that
 passes every gate.
 
+## A pack may not instruct a tool the lane does not have
+
+Before writing a command into a capability pack, open the agent file and read
+its `tools:` line. `scout`, `story-author` and `docs-engineer` have no `Bash`;
+a pack telling one of them to run `git diff` is a false premise about the lane
+itself, and it will be silently worked around rather than reported.
+
+This is the one false premise `pack_corrections` does not catch. That loop is
+aimed at facts about the *code* — a path that moved, a fixture that was renamed
+— and an agent that cannot run a command tends to substitute something and
+mention it in `risks`, not to emit a correction. In the first closed run the
+docs lane hit exactly this three times and never once filed it as a pack
+correction.
+
+So the check belongs here, at authoring time: **every command in a pack must be
+runnable by the lane that pack belongs to.**
+
 ## Adding a project
 
 Create `projects/<name>/project.md` plus capability packs, and drop

@@ -103,11 +103,8 @@ Two obligations, both mandatory:
    it.** Not the report — the head. Its counts must match your artifact, because
    they are what decides whether the orchestrator ever opens it.
 
-Check your own artifact before returning, which is strictly cheaper than being
-sent back for a missing `- none`:
-
-```bash
-python <agenticRoot>/scripts/check_report.py <your report_to path> --lane docs
-```
+**You have no `Bash`, by design** — so you cannot run `scripts/check_report.py` on your own artifact. Check the block against
+`PROTOCOL.md` § 3 by eye instead, and do not spend a `risks` bullet on it:
+the orchestrator validates every artifact before routing from it.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

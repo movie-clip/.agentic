@@ -89,10 +89,17 @@ note to write the handoff later.
 
 ## Step 1 — Read the story and the diff
 
-```bash
-git diff main...HEAD --name-only
-git log main..HEAD --oneline
-```
+**You have no `Bash`, so you cannot run `git diff` yourself.** You do not need
+to: your order's `inputs` name the upstream lanes' reports, and their `changed:`
+sections **are** the diff — each is one line per file, written by the lane that
+touched it. Read those, plus the files they name.
+
+That is the relay rule doing its job. A lane report's `changed:` list is a
+better source than `git diff` anyway: it says what changed *and why*, and it
+cannot include an unrelated edit that happened to be in the working tree.
+
+If your order names no upstream reports and you genuinely cannot tell what
+shipped, that is `status: BLOCKED` — not a guess.
 
 | Changed path | Doc impact |
 |---|---|

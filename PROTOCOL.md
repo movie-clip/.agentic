@@ -274,7 +274,9 @@ Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
 - `contract_notes` is how cross-lane drift gets caught. A backend agent that
   changes a schema **must** emit a contract note naming the client type and the
   contract doc that now lag.
-- Empty sections stay in with `- none`. Silence is ambiguous.
+- Empty sections stay in with a **bare** `- none`. Silence is ambiguous, and
+  `- none — because X` is counted as one real entry, so your head advertises
+  work that does not exist. If the reason matters, it is a `risks` bullet.
 
 ## 7. The report is checked, not trusted
 
@@ -282,10 +284,16 @@ Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
 python <agenticRoot>/scripts/check_report.py <report_to path> --lane <lane>
 ```
 
-Run this on your own artifact before returning. Exit 0 means it is routable;
-non-zero prints exactly what is wrong. The orchestrator runs it anyway, so
-running it yourself is strictly cheaper than being sent back for a missing
-`- none`.
+Run this on your own artifact before returning — **if your `tools:` includes
+`Bash`.** Exit 0 means it is routable; non-zero prints exactly what is wrong.
+
+**If you have no `Bash`, you cannot run it, and that is expected.** `scout`,
+`story-author` and `docs-engineer` are deliberately shell-less. Check the block
+against § 3 by eye, and say nothing about it in `risks` — the orchestrator runs
+the validator on every artifact before routing from it (that is mandatory, not
+best-effort), so your artifact is checked either way. A `risks` bullet spent
+apologising for a tool you were never granted is a bullet the next lane has to
+read for nothing.
 
 It checks that the enums are real values, that every section is present, that an
 empty section says `- none`, that `DONE` is not paired with `NOT_RUN` on an

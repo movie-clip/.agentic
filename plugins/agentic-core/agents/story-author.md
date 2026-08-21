@@ -193,11 +193,8 @@ Your `verdict` is `NONE` — you draft, you do not gate. And `status: DONE` here
 means "the draft is written", never "the story is approved": approval is the
 human's, and both your report and your head's `headline` say so.
 
-Check your own artifact before returning, which is strictly cheaper than being
-sent back for a missing `- none`:
-
-```bash
-python <agenticRoot>/scripts/check_report.py <your report_to path> --lane story
-```
+**You have no `Bash`, by design** — so you cannot run `scripts/check_report.py` on your own artifact. Check the block against
+`PROTOCOL.md` § 3 by eye instead, and do not spend a `risks` bullet on it:
+the orchestrator validates every artifact before routing from it.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/11
+artifact: C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\11-test.md
+status: DONE
+verdict: NONE
+verification: PASS
+detail: backend 878 passed (up from 858 in 09-backend.md, +20 new tests); frontend 331 passed / 37 files; tsc clean; dead-code gate clean (ruff/vulture/knip all clean); dashboardGoldens.ts untouched
+changed: 2
+contract_notes: 0
+pack_corrections: 0
+handoff: 5
+risks: 0
+headline: Added 20 tests covering US-38.1 AC1-AC9 look-through sector classification; run_all_tests.py green, no defects found in landed T-38.1.1/T-38.1.2 code.

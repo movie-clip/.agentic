@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/T-40.1.1
+artifact:    C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\T-40.1.1-docs.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      order specified verification: NONE; docs-only, no Bash tool granted to this lane
+changed:     1
+contract_notes: 1
+pack_corrections: 1
+handoff:     2
+risks:       1
+headline:    Inserted the exact trust-source exclusion bullet into docs/contracts/exposure-fields.md, sibling to the CR-1 fix, no other edits made.

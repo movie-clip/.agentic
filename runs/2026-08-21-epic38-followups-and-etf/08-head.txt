@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/08
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\08-test.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      backend 858 passed; frontend 331 test files/tests passed; dead-code gate (ruff/vulture/knip) clean; tsc clean; dashboardGoldens.ts unchanged (git status confirms no drift)
+changed:     10
+contract_notes: 0
+pack_corrections: 0
+handoff:     4
+risks:       0
+headline:    Fixed the 8 broken tests and added full AC1-AC8 cache-flag coverage for US-38.2; run_all_tests.py green end to end.

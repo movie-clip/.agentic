@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/09
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\09-docs.md
+status:      PARTIAL
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order named verification: NONE (docs lane, no Bash tool granted per PROTOCOL.md §7)
+changed:     4
+contract_notes: 1
+pack_corrections: 1
+handoff:     2
+risks:       2
+headline:    Reconciled methodology/contract/tech-debt/current-state docs with the landed direct-held ETF sector-resolution branch (US-39.1/T-39.1.4); flagged a pack-convention conflict on new-methodology-section handling.

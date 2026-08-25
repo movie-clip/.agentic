@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/09
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\09-backend.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      app/tests/test_risk.py does not exist (T-38.1.4 not yet dispatched) — ran the closest existing coverage instead: test_analytics.py 194 passed; full backend suite 858 passed, 0 failed; detect_deadcode --strict clean (ruff/vulture/knip all clea
+changed:     3
+contract_notes: 1
+pack_corrections: 0
+handoff:     3
+risks:       2
+headline:    Look-through sector fallbacks now resolve via static registry or honest "Unclassified", plus 8 curated ETF entries added.

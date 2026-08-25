@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/04
+artifact:    C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\04-stories.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only drafting order; no verification command applies. Both stories are drafts for human review, not approved.
+changed:     2
+contract_notes: 0
+pack_corrections: 0
+handoff:     5
+risks:       4
+headline:    Two Backlog-status story drafts written (US-40.1, US-40.2) for Epic 40 — for human review, neither approved nor ticketed for dispatch.

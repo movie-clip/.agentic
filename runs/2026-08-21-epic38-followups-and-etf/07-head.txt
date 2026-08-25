@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/07
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\07-backend.md
+status:      DONE
+verdict:     NONE
+verification: FAIL
+detail:      45 passed, 8 failed — all 8 are the pre-existing tests named in 06-technical-plan.md § Decisions #5, see § Expected failures below. No other test regressed. Pinned test_get_etf_holders_cache_identity_is_unc
+changed:     13
+contract_notes: 0
+pack_corrections: 0
+handoff:     3
+risks:       0
+headline:    All five methods and both clients now report real per-call cache hit/miss via one shared fmp.py formula; 8 pre-existing tests break as predicted, for T-38.2.3.

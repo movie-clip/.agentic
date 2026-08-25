@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/08
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\08-backend.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      2 failed, 21 passed — the 2 failures are the pre-identified pinned-behavior tests the order named as expected, both for the predicted reason; no other test's outcome changed
+changed:     2
+contract_notes: 0
+pack_corrections: 0
+handoff:     1
+risks:       3
+headline:    ETF direct-held sector branch now resolves via identity-gated dominance-threshold FMP lookup, keyword matcher and Broad Market default removed.

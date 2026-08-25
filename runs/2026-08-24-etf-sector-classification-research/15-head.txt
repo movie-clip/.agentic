@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/15
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\15-docs-closeout.md
+status:      PARTIAL
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order named verification: NONE (docs lane, no Bash tool granted per PROTOCOL.md §7)
+changed:     4
+contract_notes: 1
+pack_corrections: 0
+handoff:     3
+risks:       2
+headline:    Epic 39 closed out — PRD created, roadmap/story-index/story reconciled; status PARTIAL only because writing the PRD conflicts with a stale pack convention, per the order's explicit DoD.

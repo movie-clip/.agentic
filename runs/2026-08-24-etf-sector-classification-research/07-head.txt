@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/07
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\07-backend.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      85 passed (pytest, no failures/errors); detect_deadcode.py --strict: ruff clean, vulture clean, knip clean, "STRICT: no dead-code findings — clean."
+changed:     4
+contract_notes: 3
+pack_corrections: 0
+handoff:     3
+risks:       0
+headline:    T-39.1.1-3 landed: new ClassificationSource literal, SBIO SymbolResolutionRule, and FMP/MarketDataService sector-weightings client method — all tests pass.

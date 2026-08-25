@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/01
+artifact:    C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\01-scout.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only recon order, no verification command named
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     9
+risks:       3
+headline:    "3 points" = the 4 CARRIED findings in run.md § Open (3 named + the scoped 4th); all reconfirmed live in current code, none tracked elsewhere.

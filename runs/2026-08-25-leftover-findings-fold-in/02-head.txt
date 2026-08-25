@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/02
+artifact:    C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\02-delivery-brief.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only producer order, no verification command named
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     7
+risks:       3
+headline:    Proposes 1 new epic (sibling to Epic 38) with 2 stories, not literally 1 — flags story-count, scope-inclusion, and title decisions for the human.

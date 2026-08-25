@@ -57,7 +57,12 @@ done.
 one. Formula phrasing, citation choice and edge-case framing are judgment calls,
 and `financial-methodology.md` is the source of truth every other doc defers to.
 
-**Never:** create a PRD file. That belongs to story authoring.
+**Auto (close-out only):** create the epic PRD file when none exists for a
+newly-closed epic, dated the day of closure — a retrospective record of what
+shipped, mirroring `docs/product/prd/epic-37-*.md`'s shape. This is distinct
+from any pre-implementation planning document story-authoring might produce;
+this project's convention treats the PRD as written after the epic closes, not
+before.
 
 ## The second close-out order: applying pack corrections
 

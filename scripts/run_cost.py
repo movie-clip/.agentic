@@ -140,6 +140,11 @@ def report(run_dir: Path) -> bool:
 
 
 def main(argv: list[str]) -> int:
+    # Same cp1252 stdout trap check_report.py hit: this prints ledger
+    # text back, and a ledger may hold any character a lane wrote.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     if len(argv) < 2:
         print(__doc__)
         return 2

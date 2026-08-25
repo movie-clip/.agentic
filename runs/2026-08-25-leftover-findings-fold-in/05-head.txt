@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/05
+artifact: C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\05-technical-plan.md
+status: DONE
+verdict: NONE
+verification: NOT_RUN
+detail: read-only DESIGN order; no verification command applies. `python scripts/detect_deadcode.py --strict` was run read-only to settle T-40.1.3's dead-param question — confirmed clean/no findings.
+changed: 0
+contract_notes: 3
+pack_corrections: 0
+handoff: 2
+risks: 4
+headline: Both stories' 7 tickets designed; US-40.2 needs a small new backend endpoint reusing combine_imported_snapshots, deviating from the order's client-side assumption — flagged for human confirmation.

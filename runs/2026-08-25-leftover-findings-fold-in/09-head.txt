@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/09
+artifact:    C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\09-docs.md
+status:      PARTIAL
+verdict:     NONE
+verification: PASS
+detail:      4 hits — section heading (2263), body reference (2265, 2315), Implementation list (2332). Confirmed by direct grep re-run after edit.
+changed:     1
+contract_notes: 0
+pack_corrections: 0
+handoff:     2
+risks:       2
+headline:    Added financial-methodology.md's Multi-Statement Snapshot Merge section documenting NAV/TWR merge and CR-1's account-identity guard; flagged pack-vs-order conflict.

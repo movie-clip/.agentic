@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/16
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\16-pack-apply.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      pack-file edit, no verification command applies per order
+changed:     1
+contract_notes: 0
+pack_corrections: 0
+handoff:     0
+risks:       0
+headline:    Replaced docs.md's "never create a PRD" line with the correct close-out-authors-PRD convention, verified against both epic PRDs.

@@ -187,6 +187,58 @@ check("CHANGES_REQUESTED from protocol-lint is rejected",
           for x in cr.check(cr2, "protocol-lint")),
       str(cr.check(cr2, "protocol-lint")))
 
+print("F3 - a directory sweep opens every report, not just numbered ones")
+sweep = Path(tempfile.mkdtemp()) / "2026-01-01-a-run"
+sweep.mkdir()
+(sweep / "01-scout.md").write_text(BLOCK, encoding="utf-8")
+(sweep / "AUDIT-quant.md").write_text(BLOCK, encoding="utf-8")
+(sweep / "T-40.1.3-backend.md").write_text(BLOCK, encoding="utf-8")
+(sweep / "run.md").write_text("# RUN 2026-01-01-a-run\nstatus: CLOSED\n",
+                              encoding="utf-8")
+(sweep / "pack-corrections.md").write_text("# Pack corrections\n- none\n",
+                                           encoding="utf-8")
+found = sorted(f.name for f in sweep.glob("*.md") if cr._is_report(f))
+check("ticket-named artifacts are reports too",
+      found == ["01-scout.md", "AUDIT-quant.md", "T-40.1.3-backend.md"], str(found))
+check("the ledger is not a report", not cr._is_report(sweep / "run.md"))
+check("the pack queue is not a report",
+      not cr._is_report(sweep / "pack-corrections.md"))
+check("the sweep exits 0 with every artifact clean",
+      cr.main(["check_report.py", str(sweep)]) == 0)
+
+print("F3 - the lane is read from anywhere in the name, once")
+for _name, _want in [("T-40.1.3-T-40.2.2a-backend.md", "backend"),
+                     ("INTEGRATION-tech-lead.md", "integration"),
+                     ("CR-1-frontend.md", "frontend"),
+                     ("01-scout.md", "recon"),
+                     ("04-stories.md", "story")]:
+    _got = cr.lane_from_name(Path(_name))
+    check(f"{_name} -> {_want}", _got == _want, str(_got))
+
+# `quant-audit` contains `quant`. Reading the shorter one would flag the audit's
+# own verdict as coming from a lane that may not judge - a violation that is not
+# there, which is worse than inferring nothing at all.
+for _name in ("AUDIT-quant.md", "10-quant-reaudit.md", "13-quant-audit-recheck.md"):
+    check(f"{_name} is the audit lane, not the research lane",
+          cr.lane_from_name(Path(_name)) == "quant-audit",
+          str(cr.lane_from_name(Path(_name))))
+check("a name that says nothing infers nothing",
+      cr.lane_from_name(Path("05-technical-plan.md")) is None,
+      str(cr.lane_from_name(Path("05-technical-plan.md"))))
+check("a name that says two lanes infers neither",
+      cr.lane_from_name(Path("07-backend-and-frontend.md")) is None,
+      str(cr.lane_from_name(Path("07-backend-and-frontend.md"))))
+
+print("F3 - a character outside cp1252 does not abort the sweep")
+wide = Path(tempfile.mkdtemp()) / "2026-01-01-wide"
+wide.mkdir()
+(wide / "01-scout.md").write_text(
+    BLOCK.replace("  - one item", "  - a \u2192 b, and an em-dash \u2014 too"),
+    encoding="utf-8")
+(wide / "02-review.md").write_text(BLOCK, encoding="utf-8")
+check("the run completes instead of raising UnicodeEncodeError",
+      cr.main(["check_report.py", str(wide)]) == 0)
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

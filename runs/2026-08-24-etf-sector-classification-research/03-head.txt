@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-24-etf-sector-classification-research/03
+artifact:    C:\projects\investments\.agentic\runs\2026-08-24-etf-sector-classification-research\03-quant-research.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order named verification: NONE (read-only RESEARCH order). Live FMP + yfinance calls made ad hoc via throwaway scripts — full call list and raw responses in § Live evidence log.
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     7
+risks:       4
+headline:    A reliable source exists — FMP's /stable/etf/sector-weightings, not get_profile — but needs Epic 37's identity gate too, live-proven via a real SBIO ticker collision.

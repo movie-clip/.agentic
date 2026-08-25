@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-25-leftover-findings-fold-in/T-40.2.2b
+artifact: C:\projects\investments\.agentic\runs\2026-08-25-leftover-findings-fold-in\T-40.2.2b-frontend.md
+status: PARTIAL
+verdict: NONE
+verification: FAIL
+detail: tsc clean (no output). vitest: 1 test file failed, 37 passed; 2 tests failed, 339 passed (341 total). Both failures pre-date/are-caused-by other-lane work, not a defect in this ticket's logic — see risks.
+changed: 5
+contract_notes: 3
+pack_corrections: 0
+handoff: 6
+risks: 7
+headline: add_snapshot now combines history via the new backend endpoint; verification fails only on 2 tests owned by other lanes (T-40.2.3 mock gap, T-40.1.2 label regression).

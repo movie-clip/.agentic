@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/15
+artifact: C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\15-docs-closeout.md
+status: DONE
+verdict: NONE
+verification: NOT_RUN
+detail: docs-only reconciliation pass; order's verification was NONE, no Bash tool granted to this lane
+changed: 7
+contract_notes: 0
+pack_corrections: 0
+handoff: 2
+risks: 2
+headline: Epic 38 closed out — new PRD, roadmap/index updated, both stories flipped to Done, exposure-fields.md citation fixed.

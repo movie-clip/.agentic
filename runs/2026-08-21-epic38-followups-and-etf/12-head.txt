@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/12
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\12-quant-audit.md
+status:      DONE
+verdict:     PASS
+verification: PASS
+detail:      24 passed, 190 deselected. Also spot-ran app/tests/test_market_data.py + test_fmp_client.py (62 passed, includes the 9 real-cache miss/hit tests for US-38.2) and my own independent re-derivation script (see
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     0
+risks:       2
+headline:    US-38.1 aggregation/suppression/override math and US-38.2's cache-diagnostic side effects independently reproduced correct — no CRITICAL/MATERIAL findings, verdict PASS.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-21-epic38-followups-and-etf/13
+artifact:    C:\projects\investments\.agentic\runs\2026-08-21-epic38-followups-and-etf\13-integration.md
+status:      DONE
+verdict:     PASS
+verification: PASS
+detail:      backend 878 passed; frontend 331 tests / 37 files passed; tsc clean; dead-code gate (ruff+vulture+knip) clean; dashboardGoldens.ts untouched — matches 11-test.md's numbers exactly, independently reproduced
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     0
+risks:       2
+headline:    All 7 tickets landed exactly per the technical plan; no duplication, no contract drift; both non-blocking audit notes decided; full suite re-run green.

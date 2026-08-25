@@ -172,17 +172,53 @@ def counts(text: str) -> dict[str, int]:
     return {n: len(_bullets(_section(text, n) or [])) for n in COUNTED}
 
 
+def _is_report(path: Path) -> bool:
+    """True when the file is an agent report rather than a ledger or a queue."""
+    try:
+        with path.open(encoding="utf-8") as fh:
+            for line in fh:
+                if line.strip():
+                    return line.startswith("REPORT ")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return False
+
+
+# Names filenames actually use that are not the lane's own name. Each entry is
+# here because a real artifact carries it, not on speculation: `01-scout.md`
+# (the agent, not the lane), `04-stories.md`, `AUDIT-quant.md` and
+# `10-quant-reaudit.md` (a re-audit is an audit).
+NAME_ALIASES = {
+    "scout": "recon",
+    "stories": "story",
+    "audit-quant": "quant-audit",
+    "quant-reaudit": "quant-audit",
+}
+
+
 def lane_from_name(path: Path) -> str | None:
-    """Infer the lane from `<nn>-<lane>[-<ticket>].md`, or None if unclear.
+    """Infer the lane from an artifact filename, or None if unclear.
 
     Lets a whole-directory scan still apply the gate rules. Only returns a lane
     it actually recognises — guessing one would invent violations.
+
+    The lane token used to be read from one fixed position, right after the
+    `<nn>-` prefix. Ticket-named artifacts put it last instead
+    (`INTEGRATION-tech-lead.md`, `T-40.1.3-T-40.2.2a-backend.md`), so every one
+    of them inferred nothing and ran unchecked against the gate rules. Scan the
+    whole name instead, and prefer a two-token match to a one-token match: a
+    `quant-audit` that also contains `quant` is the more specific evidence, and
+    reading it as the `quant` lane would flag its verdict as a lane that may not
+    judge — inventing a violation, which is the one thing this must not do.
     """
-    parts = path.stem.split("-")
-    if len(parts) >= 3 and f"{parts[1]}-{parts[2]}" in LANES:
-        return f"{parts[1]}-{parts[2]}"
-    if len(parts) >= 2 and parts[1] in LANES:
-        return parts[1]
+    parts = [NAME_ALIASES.get(s, s) for s in path.stem.lower().split("-")]
+    pairs = [f"{a}-{b}" for a, b in zip(parts, parts[1:])]
+    for window in ([NAME_ALIASES.get(x, x) for x in pairs], parts):
+        hits = {x for x in window if x in LANES}
+        if len(hits) == 1:
+            return hits.pop()
+        if hits:
+            return None  # two lanes named, no way to choose between them
     return None
 
 
@@ -437,6 +473,14 @@ def _flag_value(argv: list[str], flag: str) -> str | None:
 
 
 def main(argv: list[str]) -> int:
+    # Reports quote file paths, arrows and dashes; Python on Windows encodes
+    # stdout as cp1252 and raises on the first character outside it. That
+    # aborted the whole sweep mid-directory with a traceback, so the artifacts
+    # after the offending one were never checked and the run still looked like
+    # a tooling glitch rather than a gap in coverage.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     lane = _flag_value(argv, "--lane")
     head_path = _flag_value(argv, "--head")
     emit = "--emit-head" in argv
@@ -468,11 +512,14 @@ def main(argv: list[str]) -> int:
         return 0
 
     if target.is_dir():
-        # Report artifacts are numbered: 01-scout.md, 02-delivery-brief.md.
-        # run.md is the ledger and pack-corrections.md is a queue; neither is
-        # a report and neither should be validated as one.
-        files = sorted(p for p in target.glob("*.md")
-                       if re.match(r"^\d{2}-", p.name))
+        # A report is a file whose first line says so — PROTOCOL.md § 3's own
+        # definition. The rule used to be the filename regex `^\d{2}-`, which
+        # silently skipped every ticket-named artifact once runs started using
+        # them: a sweep of a 10-artifact run reported "ok" having opened 3,
+        # including neither the AUDIT nor the INTEGRATION gate. run.md is the
+        # ledger and pack-corrections.md is a queue; neither opens with REPORT,
+        # so neither needs naming here.
+        files = sorted(p for p in target.glob("*.md") if _is_report(p))
     else:
         files = [target]
     if not files:

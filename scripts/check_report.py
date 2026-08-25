@@ -438,9 +438,18 @@ def _check_head(head: str, text: str) -> list[str]:
     if hd is not None and ad is not None and not _PLACEHOLDER.match(hd):
         expect = ad[:MAX_HEADLINE].strip()
         if hd != expect:
+            # Show where they part, not the first 60 characters of each. The
+            # divergence is usually past that mark - an agent copies the detail
+            # and stops one character late, or abridges the middle - so both
+            # sides opened with an identical prefix and six ledger rows across
+            # two runs wrote this off as a cosmetic encoding quirk. It was not
+            # cosmetic: two of those were the lane editing its own evidence.
+            i = next((k for k in range(min(len(hd), len(expect)))
+                      if hd[k] != expect[k]), min(len(hd), len(expect)))
             bad.append(f"head detail must be verification.detail truncated at "
-                       f"{MAX_HEADLINE} chars, verbatim - expected "
-                       f"{expect[:60]!r}..., got {hd[:60]!r}...")
+                       f"{MAX_HEADLINE} chars, verbatim - they diverge at char "
+                       f"{i} of {len(hd)}/{len(expect)}: head has "
+                       f"{hd[i:i + 40]!r}, artifact has {expect[i:i + 40]!r}")
 
     for name, n in counts(text).items():
         raw = _scalar(head, name)

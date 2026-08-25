@@ -100,10 +100,20 @@ Two obligations, both mandatory:
    they are what decides whether the orchestrator ever opens it.
 
 Check your own artifact before returning, which is strictly cheaper than being
-sent back for a missing `- none`:
+sent back for a missing `- none` — then **derive your head rather than typing
+it**:
 
 ```bash
 python <agenticRoot>/scripts/check_report.py <your report_to path> --lane review
+python <agenticRoot>/scripts/check_report.py <your report_to path> --emit-head
 ```
+
+Return what the second command prints, replacing only the lines it leaves in
+angle brackets: `headline`, and `blocked_on` when your status is `BLOCKED` or
+`REFUSED`. Retype nothing else. `detail` especially is a verbatim slice of your
+own `verification.detail`, and copying it by hand is the single most common way
+a head has come back disagreeing with its artifact — 18 times across the closed
+runs. You cannot count list items or slice a string to an exact length by eye,
+and the head is made entirely of both. The script can.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

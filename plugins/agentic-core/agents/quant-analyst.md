@@ -223,10 +223,26 @@ Two obligations, both mandatory:
    they are what decides whether the orchestrator ever opens it.
 
 Check your own artifact before returning, which is strictly cheaper than being
-sent back for a missing `- none`:
+sent back for a missing `- none` — then **derive your head rather than typing
+it**:
 
 ```bash
-python <agenticRoot>/scripts/check_report.py <your report_to path> --lane quant
+python <agenticRoot>/scripts/check_report.py <your report_to path> --lane <lane>
+python <agenticRoot>/scripts/check_report.py <your report_to path> --emit-head
 ```
+
+Your `--lane` is the mode you were dispatched in: `quant` for a RESEARCH
+order, `quant-audit` for an AUDIT one. Naming the wrong one makes the
+self-check fail on your own verdict — `quant-audit` may judge and `quant` may
+not, so an AUDIT that correctly returns `FAIL`, checked as `quant`, reports a
+violation that is not there.
+
+Return what the second command prints, replacing only the lines it leaves in
+angle brackets: `headline`, and `blocked_on` when your status is `BLOCKED` or
+`REFUSED`. Retype nothing else. `detail` especially is a verbatim slice of your
+own `verification.detail`, and copying it by hand is the single most common way
+a head has come back disagreeing with its artifact — 18 times across the closed
+runs. You cannot count list items or slice a string to an exact length by eye,
+and the head is made entirely of both. The script can.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

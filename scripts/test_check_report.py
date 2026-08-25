@@ -239,6 +239,42 @@ wide.mkdir()
 check("the run completes instead of raising UnicodeEncodeError",
       cr.main(["check_report.py", str(wide)]) == 0)
 
+print("F1 - a derived head validates, and a hand-typed one names where it broke")
+rt = Path(tempfile.mkdtemp()) / "2026-01-01-round-trip"
+rt.mkdir()
+art = rt / "01-scout.md"
+long_detail = (
+    "backend 905 passed, 4 skipped; frontend 331 passed (37 files); "
+    "tsc clean; dead-code gate clean; goldens unchanged; "
+    "and a good long tail running well past the two hundredth character, "
+    "which is the part a hand-typed head keeps losing")
+art.write_text(BLOCK.replace("802 passed, 4 skipped, 1 xfail", long_detail),
+               encoding="utf-8")
+check("the fixture detail is longer than the cap",
+      len(long_detail) > cr.MAX_HEADLINE, str(len(long_detail)))
+
+derived = cr.head_for(art)
+filled = "\n".join(
+    "headline:        one sentence of outcome" if ln.startswith("headline:") else ln
+    for ln in derived.splitlines())
+check("a derived head with only the headline filled in validates",
+      [x for x in cr.check(art, "recon", filled, []) if x.startswith("head")] == [],
+      str(cr.check(art, "recon", filled, [])))
+
+# The three ways a hand-typed detail actually went wrong in the closed runs:
+# one character too long, not truncated at all, and abridged in the middle.
+for label, hd in [
+        ("one char too long", long_detail[:cr.MAX_HEADLINE] + "."),
+        ("never truncated", long_detail),
+        ("abridged in the middle",
+         long_detail[:60] + long_detail[120:cr.MAX_HEADLINE])]:
+    typed = filled.replace("detail:", "detail:  @X@", 1).replace(
+        "@X@" + filled.split("detail:")[1].split("\n")[0].strip(), hd)
+    probs = [x for x in cr.check(art, "recon", typed, []) if "detail" in x]
+    check(f"{label} is caught", bool(probs), str(probs))
+    check(f"{label} says where they diverge",
+          any("diverge at char" in x for x in probs), str(probs))
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

@@ -186,15 +186,28 @@ Two obligations, both mandatory:
    use `<run_dir>/<nn>-<lane>.md`; if there is no run dir either, say so in
    `risks`.
 2. **End your final message with the `REPORT HEAD` block, and nothing after
-   it.** Not the report — the head. Its counts must match your artifact, because
-   they are what decides whether the orchestrator ever opens it.
+   it.** Not the report — the head. Give the counts your best reading and move
+   on; the orchestrator re-derives them from your artifact before routing, so
+   what decides whether a section gets opened is what is *in* the artifact, not
+   what you counted.
 
 Your `verdict` is `NONE` — you draft, you do not gate. And `status: DONE` here
 means "the draft is written", never "the story is approved": approval is the
 human's, and both your report and your head's `headline` say so.
 
-**You have no `Bash`, by design** — so you cannot run `scripts/check_report.py` on your own artifact. Check the block against
-`PROTOCOL.md` § 3 by eye instead, and do not spend a `risks` bullet on it:
-the orchestrator validates every artifact before routing from it.
+**You have no `Bash`, by design** — so you cannot run `scripts/check_report.py`
+on your own artifact, and you are not asked to. **The orchestrator derives your
+head from your artifact with `--emit-head` before it routes anything** (its
+standing post-dispatch step, `protocol/orchestrator.md` § "A head you cannot
+derive"). Your counts are a courtesy; the derived ones are what gets used.
+
+So spend your effort on the artifact, not on the block. Get every section
+present and every bullet in the right one — that is what the derived head is
+counted from, and the one thing only you can get right. Do not count your own
+bullets twice over, do not try to slice `detail` to an exact character length,
+and do not spend a `risks` bullet on any of it. The old instruction here was to
+check the block "by eye", which asked you to count list items and measure
+strings — across the closed runs that produced a mismatched head 11 times, and
+never once caught anything.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

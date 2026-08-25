@@ -217,12 +217,29 @@ that is not about cost. `verification: PASS` is a claim; `detail` is the
 evidence — "802 passed" against "802 passed, 4 skipped, 1 xfail". If the head
 carried only the verdict, then "DONE on work that ran a command and misread its
 own output" would become uncatchable, because nothing would give the
-orchestrator a reason to open the artifact. Derive the head rather than typing
-it:
+orchestrator a reason to open the artifact.
+
+**Derive the head. Do not type it.** This is a rule, not a preference:
 
 ```bash
 python <agenticRoot>/scripts/check_report.py <report_to path> --emit-head
 ```
+
+Fill in only what the output leaves in angle brackets — `headline`, and
+`blocked_on` when the status is `BLOCKED` or `REFUSED`. Every other line comes
+from the artifact and must arrive unretyped.
+
+A head is a count of list items and a string sliced to an exact length. Those
+are the two things a model cannot do reliably by inspection, and the evidence is
+not ambiguous: across eight closed runs, **26 of 59 heads disagreed with their
+own artifact** — 18 on `detail`, 14 on a count — in every lane but one, whether
+or not that lane had a shell. It is not a discipline problem and no wording
+fixes it. The script counts; the lane judges.
+
+Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this.
+The orchestrator derives their head for them as a standing post-dispatch step —
+`protocol/orchestrator.md` § "A head you cannot derive" — so those lanes write
+the artifact and leave the counting alone.
 
 **Why the head and not the body.** The orchestrator's context is the scarcest
 resource in a run, and it is the one thing every dispatch spends. A body
@@ -290,12 +307,16 @@ Run this on your own artifact before returning — **if your `tools:` includes
 `Bash`.** Exit 0 means it is routable; non-zero prints exactly what is wrong.
 
 **If you have no `Bash`, you cannot run it, and that is expected.** `scout`,
-`story-author` and `docs-engineer` are deliberately shell-less. Check the block
-against § 3 by eye, and say nothing about it in `risks` — the orchestrator runs
-the validator on every artifact before routing from it (that is mandatory, not
-best-effort), so your artifact is checked either way. A `risks` bullet spent
-apologising for a tool you were never granted is a bullet the next lane has to
-read for nothing.
+`story-author` and `docs-engineer` are deliberately shell-less. The orchestrator
+runs the validator on every artifact before routing from it, and derives your
+head with `--emit-head` in the same step (both mandatory, not best-effort), so
+your artifact is checked and your counts are corrected either way.
+
+Do not try to do it by hand in the meantime. Put your effort into the artifact —
+every section present, every bullet under the right one — because that is what
+the derived head is counted from. And say nothing about any of it in `risks`: a
+bullet spent apologising for a tool you were never granted is a bullet the next
+lane has to read for nothing.
 
 It checks that the enums are real values, that every section is present, that an
 empty section says `- none`, that `DONE` is not paired with `NOT_RUN` on an

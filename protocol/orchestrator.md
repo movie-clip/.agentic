@@ -223,9 +223,41 @@ if you need them. Do not read the document.
 The sections you skip are not lost — they reach the lane that needs them as an
 `inputs` path, which is the entire point of the relay rule.
 
+### A head you cannot derive
+
+`scout`, `docs-engineer` and `story-author` have no `Bash`, by design. They
+cannot run the validator on what they just wrote, so the head they hand back is
+a courtesy, not a measurement. **Derive it yourself before you route anything.
+This is a standing step on every dispatch from those three lanes, not a
+response to something looking wrong:**
+
+```bash
+python <agenticRoot>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --emit-head
+```
+
+Use that head. Keep the lane's `headline` — it is the one line the script
+cannot produce and the lane can. Everything else comes from the artifact.
+
+The alternative was tried and it is expensive. Their agent files used to say
+"check the block against `PROTOCOL.md` § 3 by eye", which asks a model to count
+list items and slice a string to an exact length. Across the closed runs those
+three lanes returned a mismatched head 11 times, and each one cost a full
+artifact read — the read the head exists to avoid. A head cost one Bash call to
+derive the whole time.
+
 **If a head is missing, malformed, or its counts disagree with the artifact**,
-that lane is not closed. Re-dispatch it or read the artifact in full and say in
-the ledger that you did. Do not infer the head.
+that lane is not closed. From a shell-less lane, derive it as above and carry
+on — a mismatch there is expected and is not a finding. From a lane that has
+`Bash`, it is: that lane was told to derive its head and typed one instead, so
+re-dispatch it, or read the artifact in full and say in the ledger that you did.
+Do not infer the head in either case.
+
+**A `detail` mismatch is never cosmetic.** `verification.detail` is the evidence
+behind a `PASS`, and the head must carry it verbatim. When the two disagree, the
+validator names the character they diverge at — read that, then decide. Six
+ledger rows across two runs recorded this class as a recurring em-dash encoding
+quirk and waved it through; none of them was an encoding problem, and two were a
+lane abridging its own evidence line.
 
 ---
 

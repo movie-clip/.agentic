@@ -40,6 +40,7 @@ blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
 next:         <the single next action, always current — see below>
 route:        recon | express | audit | review | story | full
 express:      yes | no
+gates:        <each of quant-audit, integration, review — verdict, or skipped and why>
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |
@@ -77,7 +78,7 @@ is how this column becomes fiction; read it if you are unsure.
 |---|---|
 | dispatches | 16 |
 | rounds | 1 |
-| by model | sonnet 14 · haiku 1 · opus 1 |
+| by model | sonnet 15 · opus 1 |
 | escalations | 03-backend sonnet→opus (second CR round on the same finding) |
 ```
 
@@ -129,6 +130,35 @@ resume re-dispatches a lane that already ran, or the close-out tally is
 assembled from a table that is missing rows. **Updating the ledger before a
 dispatch does not discharge this** — a pre-dispatch edit records intent, and
 intent is exactly what a stale ledger already has too much of.
+
+### `gates:` accounts for all three, including the ones you skipped
+
+```
+gates:        quant-audit PASS · integration PASS · review skipped (no story to
+              accept — human approved)
+```
+
+Name **every** gate, every run. A gate that ran carries its verdict, and the
+verdict must match its Artifacts row. A gate that did not run carries `skipped`
+and the reason. Neither `quant-audit` nor `review` is required by route alone —
+one waits on the substance being mathematical, the other on there being a story
+to accept — so a missing row is not by itself wrong. A missing row nobody
+*decided* on is.
+
+Three, not the four in `gates.md`. `protocol-lint` gates authoring orders
+against the network's own files and has nothing to say about a run that changes
+the bound repo — a line that would read `skipped (not an authoring order)` every
+time is a line nobody reads.
+
+That is the failure this closes. `2026-08-24-sbio-still-unclassified-bug` ran
+DESIGN, four build lanes, an AUDIT that returned `FAIL`, a change request and an
+INTEGRATION pass, then closed — with no acceptance gate and nothing anywhere
+saying so. `2026-08-25-leftover-findings-fold-in` skipped the same gate and only
+caught it because the docs lane happened to notice at close-out and put it in a
+`handoff` bullet. The skill already required you to report which gates did not
+run and why; it required you to say it to the human, once, in prose that is gone
+by the next run. Say it in the ledger, where it survives and `run_cost.py`
+checks it.
 
 ### `next:` is what makes a run resumable
 

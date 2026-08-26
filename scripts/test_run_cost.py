@@ -31,6 +31,7 @@ HEADER = """# RUN test
 status:       CLOSED
 route:        full
 express:      no
+gates:        quant-audit PASS · integration skipped (none) · review skipped (none)
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |
@@ -110,6 +111,42 @@ check("parent of runs exits 0", rc.main(["run_cost.py", str(_d.parent)]) == 0)
 (_d / "01-scout.md").write_text("not a ledger", encoding="utf-8")
 check("some other file exits 2, does not traceback",
       rc.main(["run_cost.py", str(_d / "01-scout.md")]) == 2)
+
+print("F5 - every gate is accounted for, including the skipped ones")
+check("all three named, verdicts matching the rows, exits 0",
+      rc.main(["run_cost.py", str(ledger(HEADER + ROUNDS + COST))]) == 0)
+
+_no_line = HEADER.replace(
+    "gates:        quant-audit PASS · integration skipped (none) · "
+    "review skipped (none)\n", "")
+_, _p = rc.derive(ledger(_no_line + ROUNDS + COST))
+check("a ledger with no `gates:` line says so",
+      any("no `gates:` line" in x for x in _p), str(_p))
+
+def _gates(line):
+    h = HEADER.replace("quant-audit PASS · integration skipped (none) · "
+                       "review skipped (none)", line)
+    return rc.derive(ledger(h + ROUNDS + COST))[1]
+
+# The failure this exists for: a run that closed with no acceptance gate and
+# nothing anywhere saying so. Both spellings of that are caught.
+check("a gate left out of the line is caught",
+      any("does not account for review" in x
+          for x in _gates("quant-audit PASS · integration skipped (none)")),
+      str(_gates("quant-audit PASS · integration skipped (none)")))
+check("a gate claimed but never run is caught",
+      any("no verdict row" in x and "review" in x
+          for x in _gates("quant-audit PASS · integration skipped (none) · review PASS")),
+      str(_gates("quant-audit PASS · integration skipped (none) · review PASS")))
+check("a verdict disagreeing with the rows is caught",
+      any("disagrees with the rows on quant-audit" in x
+          for x in _gates("quant-audit FAIL · integration skipped (none) · review skipped (none)")),
+      str(_gates("quant-audit FAIL · integration skipped (none) · review skipped (none)")))
+check("skipping a gate on purpose is clean",
+      _gates("quant-audit PASS · integration skipped (express route) · "
+             "review skipped (no story to accept)") == [],
+      str(_gates("quant-audit PASS · integration skipped (express route) · "
+                 "review skipped (no story to accept)")))
 
 n_fail = results.count(False)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

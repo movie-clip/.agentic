@@ -110,8 +110,9 @@ time this session compacts.
 
 **Cost has two terms, and you control both.** The route decides *how many*
 dispatches; the model decides *what each one costs*. Every agent file pins a
-model — `sonnet` for almost everything, `opus` only for `quant-analyst`, `haiku`
-for `scout` (the reasoning is in `protocol/authoring.md` § "Choosing a model").
+model — `sonnet` for almost everything, `opus` only for `quant-analyst` and
+`protocol-linter`, the two gates nothing downstream checks (the reasoning is in
+`protocol/authoring.md` § "Choosing a model").
 Take those defaults. Override for a single dispatch only when this run has
 produced evidence the lane is out of its depth:
 
@@ -462,13 +463,31 @@ Dispatch the `docs` lane twice, or once with both inputs:
   in which a lane writes inside `<agenticRoot>` outside the run dir, and it is
   what stops the packs decaying into a description of the repo as it was.
 
+Before you set `status: CLOSED`, walk the ledger once. Every line is something
+a closed run has been missing:
+
+- [ ] **`gates:` accounts for all three** — `quant-audit`, `integration`,
+      `review` — each with its verdict or `skipped` and why. Two runs closed
+      without an acceptance gate; one said nothing about it anywhere.
+- [ ] **Every `Open` row is `ABSORBED`, `CLOSED`, or deliberately `CARRIED`** —
+      a `CARRIED` row is a handoff to the human and belongs in your report.
+- [ ] **The docs close-out order actually ran**, scoped to the contract notes,
+      `pack-corrections.md`, **and** `docs/product/` — the epic's own record
+      included. Epic 40 got no PRD because the order fenced that directory out,
+      which was a scoping error here, not a docs-lane miss.
+- [ ] **`Cost` is filled and `run_cost.py` exits 0** (below).
+- [ ] **`next:` says `none — CLOSED`**, so a resumed session does not re-dispatch
+      a lane that already ran.
+
 Then set `run.md` `status: CLOSED` and report to the user:
 
 - `agentic-core v<version> · dispatched: <n>` — the same banner you opened with,
   now with the count. Zero dispatches on anything but recon gets the explicit
   disclosure from "The failure mode this skill actually has".
 - what changed, by lane
-- every gate verdict that ran, and **which gates did not run and why**
+- every gate verdict that ran, and **which gates did not run and why** — the
+  same content as the ledger's `gates:` line, which is where it has to live to
+  outlast this session
 - anything still open: `PARTIAL` lanes, `SHOULD_FIX` items, unabsorbed contract
   notes, unapplied pack corrections
 - any producer finding raised during the work — scope that turned out wrong is

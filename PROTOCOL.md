@@ -139,9 +139,29 @@ judgment call.
 
 ### Bullet discipline
 
-One fact per bullet, under 200 characters; 400 is the hard limit the validator
-enforces. The orchestrator routes bullets individually, so a 700-character
-bullet carrying four facts cannot be routed to four lanes.
+One fact per bullet. The orchestrator routes bullets individually, so a
+700-character bullet carrying four facts cannot be routed to four lanes.
+
+| lane | target | ceiling |
+|---|---|---|
+| gate lanes — `integration`, `review`, `quant-audit`, `protocol-lint` | 200 | **400, enforced** |
+| `recon`, `quant` RESEARCH | 400 | 600, advisory |
+| everything else | 200 | 400, advisory |
+
+**The ceiling blocks on a gate lane and advises everywhere else.** A gate's
+bullets are *routed*: a finding becomes a change request, a `BLOCKING` item
+becomes a dispatch. One that cannot be handed to a single lane is a structural
+problem there, and only there — elsewhere a long bullet is read by a human in
+context. The closed runs argue it from both sides. Gate lanes have never once
+exceeded 400 characters (their longest is 310), so enforcing it costs them
+nothing; every other lane produced **97 blocking violations that were overridden
+every single time**, and not one turned out to be a real content problem.
+
+**`recon` and `quant` RESEARCH get more room** because a bullet there carries a
+claim plus the `file:line` that proves it, and the citation is the point.
+`recon`'s median bullet is 314 characters — a 200-character target that half of
+all output misses is not a target, it is noise that teaches the reader to skip
+the advisory lines. It flagged 91% of `recon`'s bullets; it now flags 30%.
 
 A bullet that needs a paragraph is several bullets. If it genuinely needs a
 paragraph — a worked example, a table, a diff — put that below the block in a
@@ -167,6 +187,13 @@ Silently following the order is the failure to avoid. It happened on the first
 real run: a pack said a brand-new methodology section is flag-for-human, an
 order said write it, and the lane wrote it — correctly flagging the conflict,
 but reporting `DONE`, so nothing downstream treated the doc as provisional.
+
+That particular conflict no longer arises — the docs pack has since split the
+rule by whether the order specifies the content, because a convention phrased as
+*flag instead of doing* runs straight into the rule above and can only ever
+produce a report after the fact. The rule above is unchanged and still governs
+every other pack convention; a convention that only a `PARTIAL` can express is a
+convention worth rewriting rather than reporting.
 
 ### You cannot delete or rename files
 

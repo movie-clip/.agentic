@@ -53,9 +53,29 @@ row; slice log entry; `current-product-state.md` entry; contract field table
 when fields were added or removed; epic Active → Completed when every story is
 done.
 
-**Flag for a human:** any new methodology section, and any edit to an existing
-one. Formula phrasing, citation choice and edge-case framing are judgment calls,
-and `financial-methodology.md` is the source of truth every other doc defers to.
+**Flag for a human — methodology content you would have to compose.** If an
+order names a section of `financial-methodology.md` but leaves you to phrase the
+formula, choose the citation, or frame the edge case, **do not write it.** Put
+what the section would need into `handoff`, addressed to the quant lane, and
+leave the file untouched. That is a flag: the section does not exist until
+someone who owns the mathematics writes it. See also *Never invent a formula*
+under **What not to do** — this is that rule, applied to a whole section.
+
+**Auto: methodology content the order specifies.** Exact wording, or wording the
+order points at — a quant finding's own `expected:` text, a formula block from
+the technical plan. Write it, name the source in `changed`, report `DONE`. There
+is no conflict to report and no `PARTIAL` to set: you are not exercising the
+judgment this rule protects, you are transcribing a decision someone else
+already made, and the quant lane reads this file on every dispatch and audits
+what is in it.
+
+This split replaced a flat "any new methodology section is flag-for-human". That
+version could not do anything: core § "When the order and your capability pack
+disagree" says a pack convention never blocks an order, so a rule phrased as
+*flag instead of writing* could only ever produce a conflict report after the
+fact. Across five dispatches that touched `financial-methodology.md`, five wrote
+it and none withheld — and the human accepted the content every time. The
+protection was real; where it was placed was not.
 
 **Auto (close-out only):** create the epic PRD file when none exists for a
 newly-closed epic, dated the day of closure — a retrospective record of what
@@ -187,5 +207,6 @@ drift.
 - [ ] Slice log entry written in the house style, confirmed with the user
 - [ ] `current-product-state.md` reflects the new user-visible surface
 - [ ] Every `contract_note` from every lane landed or explicitly dismissed with a reason
-- [ ] Methodology changes flagged as editable suggestions, never silently written
+- [ ] Methodology content you had to compose was flagged to the quant lane, not written;
+      content the order specified was written, with its source named in `changed`
 - [ ] Epic header flipped if the epic is now complete

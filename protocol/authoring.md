@@ -59,8 +59,20 @@ frequency is the profile that earns Opus.
 | Model | Lanes | Why |
 |---|---|---|
 | `opus` | `quant-analyst`, `protocol-linter` | **Neither has a downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
-| `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
-| `haiku` | `scout` | Read-only retrieval — glob, grep, read, report `file:line`. Every claim it makes is cheap to verify by opening the file it cites. |
+| `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
+| `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
+
+**`scout` moved from `haiku` to `sonnet` (v0.5.4).** The old row's reasoning was
+about *claim accuracy*, and on that scout was never wrong — every ledger that
+checked its findings recorded them as coherent and independently reconfirmed.
+What it missed is that a recon report is not only claims. Of five dispatches,
+**two returned a head disagreeing with its artifact and one produced a brief
+that failed to name six of its own sections** — and that last one is the
+expensive kind, because the orchestrator routes off the brief. A brief that does
+not index its sections costs a full artifact read, which is the exact cost the
+whole head-and-brief design exists to avoid. Deriving the head (v0.5.0) fixes
+the counting half; indexing your own document is comprehension, and no script
+can do it for you.
 
 ### Effort is the second dial, and it is not the model
 
@@ -100,9 +112,12 @@ settings:
   `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing the work —
   but the gate that has no downstream check is the worst place for a silent
   regression. If an audit passes something a later gate catches, raise it.
-- **`scout` at `medium`.** Retrieval is the canonical `low` task, so this is
-  the one lane deliberately running above the cheapest setting that would do.
-  Judge it on whether `file:line` citations stay complete, not on cost.
+- **`scout` at `sonnet`/`medium`.** It moved up a model tier on structural
+  grounds, not accuracy ones, so watch the thing that moved it: does the
+  `## Orchestrator brief` name every section below it, and does the head come
+  back matching the artifact? Its citations were already complete at `haiku` and
+  are not the question. If the briefs come back clean, the move paid for itself;
+  if they do not, the problem is the order's framing, not the tier.
 - **`protocol-linter` at all.** It has never run. It is the second Opus lane and
   the second gate with no downstream check, so a wrong `PASS` from it is as
   invisible as a wrong audit. Judge its first dispatches on whether every `FAIL`

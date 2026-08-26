@@ -28,6 +28,71 @@ from pathlib import Path
 # an ASCII fallback are accepted; the model name is what matters.
 ESCALATED = ("↑", "^")
 
+# The three gates a delivery run can be asked for. `quant-audit` is conditional
+# on the substance being mathematical and `review` on there being a story to
+# accept, so none of these is required by route alone - which is exactly why the
+# ledger has to say what happened to each one rather than the script guessing.
+#
+# This is deliberately three where check_report.GATE_LANES is four. The fourth,
+# `protocol-lint`, gates authoring orders against the network's own files; it
+# has nothing to say about a run that changes the bound repo, and requiring
+# every delivery ledger to write `protocol-lint skipped (not an authoring
+# order)` would be a line that is always the same and therefore never read.
+GATES = ("quant-audit", "integration", "review")
+
+
+def _field(text: str, name: str) -> str | None:
+    """A `name:  value` line from the ledger header, or None."""
+    m = re.search(rf"^{re.escape(name)}:[ 	]*(.*)$", text, re.M)
+    return m.group(1).strip() if m else None
+
+
+def _gate_rows(arts: list[list[str]]) -> dict[str, str]:
+    """Gate lane -> the verdict its last row recorded."""
+    seen: dict[str, str] = {}
+    for row in arts:
+        if len(row) < 8:
+            continue
+        lane, verdict = row[1].strip().lower(), row[7].strip()
+        # A gate can be written as its lane (`quant-audit`) or as a lane plus a
+        # mode (`quant` + `AUDIT`), and both spellings are in the closed runs.
+        mode = row[2].strip().lower()
+        if lane == "quant" and mode.startswith("audit"):
+            lane = "quant-audit"
+        if lane in GATES and verdict and verdict not in {"—", "-"}:
+            seen[lane] = verdict
+    return seen
+
+
+def _check_gates(text: str, arts: list[list[str]]) -> list[str]:
+    """Every gate either ran and is recorded, or is accounted for as skipped.
+
+    Two runs closed without an acceptance gate and without saying so anywhere
+    that outlives the session. The skill already required the orchestrator to
+    report "which gates did not run and why" - to the human, once, in prose
+    that is gone by the next run. This puts the same disclosure in the ledger,
+    where it survives and can be checked.
+    """
+    stated = _field(text, "gates")
+    ran = _gate_rows(arts)
+    if stated is None:
+        return ["no `gates:` line - the ledger cannot say which gates ran and "
+                "which were skipped on purpose (added v0.5.2)"]
+    low = stated.lower()
+    problems = []
+    for g in GATES:
+        if g not in low:
+            problems.append(f"`gates:` does not account for {g} - name it with "
+                            f"its verdict, or `skipped` and why")
+        elif g in ran and ran[g].lower() not in low:
+            problems.append(f"`gates:` disagrees with the rows on {g}: rows "
+                            f"recorded {ran[g]}")
+        elif g not in ran and "skip" not in low.split(g, 1)[1][:40]:
+            problems.append(f"{g} has no verdict row, and `gates:` does not "
+                            f"mark it skipped - a gate that quietly did not "
+                            f"run is the one failure close-out cannot see")
+    return problems
+
 
 def _table(text: str, heading: str) -> list[list[str]]:
     """Rows of the markdown table under `## <heading>`, header/rule dropped."""
@@ -119,6 +184,9 @@ def derive(run_dir: Path) -> tuple[dict, list[str]]:
     elif arts and not legacy:
         problems.append("no `## Cost` block - fill it at close-out, even on a "
                         "one-dispatch express run")
+
+    if arts and not legacy:
+        problems += _check_gates(text, arts)
 
     return metrics, problems
 

@@ -55,6 +55,24 @@ CR_LANES = {"integration"}
 # 336 chars, longest 1517. The median is the habit this cap is changing.
 TARGET_BULLET = 200
 MAX_BULLET = 400
+
+# `recon` and `quant` RESEARCH are evidence lanes: a bullet carries a claim plus
+# the file:line that proves it, and the citation is the point. Measured over the
+# closed runs, recon's *median* bullet is 314 characters - a 200 target that
+# half of all bullets miss is not a target, it is noise that teaches the reader
+# to skip the `~` lines. Their ceiling is set above every quant bullet ever
+# written (max 591) and above recon's p90 (634), which still leaves recon's real
+# outliers - 923, 1000, 1517 - flagged as what they are.
+WIDE_LANES = {"recon", "quant"}
+WIDE_TARGET = 400
+WIDE_MAX = 600
+
+
+def _limits(lane: str | None) -> tuple[int, int]:
+    """(target, max) for this lane's bullets."""
+    if lane in WIDE_LANES:
+        return WIDE_TARGET, WIDE_MAX
+    return TARGET_BULLET, MAX_BULLET
 # PROTOCOL.md § 4. An index with verdicts, not a summary of the reasoning.
 MAX_HEADLINE = 200
 MAX_BRIEF = 15
@@ -286,16 +304,27 @@ def check(path: Path, lane: str | None = None, head: str | None = None,
                 warn.append(
                     f"{name}: '- none' carries trailing commentary, so it counts "
                     "as 1 entry - write bare '- none', or make it a real bullet")
+            target, cap = _limits(lane)
+            # Over the cap blocks on a gate lane and advises everywhere else.
+            # The orchestrator *routes* off a gate's bullets - a finding becomes
+            # a change request, a BLOCKING item becomes a dispatch - so one that
+            # cannot be handed to a single lane is a structural problem there.
+            # Elsewhere a long bullet is read by a human in context. The closed
+            # runs say the same thing from the other side: gate lanes have never
+            # once exceeded 400 (their longest is 310), so this costs them
+            # nothing, while 97 blocking violations were overridden everywhere
+            # else without one of them ever turning out to be a real defect.
+            over = bad if lane in GATE_LANES else warn
             for b in _bullets(lines):
-                if len(b) > MAX_BULLET:
-                    bad.append(
-                        f"{name}: bullet is {len(b)} chars (max {MAX_BULLET}) - "
+                if len(b) > cap:
+                    over.append(
+                        f"{name}: bullet is {len(b)} chars (max {cap}) - "
                         "it is carrying several facts; split it, or move the "
                         f"detail below the block and cite it: {b[:60]}...")
-                elif len(b) > TARGET_BULLET:
+                elif len(b) > target:
                     warn.append(
                         f"{name}: bullet is {len(b)} chars (target "
-                        f"{TARGET_BULLET}): {b[:60]}...")
+                        f"{target}): {b[:60]}...")
 
     result = _scalar(text, "result")
     command = _scalar(text, "command")

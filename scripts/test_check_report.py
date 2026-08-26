@@ -275,6 +275,47 @@ for label, hd in [
     check(f"{label} says where they diverge",
           any("diverge at char" in x for x in probs), str(probs))
 
+print("F4 - the bullet ceiling blocks on a gate lane and advises elsewhere")
+def _bul(n):
+    return BLOCK.replace("  - one item", "  - " + ("x" * n))
+
+def _split(doc, lane):
+    d = Path(tempfile.mkdtemp()) / "01-x.md"
+    d.write_text(doc, encoding="utf-8")
+    w = []
+    return cr.check(d, lane, None, w), w
+
+# Gate lanes have never exceeded 400 in a real run (longest: 310), so enforcing
+# it there costs nothing - and it is the only place a bullet is routed onward.
+for gate in ("integration", "review", "quant-audit", "protocol-lint"):
+    b, w = _split(_bul(500), gate)
+    check(f"{gate}: over the ceiling blocks",
+          any("chars (max 400)" in x for x in b), str(b))
+    b, w = _split(_bul(300), gate)
+    check(f"{gate}: under the ceiling is advisory only",
+          not b and any("target 200" in x for x in w), f"{b} {w}")
+
+for lane in ("backend", "docs", "story", "test", "frontend"):
+    b, w = _split(_bul(500), lane)
+    check(f"{lane}: over the ceiling only advises",
+          not b and any("chars (max 400)" in x for x in w), f"{b} {w}")
+
+print("F4 - recon and quant carry citations, so they get more room")
+for wide in ("recon", "quant"):
+    b, w = _split(_bul(350), wide)
+    check(f"{wide}: 350 chars is silent", not b and not w, f"{b} {w}")
+    b, w = _split(_bul(500), wide)
+    check(f"{wide}: 500 chars advises against the raised target",
+          not b and any("target 400" in x for x in w), f"{b} {w}")
+    b, w = _split(_bul(700), wide)
+    check(f"{wide}: 700 chars advises against the raised ceiling",
+          not b and any("chars (max 600)" in x for x in w), f"{b} {w}")
+# recon and quant are not gate lanes, so nothing they write ever blocks on
+# length; quant-audit is the gate and keeps the strict pair.
+b, _ = _split(_bul(700), "quant-audit")
+check("quant-audit keeps the strict ceiling, unlike quant",
+      any("chars (max 400)" in x for x in b), str(b))
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

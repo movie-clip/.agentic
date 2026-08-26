@@ -28,7 +28,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │     ├─ producer.md        sonnet/high  roadmap · epics · stories · sequencing
 │     ├─ quant-analyst.md   OPUS/medium    formulas · trust classes · financial gate
 │     ├─ story-author.md    sonnet/medium  drafts the ticketed story (human approves)
-│     ├─ scout.md           haiku/medium   read-only recon
+│     ├─ scout.md           sonnet/medium  read-only recon
 │     ├─ tech-lead.md       sonnet/high  design pass + integration gate
 │     ├─ backend-engineer.md   sonnet/high
 │     ├─ frontend-engineer.md  sonnet/high
@@ -197,14 +197,16 @@ Honest list of what is still enforced by asking an agent nicely:
 | Rule | Backed by |
 |---|---|
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
+| Bullets stay routable | **script** — `check_report.py`, but only on the four gate lanes, where a bullet becomes a dispatch. Real there, advisory everywhere else, and deliberately so: 97 blocking violations off the gate lanes were overridden every time without one being a real defect. |
 | Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
 | A run's cost tally matches its rows | **script** — `scripts/run_cost.py`. Real. Catches a Cost block that disagrees with the Artifacts table, and a dispatch with no model. |
-| Every lane runs on a chosen model | **agent frontmatter** — all ten pinned explicitly, no `inherit`. Real. |
-| Every lane runs at a chosen effort | **agent frontmatter** — all ten pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
+| Every gate either ran or was skipped on purpose | **script** — `run_cost.py` checks the ledger's `gates:` line against the Artifacts rows. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. It cannot tell you a skip was *wise*. |
+| Every lane runs on a chosen model | **agent frontmatter** — all eleven pinned explicitly, no `inherit`. Real. |
+| Every lane runs at a chosen effort | **agent frontmatter** — all eleven pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
 | A report head's counts match its artifact | **script** — `check_report.py --head`, and `--emit-head` derives the head so it cannot disagree. Real. |
 | Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
-| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 23 cases. Real, and it exists because a review pass found six bugs in the validator. |
+| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 79 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only. v0.5. |

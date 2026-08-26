@@ -18,6 +18,7 @@ status:       CLOSED
 next:         none — CLOSED
 route:        review
 express:      no
+gates:        quant-audit PASS · integration PASS · review PASS
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |

@@ -209,7 +209,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | The validator itself is correct | **tests** — `scripts/test_check_report.py`, 79 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
-| `scope` fences a work order | prose only. v0.5. |
+| `scope` fences a work order | prose only, and it has held. Across 8 runs and ~110 dispatches there is no recorded breach — every mention of scope in a ledger is a lane stopping at its fence and reporting what it saw there. The `v0.5` marker that used to sit here proposed enforcing it; the runs say there is nothing yet to enforce. Revisit on the first real breach. |
 | The express lane isn't abused | prose only — but it self-voids on any contract note. |
 | A report's *contents* are true | nothing, and nothing can. The validator checks routability, not honesty — that is what the three gates and your own reading are for. |
 

@@ -10,6 +10,7 @@ story:        docs/product/stories/US-37.2-sector-classification-followups.md
 status:       CLOSED
 route:        story (lighter weight — no design pass, no quant-audit/integration gate per human's explicit approval)
 express:      no
+gates:        review PASS · quant-audit skipped · integration skipped (both per the human's explicit approval of the lighter story route — see `route:` above)
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |

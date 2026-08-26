@@ -11,6 +11,7 @@ status:       CLOSED
 next:         none — CLOSED
 route:        full (scope grew past express once a contract change entered)
 express:      no
+gates:        quant-audit FAIL (Finding 1 fixed by CR-1, re-verified in INTEGRATION; no re-audit dispatched) · integration PASS · review skipped — no story to accept, but backfilled: no decision to skip it was recorded at the time
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |

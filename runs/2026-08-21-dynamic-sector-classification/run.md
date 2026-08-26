@@ -5,6 +5,7 @@ story:        docs/product/stories/US-37.1-dynamic-equity-sector-classification.
 status:       CLOSED
 route:        full
 express:      no
+gates:        quant-audit PASS (re-audit, 13) · integration PASS · review PASS
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |

@@ -41,8 +41,8 @@ means the lane silently runs on whatever the main session happens to be, so a
 ten-dispatch run quietly bills ten times at the orchestrator's tier and nothing
 in the run says so. **Never `fable`.**
 
-**Sonnet is the ceiling.** It is the default for any lane that produces work
-something downstream can catch.
+**Sonnet is the default**, and the ceiling for any lane that produces work
+something downstream can catch — which is most of them.
 
 Opus is reserved for one situation, and it is worth stating as a test rather
 than a list:
@@ -136,14 +136,20 @@ turns rather than depth. Leave it unset unless a lane demonstrably runs away —
 a turn cap that fires mid-task produces a truncated report, which is worse than
 an expensive one, and `status: PARTIAL` will not always catch it.
 
-### Why the gates are on Sonnet
+### Why `integration` and `review` are on Sonnet
 
-Because v0.4 moved their load-bearing checks off the model and onto mechanisms.
-`check_report.py` enforces the report shape, the head's counts and the brief's
-completeness; acceptance criteria must name the observation that would prove
-them false; the external-anchor rule in `gates.md` says what a gate must check
-against. A gate leaning on structure is far less tier-sensitive than one leaning
-on the model noticing something.
+The other two gates are not: `quant-audit` and `protocol-lint` run on Opus,
+for the reason the model table gives — nothing downstream checks them. These two
+are different because something does. `integration` is followed by `review`, and
+`review` by the human's acceptance of the work itself.
+
+And because v0.4 moved their load-bearing checks off the model and onto
+mechanisms. `check_report.py` enforces the report shape, the head's counts and
+the brief's completeness; acceptance criteria must name the observation that
+would prove them false; the external-anchor rule in `gates.md` says what a
+gate must check against. A gate leaning on structure is far less
+tier-sensitive than one leaning on the model noticing something — and these
+are the two gates with the most structure to lean on.
 
 If gate quality visibly drops, `tech-lead` in `INTEGRATION` mode is the first
 lane to move back to Opus — it is the gate with the widest surface and the one

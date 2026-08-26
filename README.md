@@ -26,7 +26,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
 │     ├─ producer.md        sonnet/high  roadmap · epics · stories · sequencing
-│     ├─ quant-analyst.md   OPUS/medium    formulas · trust classes · financial gate
+│     ├─ quant-analyst.md   opus/medium    formulas · trust classes · financial gate
 │     ├─ story-author.md    sonnet/medium  drafts the ticketed story (human approves)
 │     ├─ scout.md           sonnet/medium  read-only recon
 │     ├─ tech-lead.md       sonnet/high  design pass + integration gate

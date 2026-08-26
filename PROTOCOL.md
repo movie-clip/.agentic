@@ -259,8 +259,8 @@ from the artifact and must arrive unretyped.
 A head is a count of list items and a string sliced to an exact length. Those
 are the two things a model cannot do reliably by inspection, and the evidence is
 not ambiguous: across eight closed runs, **26 of 59 heads disagreed with their
-own artifact** — 18 on `detail`, 14 on a count — in every lane but one, whether
-or not that lane had a shell. It is not a discipline problem and no wording
+own artifact** — 18 on `detail`, 14 on a count — in every lane but one,
+whether or not that lane had a shell. It is not a discipline problem and no wording
 fixes it. The script counts; the lane judges.
 
 Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this.

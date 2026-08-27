@@ -151,6 +151,9 @@ Two of these are also exposed as tools, which is the cheaper way in:
   what a route actually returns instead of writing a throwaway script. It
   derives the module to patch from the route, so the "patch the engine module,
   not the service module" gotcha above cannot bite you through this path.
+  It does **not** validate the payload shape: engine routes take three different
+  shapes and a mismatched one returns 200 with `trust: "unavailable"`, never
+  422. The backend pack carries the route-to-shape table.
 
 **One caveat that does not apply to pytest.** `probe_engine` runs outside a
 pytest session, so `pytest.ini`'s `--disable-socket` guard is not protecting it

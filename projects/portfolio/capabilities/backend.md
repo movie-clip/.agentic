@@ -138,9 +138,35 @@ Before writing a throwaway script to find out what a route returns, call
 JSON — no network, no scratchpad file, no re-deriving the fixture shape.
 
 ```
-build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
-probe_engine("/engines/drawdown/run", {"snapshot": <that>}, histories={"AAPL": [...]})
+snap = build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
+# wrapped-shape route:
+probe_engine("/engines/correlation/multi", {"snapshot": snap, "lookback_days": 250},
+             histories={"AAPL": [...]})
+# flat-shape route — same data, no wrapper:
+probe_engine("/engines/drawdown/run",
+             {"benchmark_symbol": "SPY", "cash_balances": [], **snap},
+             histories={"AAPL": [...], "SPY": [...]})
 ```
+
+**Check the payload shape first — the wrong one returns 200, not 422.** Engine
+requests come in three shapes, and every field has a default, so a mismatched
+payload is *accepted*: the engine sees zero positions, fail-closes, and hands
+back `trust: "unavailable"` with null scalars. That reads as a broken engine.
+
+| payload shape | routes |
+| --- | --- |
+| flat — snapshot fields at the top level | `exposure` · `diagnostics/run` · `dashboard-history/run` · `drift` · `stress` · `drawdown` · `distribution` |
+| wrapped in a `snapshot` key | `currency-risk` · `attribution` · `correlation/multi` · `correlation/intra` · `provenance` |
+| a bare snapshot as the whole body | `diagnostics/run-imported` · `dashboard-history/run-imported` |
+
+Flat routes take `{"benchmark_symbol": ..., "positions": [...], "cash_balances": []}`
+directly — `build_snapshot`'s output goes at the top level, not under a key.
+**Always read `trust` before believing a 200.**
+
+**The response is not truncated.** Unlike `run_tests`, `probe_engine` returns the
+route's JSON whole — a drawdown probe over 750 days is ~8.5k tokens, nearly all
+of it `underwater_series`. Probe with the shortest history that still exercises
+what you are checking, and do not re-probe to re-read a value you already have.
 
 The module to patch is derived from the route (`/engines/<name>/run` →
 `app.services.<name>_engine`), so the "patch the engine module, not the service

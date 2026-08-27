@@ -154,9 +154,34 @@ in-process with market data mocked and returns the JSON, so you can put the
 engine's answer next to your independent recomputation directly:
 
 ```
-build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
-probe_engine("/engines/drawdown/run", {"snapshot": <that>}, histories={"AAPL": [...]})
+snap = build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
+# wrapped-shape route:
+probe_engine("/engines/correlation/multi", {"snapshot": snap, "lookback_days": 250},
+             histories={"AAPL": [...]})
+# flat-shape route — same data, no wrapper:
+probe_engine("/engines/drawdown/run",
+             {"benchmark_symbol": "SPY", "cash_balances": [], **snap},
+             histories={"AAPL": [...], "SPY": [...]})
 ```
+
+**Check the payload shape first — the wrong one returns 200, not 422.** Engine
+requests come in three shapes, and every field has a default, so a mismatched
+payload is *accepted*: the engine sees zero positions, fail-closes, and hands
+back `trust: "unavailable"` with null scalars. That reads as a broken engine.
+
+| payload shape | routes |
+| --- | --- |
+| flat — snapshot fields at the top level | `exposure` · `diagnostics/run` · `dashboard-history/run` · `drift` · `stress` · `drawdown` · `distribution` |
+| wrapped in a `snapshot` key | `currency-risk` · `attribution` · `correlation/multi` · `correlation/intra` · `provenance` |
+| a bare snapshot as the whole body | `diagnostics/run-imported` · `dashboard-history/run-imported` |
+
+Flat routes take `{"benchmark_symbol": ..., "positions": [...], "cash_balances": []}`
+directly — `build_snapshot`'s output goes at the top level, not under a key.
+**Always read `trust` before believing a 200.**
+
+A probe that came back `trust: "unavailable"` is not a finding. Comparing it
+against a real recomputation manufactures a discrepancy that does not exist —
+fix the payload and probe again before you report anything.
 
 Your recomputation must still be written from the methodology doc, not from the
 engine's output. The tool gets you the number to compare against; it does not

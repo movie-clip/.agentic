@@ -15,7 +15,7 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **Guardrails, in code terms** · **Gotchas that will bite you** · **Reuse — do not re-derive these** · **Definition of done for this lane**
+**Always read:** **Guardrails, in code terms** · **Gotchas that will bite you** · **Reuse — do not re-derive these** · **Project tool server — prefer it over the raw command** · **Definition of done for this lane**
 
 | Section | Read it when |
 |---|---|
@@ -129,6 +129,31 @@ at build time, the route simply is not there.
 A second copy of a formula is a real defect class here — US-34.8 found `risk.py`
 holding its own copy of the daily-return formula. If a computation exists,
 import it.
+
+## Project tool server — prefer it over the raw command
+
+Before writing a throwaway script to find out what a route returns, call
+`probe_engine`. It boots the app in-process, patches the engine module's
+`MarketDataService` with deterministic rows, POSTs your payload and returns the
+JSON — no network, no scratchpad file, no re-deriving the fixture shape.
+
+```
+build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
+probe_engine("/engines/drawdown/run", {"snapshot": <that>}, histories={"AAPL": [...]})
+```
+
+The module to patch is derived from the route (`/engines/<name>/run` →
+`app.services.<name>_engine`), so the "patch the engine module, not the service
+module" trap cannot bite you through this path. Pass `engine_module=` to override.
+
+Also available: `run_tests(scope, path, k)` for your `verification` command,
+returning parsed failures rather than the full dump; `check_gates()` to see
+whether the dead-code gate and `tsc` will pass before you commit; and
+`reset_goldens()`.
+
+**Nothing here is only doable through a tool.** Every one wraps a command you can
+still run under `Bash`, and the pack names those commands too. What the server
+buys is a bounded return value and a removed class of error, not a capability.
 
 ## Guardrails, in code terms
 

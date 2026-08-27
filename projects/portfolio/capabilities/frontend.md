@@ -18,7 +18,7 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **Tokens — never a literal** · **Guardrails, in UI terms** · **Do not opportunistically migrate** · **The five audit checks** · **Definition of done for this lane**
+**Always read:** **Tokens — never a literal** · **Guardrails, in UI terms** · **Do not opportunistically migrate** · **The five audit checks** · **Project tool server — prefer it over the raw command** · **Definition of done for this lane**
 
 | Section | Read it when |
 |---|---|
@@ -135,6 +135,23 @@ immediately above the literal. Use it rarely and always with a real reason.
 `ALL_CARD_FILES` and `CARDS_WITH_BADGE` in `designSystem.audit.test.ts` are the
 authoritative audited-surface lists. **Read the constants** rather than trusting
 any copy of them, including this one.
+
+## Project tool server — prefer it over the raw command
+
+Three `mcp__project__*` tools cover this lane's verification:
+
+- `run_tests(scope="frontend", path=…)` and `run_tests(scope="typecheck")` —
+  vitest and `tsc --noEmit`, returning parsed failures (`file`, `line`, `column`,
+  the TS message) instead of the whole run.
+- `check_gates()` — dead-code, `tsc`, goldens drift and commit-gate freshness in
+  one call, before you try to commit rather than after the hook blocks you.
+- `reset_goldens()` — discards `dashboardGoldens.ts` drift.
+
+This lane is deliberately not granted the engine-probing tools: the frontend
+asks the engine, it does not compute finance, and the response shape you build
+against comes from the tech lead's contract rather than from poking a route.
+
+The raw commands are still correct. Nothing here is only doable through a tool.
 
 ## Guardrails, in UI terms
 

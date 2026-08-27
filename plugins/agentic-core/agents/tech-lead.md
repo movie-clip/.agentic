@@ -1,7 +1,7 @@
 ---
 name: tech-lead
 description: Use this agent twice in every implementation slice. BEFORE the engineers - to turn an approved story into a technical plan: layer sequencing, contract shape, which lanes are needed, and the design decisions the engineers must not each make separately. AFTER the engineers - to review their combined output for technical coherence, contract alignment across backend and frontend, and correctness, returning PASS or CHANGES_REQUESTED with per-lane change requests. It manages the engineering lanes; it does not implement.
-tools: Read, Write, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash, mcp__project__run_tests, mcp__project__check_gates, mcp__project__reset_goldens
 model: sonnet
 effort: high
 ---

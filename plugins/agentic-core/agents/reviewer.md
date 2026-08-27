@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Use this agent as the ACCEPTANCE gate, after the tech lead's engineering review has passed - it checks the implementation against the story's acceptance criteria one by one, verifies the test plan was actually delivered, spot-checks trust-state rendering, and returns PASS or FAIL with specific reasons. Read-only; it never fixes what it finds, and it does not re-check engineering coherence.
-tools: Read, Write, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash, mcp__project__run_tests, mcp__project__check_gates
 model: sonnet
 effort: high
 ---

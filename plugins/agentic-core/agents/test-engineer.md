@@ -1,7 +1,7 @@
 ---
 name: test-engineer
 description: Use this agent for any work whose deliverable is a test - writing new coverage, changing existing specs, fixing a flaky or failing test, or backfilling tests for shipped code. Also use it when a feature change requires its test slice, dispatched as a separate work order from the implementation. It owns the project's test infrastructure knowledge (frameworks, fixtures, mocks, golden artifacts, runner commands) and is the only lane that should be editing test files.
-tools: Read, Write, Edit, Glob, Grep, Bash
+tools: Read, Write, Edit, Glob, Grep, Bash, mcp__project__run_tests, mcp__project__probe_engine, mcp__project__build_snapshot, mcp__project__check_gates, mcp__project__reset_goldens
 model: sonnet
 effort: medium
 ---

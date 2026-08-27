@@ -1,0 +1,36 @@
+REPORT 2026-08-26-missing-chart-data-0414/01
+status:      DONE
+verdict:     NONE
+
+changed:
+  - none
+
+verification:
+  command:   NONE
+  result:    NOT_RUN
+  detail:    read-only recon order, no verification command named
+
+contract_notes:
+  - none
+
+pack_corrections:
+  - none
+
+handoff:
+  - Strongest candidate: `apps/desktop/src/features/portfolio/PerformanceBenchmarkCard.tsx` (Dashboard tab). `buildIndexedSeries` (lines 48-99) maps a `PerformancePoint` with `portfolio_return_pct == null` to `portfolio: null`; the `<Line connectNulls={false}>` (line 173) renders that as a genuine break in the line — this is the shape a user would describe as "missing data on the chart".
+  - Root mechanism for that null: `services/quant-engine/app/analytics/performance.py::_time_weighted_daily_return` (line 367) returns `None` whenever `current_state.return_is_publishable` is `False` — i.e. `build_true_performance_series` never fabricates a return for a withheld day, it nulls the point instead (see § Withholding evidence below).
+  - 2026-04-14 is one of exactly four withheld dates on the currently-committed statement (`test_ledger_replay_audit.py:735-740`): `["2026-04-14", "2026-04-17", "2026-06-12", "2026-07-17"]` — asserted via `state.return_is_publishable is False`.
+  - 2026-04-14 is withheld under US-33.2/US-33.4's LQQ share-unit-discontinuity guard (docs/product/stories/US-33.2-fail-closed-split-inconsistent-quantities.md AC11): LQQ trades on that date (and five others) move cash with no priced position behind them (LQQ's reconstructed quantity is withheld as a phantom split-inflated size), so the day's cash flow is recorded as `unbacked_cash_flow` and the return is unpublishable on every basis — this is documented, intentional fail-closed behaviour, not an unexplained bug.
+  - 2026-04-14, 2026 is a Tuesday (computed: 2026-01-01 = Thursday → April 1 = Wednesday → April 14 = Tuesday), and IB2026.csv itself has five real trade executions on that date (LQQ, DFND, DEFS, DFNS, VDST — lines 258/285/331-332/338/470 of docs/IB2026.csv) — the market was open and the account traded; "missing" is not a market-holiday/weekend artifact.
+  - The gap IS disclosed elsewhere on the same tab: `ReplayDisclosuresCard.tsx` (lines 160-168) renders "No return is published for 2026-04-14, ... — [reason]. The day is excluded from the return series and every statistic derived from it," driven by `runMetadata.withheld_return_dates`/`withheld_return_reason`. `PerformanceBenchmarkCard.tsx` itself also has a summary note (lines 249-258) stating "N days are excluded... See Replay Disclosures for which days and why" — but neither annotates the chart's actual line-break at the point of the gap, so a user looking only at the line has no inline explanation.
+  - Second candidate, same tab: `MonthlyReturnsGrid.tsx` — does not show per-day gaps, but a whole range/month can disappear behind `metrics.monthly_returns_reliable === false` (schema field `monthly_returns_reliable`, computed by `_monthly_returns_are_reliable` in `services/quant-engine/app/services/dashboard_history_engine.py:1029`). Not traced whether April's specific month is currently reliable=true or false on this statement — worth checking if user meant "the whole April row/cell is gone" rather than a chart-line gap.
+  - Third candidate, Exposure tab: `apps/desktop/src/features/portfolio/IndexedReturnChart.tsx` (the vs-Market drift panel). Its data comes from `services/quant-engine/app/services/drift_engine.py`, which also instantiates `PortfolioStateEngine` (drift_engine.py:9,237) — the same engine that produces `return_is_publishable`. Not confirmed whether drift_engine's daily series nulls the withheld date the same way `performance.py` does; needs a backend-lane trace of `drift_engine.py`'s date-by-date construction to confirm before concluding this chart also shows a 2026-04-14 gap.
+  - Fourth candidate, Risk tab: `DrawdownAnalyticsCard.tsx` (underwater curve, date-keyed, nullable `drawdown_pct`) and `VarDistributionCard.tsx`. Their return series is built by `services/quant-engine/app/analytics/risk.py::_portfolio_time_weighted_return_series` (lines 1580-1618), which also honours `return_is_publishable` (line 1613) — but here the withheld day is `continue`d, i.e. **entirely absent from the returns tuple list**, not emitted as an explicit null point. This is a mechanically different manifestation than the Dashboard chart's break-in-line: no confirmation yet of what the drawdown/VaR chart renders for that date (a skipped x-axis tick vs a visible gap) — needs frontend-lane trace of how the drawdown series is date-reindexed for the chart.
+  - `attribution.py:94` also checks `not state.return_is_publishable` and skips — any factor-attribution or correlation surface reading from the same daily-state chain likely inherits the same 2026-04-14 exclusion; not traced further (out of the named candidate list in the order).
+  - No FMP cache / market-data gap involved here: the withholding is driven by the account's own reconstructed ledger quantities (LQQ split-inconsistency), not by an absent SPY/benchmark price row for that date — `manage_cache.py` inspection was judged unnecessary and not run, since the mechanism is already pinned by name in the existing test suite (see below) rather than needing empirical cache inspection.
+
+risks:
+  - This whole mechanism (US-33.2/US-33.4 withholding, including the exact 2026-04-14 date) is pre-existing, already-tested, already-disclosed engine behaviour — not obviously a regression from the immediately-prior 2026-08-26-performance-benchmark-chart-audit run. That prior run touched `buildIndexedSeries`'s re-basing/window-filter logic but did not touch the null-on-withheld-day behaviour itself (its own finding log explicitly separates "first-point anchor... gaps stay None (not interpolated)" as pre-existing and judged correct). Worth the next lane explicitly re-confirming the prior run's fix didn't change gap *rendering* even though it didn't change gap *cause*.
+  - Could not confirm from static reading alone whether the user is looking at the Dashboard tab's Performance & Benchmark chart specifically, versus the Exposure drift chart or a Risk-tab chart — all three plausibly show some artifact tied to 2026-04-14 via the shared `return_is_publishable` flag, but I traced only the Dashboard-chart mechanism to a null point at the exact API layer; the other two need a lane with running access (or deeper trace) to confirm rendering, not just data-layer exclusion.
+  - Did not verify whether this is "the bug" (nothing to fix — correct, disclosed withholding) or whether the actual complaint is a UX gap (the chart's line-break carries no inline annotation/tooltip explaining *why*, only a separate card below and a text note that says "see Replay Disclosures") — that judgment belongs to quant-audit/design, not scout.
+  - Did not open `scripts/manage_cache.py` or run any cache-inspection command (read-only order, no Bash tool); if a downstream lane wants empirical confirmation that FMP has (or lacks) a 2026-04-14 SPY row, that command still needs running — flagged only as unnecessary for *this* mechanism, not as ruled out for the benchmark leg specifically.

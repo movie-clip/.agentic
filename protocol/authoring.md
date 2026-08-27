@@ -237,6 +237,12 @@ its `tools:` line. `scout`, `story-author` and `docs-engineer` have no `Bash`;
 a pack telling one of them to run `git diff` is a false premise about the lane
 itself, and it will be silently worked around rather than reported.
 
+The same applies to the project tool server below, and bites harder: the grants
+are **per lane, not blanket**. A pack section telling `frontend-engineer` to call
+`probe_engine` names a tool that lane was deliberately not given, and the failure
+looks like an agent ignoring its pack rather than a pack naming a tool that is
+not there.
+
 This is the one false premise `pack_corrections` does not catch. That loop is
 aimed at facts about the *code* — a path that moved, a fixture that was renamed
 — and an agent that cannot run a command tends to substitute something and
@@ -246,6 +252,38 @@ correction.
 
 So the check belongs here, at authoring time: **every command in a pack must be
 runnable by the lane that pack belongs to.**
+
+## The project tool server
+
+A bound repo may expose a tool server to the network over MCP, registered in
+that repo's `.mcp.json` under the key **`project`**. The key forms the
+`mcp__project__<tool>` prefix, which is why it is generic: the lane definitions
+live in the agnostic layer, so they cannot name a repo. Any second project
+implements the same contract under the same key, or implements none of it.
+
+| Tool | Returns | Exists because |
+|---|---|---|
+| `run_tests` | parsed failures + a bounded tail | raw suite output is mostly noise, and a lane pays for all of it |
+| `probe_engine` | one route's JSON, computed offline | lanes were hand-writing throwaway probe scripts to answer "what does this actually return?" |
+| `build_snapshot` | a valid request payload | the fixture shape is the most-tripped gotcha in the repo |
+| `check_gates` | per-gate verdicts | a lane can ask whether its commit will be blocked *before* it is |
+| `reset_goldens` | discards generated-file drift | the single most-repeated gotcha in the testing pack |
+
+Two rules govern this contract:
+
+**A tool server may not be the only way to do something.** Every tool above
+wraps a command a lane could still run under `Bash`. The server buys a bounded,
+parsed return value and a removed class of error — not a capability. A lane whose
+work becomes impossible when the server is absent has been mis-designed, and the
+pack must name the underlying command too.
+
+**Grant per lane, and grant narrowly.** A subagent's `tools:` line is also what
+loads into its context on every dispatch, so an unused tool schema is a standing
+cost for no return. The current grants: engines and tests get everything;
+`quant-analyst` gets the probing tools because AUDIT recomputes independently and
+must be able to call the engine it is judging rather than read the code and
+infer; `reviewer` gets no mutating tool, because a gate that verifies must not
+also change the tree it is verifying.
 
 ## Adding a project
 

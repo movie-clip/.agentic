@@ -208,6 +208,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
 | The validator itself is correct | **tests** — `scripts/test_check_report.py`, 79 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
+| A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six lanes, narrowly (`reviewer` gets nothing that mutates). **Not yet exercised by a run** — the tools are tested, the lanes using them are not. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only, and it has held. Across 8 runs and ~110 dispatches there is no recorded breach — every mention of scope in a ledger is a lane stopping at its fence and reporting what it saw there. The `v0.5` marker that used to sit here proposed enforcing it; the runs say there is nothing yet to enforce. Revisit on the first real breach. |
 | The express lane isn't abused | prose only — but it self-voids on any contract note. |

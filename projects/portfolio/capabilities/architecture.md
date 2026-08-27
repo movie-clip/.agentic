@@ -15,7 +15,7 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **The seams** · **Escalate rather than decide**
+**Always read:** **The seams** · **Project tool server — prefer it over the raw command** · **Escalate rather than decide**
 
 | Section | Read it when |
 |---|---|
@@ -112,6 +112,22 @@ changed? Then it is testing the implementation, and it is not coverage.
 Watch specifically for the two brittleness patterns this repo has been bitten
 by: exact equality on structures designed to grow, and assertions that pin an
 implicit default the test never set.
+
+## Project tool server — prefer it over the raw command
+
+On an INTEGRATION order, three `mcp__project__*` tools do the running for you:
+
+- `run_tests(scope="full")` — the whole gate. Deliberately does **not** skip the
+  golden freshness check, unlike the narrow scopes.
+- `check_gates()` — dead-code, `tsc`, goldens drift and commit-gate freshness in
+  one call, so you can report which gate would block rather than that something
+  did.
+- `reset_goldens()` — discards `dashboardGoldens.ts` drift when the slice did not
+  change dashboard output.
+
+Each returns a parsed verdict rather than raw output, which matters here: an
+integration report cites what failed, and a four-hundred-line dump is not a
+citation. The raw commands still work and are still correct.
 
 ## Severity calls
 

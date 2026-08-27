@@ -16,7 +16,7 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **Running tests** · **Gotchas that will bite you** · **Shared fixtures — mandatory, do not re-implement** · **Definition of done for this lane**
+**Always read:** **Running tests** · **Project tool server — prefer it over the raw command** · **Gotchas that will bite you** · **Shared fixtures — mandatory, do not re-implement** · **Definition of done for this lane**
 
 | Section | Read it when |
 |---|---|
@@ -62,6 +62,25 @@ python scripts/run_all_tests.py
 Use narrow mode while working; run what the work order's `verification` field
 names before reporting `PASS`.
 
+## Project tool server — prefer it over the raw command
+
+The `mcp__project__*` tools wrap the commands above and return **parsed** results
+instead of raw output: a failing suite comes back as a list of
+`{file, test, message}` plus a short tail, not four hundred lines you pay to read.
+
+- `run_tests(scope, path=None, k=None)` — scope is `backend` | `frontend` |
+  `typecheck` | `full`. `backend` sets `SKIP_GOLDEN_FRESHNESS_CHECK=1` for you;
+  `full` deliberately does not, because that is the gate.
+- `check_gates()` — dead-code, `tsc`, goldens drift and commit-gate freshness in
+  one call. Ask it *before* you try to commit, not after the hook blocks you.
+- `reset_goldens()` — the `git checkout --` on `dashboardGoldens.ts` described
+  under **Gotchas**.
+- `probe_engine` / `build_snapshot` — see **Shared fixtures**.
+
+The raw commands above are still correct and still work. Reach for them when you
+need a flag the tool does not expose, and when the tool server is not running.
+Nothing here is only doable through a tool.
+
 ## Gotchas that will bite you
 
 **Goldens drift is usually noise.** After `run_all_tests.py` succeeds, check
@@ -97,6 +116,17 @@ suite if you forget.
 `ResponsiveContainer`; a chart test that bypasses setup renders zero-size and
 asserts nothing.
 
+**Asserting exact chart-line values against an unexported transform.** When the
+data-transform feeding a chart (e.g. `buildIndexedSeries`) is unexported and its
+source file is out of scope to edit — the common case for a regression-guard
+test written against someone else's fix — do not parse SVG path geometry. Add a
+local `vi.mock('recharts', ...)` (setup.tsx's global shim does not carry into a
+file's own mock) that keeps `ResponsiveContainer` sizing but replaces `LineChart`
+with a stub rendering its `data` prop into a `data-testid` div; read it back via
+an async `getChartData()` helper (`await screen.findByTestId(...)`, `JSON.parse`
+the text). Reference:
+`apps/desktop/src/features/portfolio/PerformanceBenchmarkCard.test.tsx`.
+
 ## Shared fixtures — mandatory, do not re-implement
 
 From `app/tests/fixtures.py`:
@@ -111,6 +141,21 @@ From `app/tests/fixtures.py`:
 
 Need scaffolding that does not exist? Extend this module rather than inlining a
 local helper, and name the addition in your report's `handoff`.
+
+Two of these are also exposed as tools, which is the cheaper way in:
+
+- `build_snapshot(positions=[{"symbol": "AAPL", "market_value": 500}], …)` wraps
+  `imported_snapshot`, accepting position shorthand and filling the rest.
+- `probe_engine(route, payload, histories=…)` runs one engine route in-process
+  with `MarketDataService` mocked and hands back the JSON — use it to find out
+  what a route actually returns instead of writing a throwaway script. It
+  derives the module to patch from the route, so the "patch the engine module,
+  not the service module" gotcha above cannot bite you through this path.
+
+**One caveat that does not apply to pytest.** `probe_engine` runs outside a
+pytest session, so `pytest.ini`'s `--disable-socket` guard is not protecting it
+and `conftest.py`'s autouse mocks do not apply. Its own mock is what keeps it
+offline, and anything the route needs must be passed in explicitly.
 
 ## Assertion conventions (backend + frontend)
 

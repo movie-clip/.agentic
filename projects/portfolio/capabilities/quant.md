@@ -148,6 +148,20 @@ python - <<'PY'
 PY
 ```
 
+**The cheaper way to get the engine's own numbers.** Rather than starting a
+server or hand-writing a harness, call `probe_engine` — it runs one route
+in-process with market data mocked and returns the JSON, so you can put the
+engine's answer next to your independent recomputation directly:
+
+```
+build_snapshot(positions=[{"symbol": "AAPL", "market_value": 1000}])
+probe_engine("/engines/drawdown/run", {"snapshot": <that>}, histories={"AAPL": [...]})
+```
+
+Your recomputation must still be written from the methodology doc, not from the
+engine's output. The tool gets you the number to compare against; it does not
+get you the number to trust.
+
 Use `app/tests/fixtures.py` (`imported_snapshot`, `price_rows`,
 `price_rows_from_returns`) to build deterministic inputs rather than inventing
 your own — then your recomputation and the engine see identical data, and any

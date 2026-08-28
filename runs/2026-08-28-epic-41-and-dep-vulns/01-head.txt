@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-28-epic-41-and-dep-vulns/01
+artifact:        C:\projects\investments\.agentic\runs\2026-08-28-epic-41-and-dep-vulns\01-delivery-brief.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only producer order, no verification command named
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         9
+risks:           4
+headline:        Open Epic 41 (doc/roadmap accuracy) housing shipped US-41.2 + Backlog US-41.1 + proposed reconciliation story US-41.3; propose dep-vuln remediation as its own findings-first epic, audit story first.

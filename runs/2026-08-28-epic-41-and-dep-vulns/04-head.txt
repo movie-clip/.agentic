@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-28-epic-41-and-dep-vulns/04
+artifact:        C:\projects\investments\.agentic\runs\2026-08-28-epic-41-and-dep-vulns\04-design-us41.3.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only DESIGN order, no verification command named
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         10
+risks:           5
+headline:        US-41.3 plan set: one docs order (items 1-6) + a separate test order shipping the roadmap-ordering guard; AC1 is a confirmation, AC2 shrinks to one line, no schema/route/golden impact.

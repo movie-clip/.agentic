@@ -1,0 +1,12 @@
+REPORT HEAD 2026-08-27-next-epic-or-story/07
+artifact:        C:\projects\investments\.agentic\runs\2026-08-27-next-epic-or-story\07-technical-plan.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only DESIGN order, no verification command named
+changed:         0
+contract_notes:  1
+pack_corrections: 1
+handoff:         8
+risks:           5
+headline:        US-41.2 technical plan: confirmed Data Flow rewrite bounds (267-345), region-by-region replacement structure for 15 routers, and a new module-name-keyed route-inventory guard.

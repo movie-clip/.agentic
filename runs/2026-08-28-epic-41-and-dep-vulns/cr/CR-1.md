@@ -1,0 +1,7 @@
+CHANGE REQUEST 1
+lane:     docs
+severity: SHOULD_FIX
+round:    1
+finding:  docs/product/stories/US-42.1-assess-outstanding-dependency-advisories.md — line 5 reads `**Status:** Done`, but lines 8-11 still carry the `> **Draft for human review.** ... not owner-approved. Do not dispatch build lanes until the owner has approved this file and the open decision below is closed.` banner, and lines 12-31 still carry an `## Open decisions` section whose first bullet ("Does this audit's trial-bump observation require a quant sign-off?" — "Resolve before this story's gate line is set") was in fact resolved by the DESIGN owner decision (05-design-us42.1.md D5: no quant-audit gate) and by the assessment itself (bucket (b) = none).
+why:      A story file that says Done while also saying "not owner-approved, do not dispatch build lanes" gives a later reader two contradictory states for the same story; the "resolve before the gate line is set" instruction reads as still-open when the gates have run. The build lanes already executed, so the banner is now a false process gate.
+expected: Clear the draft/not-owner-approved banner and either strike the `## Open decisions` section or mark each of its three items resolved/deferred with its disposition (quant sign-off: not required per 05 D5; Epic 42 PRD: written at close-out; remediation stories: scoped by the three-bucket grouping). This is close-out docs work (order 13), which already owns the epic-roadmap.md / story-index rows for this file — not a blocker for this slice.

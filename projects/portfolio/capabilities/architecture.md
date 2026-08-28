@@ -39,8 +39,8 @@ Pydantic schema  →  engine service  →  FastAPI route  →  main.py registrat
 type ↔ UI display.
 
 Route prefixes: `/engines/{exposure, diagnostics, dashboard-history, drift,
-attribution, correlation, stress, drawdown, distribution, provenance}`,
-`/portfolios/import`, `/market-data`, `/cache`, `/health`.
+attribution, correlation, currency-risk, stress, drawdown, distribution,
+provenance}`, `/portfolios/import`, `/market-data`, `/cache`, `/health`.
 
 ## Design pass: what to settle before the engineers start
 

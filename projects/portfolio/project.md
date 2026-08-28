@@ -181,10 +181,14 @@ reference; they are not replaced by this network.
 one context, self-invokes `write-tests` / `verify-story` / `update-docs`, and
 **commits**. Every one of those is now owned by a lane or by the human.
 
-Its description still triggers on *"build US-X.Y"*, *"pick up ticket T-..."*,
-*"implement the next story"* — the same phrasing that should reach
-`orchestrate-feature`. Until its description is narrowed in the repo, two
-architectures compete for the same request and which one answers is a coin flip.
+The repo skill's own description (`.claude/skills/build-story/SKILL.md`
+frontmatter) now opens "SUPERSEDED - do not use for implementation" and
+explicitly routes "build US-X.Y" / "pick up ticket T-..." / "implement the
+next story" to `orchestrate-feature`, so the trigger collision is closed at
+the skill itself. The residual prose that once told agents to run `build-story`
+in `docs/product/stories/README.md` and `docs/product/prd/README.md` has since
+been reconciled to `orchestrate-feature` / `write-story`, so the collision is
+now closed both at the skill and across the repo docs.
 
 **If `build-story` loads for a request that belongs to this network, stop and
 route to `orchestrate-feature` instead.** A slice built through it has no run

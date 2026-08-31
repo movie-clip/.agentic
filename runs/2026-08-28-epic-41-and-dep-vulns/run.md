@@ -6,13 +6,14 @@ request:      1. open Epic 41   3. create story for this problem   4. fix it
                OWN separate story (CARRIED item 3); build both]
 agentic_root: C:\projects\investments\.agentic
 story:        NONE
-status:       DISPATCHING
-next:         await 13 close-out head; derive (--emit-head); orchestrator runs python scripts/run_all_tests.py (roadmap guard checks epic-section order); final ledger walk + Cost + run_cost.py; status CLOSED
+status:       CLOSED
+next:         none — CLOSED
+final_verify: python scripts/run_all_tests.py — exit 0 "All tests passed" (backend pytest + desktop vitest + tsc --noEmit + dead-code strict gate; test_roadmap_epic_ordering.py GREEN with Epic 41/42 sections inserted, 42>41>40>…>8). Ready for human commit.
 final_verify: b3ug4z39e — python scripts/run_all_tests.py exit 0 "All tests passed" after 06+07 landed; US-41.3 impl verified, 07 roadmap guard now GREEN
 route:        full
 express:      no
 decisions:    user 2026-08-28 — (1) dep-vuln work → NEW Epic 42 "Dependency Vulnerability Remediation" (findings-first, sibling Epic 21/36); (2) US-41.1 → under Epic 41 with WIDENED charter line ("...plus one carried Dashboard-trust story"); (3) Story B → AUDIT story (US-42.1) this run only, remediation deferred to a follow-up run
-gates:        quant-audit — SKIPPED (US-41.3 AC3 re-audit found no methodology/trust staleness; US-42.1 audit-only, 0 analytic movement in trial bumps, owner waived) · integration — PASS both (11) · review — PASS both (12; full suite green: backend 949 / frontend 359 / tsc / dead-code clean)
+gates:        quant-audit skipped (US-41.3 AC3 re-audit found no methodology/trust staleness; US-42.1 audit-only, 0 analytic movement in trial bumps, owner waived) · integration PASS (11, both stories) · review PASS (12, both stories; full suite green: backend 949 / frontend 359 / tsc / dead-code clean)
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |
@@ -27,43 +28,42 @@ gates:        quant-audit — SKIPPED (US-41.3 AC3 re-audit found no methodology
 | 08 | backend | — | backend-engineer | sonnet | 08-backend-us42.1.md | DONE (PARTIAL: 1 fail exogenous = red-before roadmap guard, fixed by 06) | — |
 | 09 | frontend | — | frontend-engineer | sonnet | 09-frontend-us42.1.md | DONE | PASS |
 | 10 | docs | — | docs-engineer | sonnet | 10-docs-us42.1.md | DONE | — |
-| 11 | integration | INTEGRATION | tech-lead | sonnet | 11-integration.md | DONE | PASS (both) |
-| 12 | review | — | reviewer | sonnet | 12-review.md | DONE | PASS (both) |
-| 13 | docs | — | docs-engineer | sonnet | 13-docs-closeout.md | pending | — |
+| 11 | integration | INTEGRATION | tech-lead | sonnet | 11-integration.md | DONE | PASS |
+| 12 | review | — | reviewer | sonnet | 12-review.md | DONE | PASS |
+| 13 | docs | — | docs-engineer | sonnet | 13-docs-closeout.md | DONE | — |
 
-## Open
+## Open  (all CARRIED — handoffs to the human / the deferred remediation run)
 | kind | from | ref | one-line | state |
 |---|---|---|---|---|
-| context | prev run | runs/2026-08-27-next-epic-or-story/03-delivery-brief.md | producer already recommended "Epic 41 — Documentation & Roadmap Accuracy Reconciliation", sibling to Epic 32/36, findings-first | OPEN |
-| context | prev run | runs/2026-08-27-next-epic-or-story/run.md § Open | US-41.2 shipped (integration+review PASS) but recorded as a narrative para, no epic home; US-41.1 deferred, its header reserves US-41.1 under any Epic 41 | OPEN |
-| plan | 01-brief | § Stories | Epic 41 setup = docs-lane close-out (PRD folding 02-scout §A-I, migrate US-41.2 record, reslot index, flip Epic field, NO renames) | OPEN — 12+ close-out |
-| plan | 01-brief | § Stories | Story A US-41.3 = 6 carried doc-reconciliation items; ACs one-per-item + suite green; item (3) current-product-state body re-audit may spawn quant referral | OPEN — 02 authors |
-| plan | 01-brief | § Stories | Story B = US-42.1 audit-only (6 advisories: reachability, min safe version, golden impact; NO version change); Epic 42 setup = docs close-out; remediation stories deferred | OPEN — 03 authors |
-| decision | 01-brief | § Open decisions | Story A guard test — producer says leave to tech-lead/story-author, not a blocker (only the roadmap-ordering item is mechanically guardable) | OPEN — DESIGN call |
-| decision | 01-brief | § Open decisions | quant-audit for Story B remediation bumps — DESIGN-time call per remediation story; not this run | CARRIED (remediation run) |
-| draft | 02-story | docs/product/stories/US-41.3-status-and-navigation-doc-reconciliation.md | US-41.3 — APPROVED as-is by user 2026-08-28 | ABSORBED (04 DESIGN) |
-| draft | 03-story | docs/product/stories/US-42.1-assess-outstanding-dependency-advisories.md | US-42.1 — APPROVED as-is by user 2026-08-28; quant sign-off NOT required (gate line = integration + review only) | ABSORBED (05 DESIGN) |
-| plan | 04-design | § verdicts | US-41.3: T-41.3.4 guard SHIPS (new test_roadmap_epic_ordering.py); AC1=confirmation; AC2=1 line (correlation-fields.md:84→reconciliation.py); factor-drift-fields.md N/A; AC4=swap Epic 23/24 blocks; no schema/route/golden impact | OPEN — 06/07 absorb |
-| risk | 04-design | § risks | AC6 tension: in-place label/pointer/date fixes YES, structural index regroup NO; prd/README.md § Index → minimal de-assert only, full rebuild is Epic 41 close-out | OPEN — 06 absorbs |
-| plan | 05-design | § Lane split | US-42.1: T-42.1.1→backend-engineer (F-1..F-5), T-42.1.2→frontend-engineer (F-6), T-42.1.3→docs-engineer (write-up); trial bump in git worktree/out-of-repo venv; offline degrade per-finding | OPEN — 08/09/10 absorb |
-| risk | 05-design | § risks | test_audit_dependencies.py:43 has placeholder GHSA-xxxx-xxxx-xxxx for pypdf — fixture text, do NOT carry into F-2; starlette bump breaks FastAPI 0.119.1 collection → "blocked" finding bucket (c) | OPEN — 08 absorbs |
-| risk | 05-design | § risks | AC5 trial-bump guardrail-1 tension: owner waived quant-audit for US-42.1; 08 must carry forward which observations touched analytic output so REMEDIATION stories route them to quant | OPEN — 08 absorbs, then CARRIED to remediation run |
-| status | 07-test | test_roadmap_epic_ordering.py | PARTIAL / verification FAIL = INTENDED red-before (Epic 23 before 24 in current roadmap); guard goes GREEN automatically once 06 swaps the blocks. Final suite run after 06 confirms. Not a defect | OPEN — resolves when 06 lands |
-| finding | 09-frontend | § F-6 | @babel/core GHSA-4x5r-pxfx-6jf8/CVE-2026-49356 (low), build-time only, NO runtime surface, lockfile-only bump 7.29.0→7.29.6/7.29.7 resolves it; bucket (a) safe; live GH Advisory DB query (env HAS network); manifests byte-identical, vitest+tsc green | OPEN — 10 consolidates |
-| finding | 06-docs | § handoff | US-41.3 landed: AC2 citation fixed, AC4 roadmap 23/24 swap (now 33 headings strict-descending 40→8), AC5 CLAUDE.md row, AC3 one stale service-file count fixed (NO methodology staleness — quant-referral branch did not fire), AC6 all residue already closed | OPEN — 06/07 → integration+review |
-| quant_referral | 06-docs | financial-methodology.md:2425/581/587/2427 vs US-34.3 | −$53.13 (US-34.3) still unreconciled with −$58.11/−$19.98 (methodology); scout § F 2026-08-27, still live; methodology-doc figure reconciliation, out of every docs order's scope — needs a quant look | CARRIED (surface to user) |
-| risk | 06-docs | § risks | AC3 "~16→~25 service files" edit borderline shipped-feature-desc vs architecture-count; treated as factual staleness, reviewer may revert that one line | OPEN — 11 reviewer |
-| finding | 08-backend | § Findings | F-2 pypdf→6.15.0, F-3 python-multipart→0.0.31, F-4 pydantic-settings→2.14.2, F-5 python-dotenv→1.2.2 all bucket (a) golden-safe (437-test subset identical); F-1 starlette bucket (c) BLOCKED (FastAPI 0.119.1 pins starlette<0.49; needs FastAPI-bump story first). NO analytic movement anywhere → no remediation needs quant-audit | OPEN — 10 consolidates |
-| finding | 08-backend | § risks | pip-audit found 37 advisory records across the 5 packages (22 for pypdf) — far more than the "5 advisories" story framing; one-finding-per-package structure still holds but framing was inaccurate | CARRIED (note to user + PRD) |
-| finding | 10-docs / 09-frontend | § handoff | apps/desktop tree ALSO carries moderate/high advisories on vite, esbuild, postcss, nanoid, @vitest/mocker, vite-node — out of US-42.1 scope; Epic 42 remediation scope is bigger than the 6 advisories | CARRIED (Epic 42 PRD + user) |
-| plan | 10-docs | § handoff | remediation roadmap: (a) 1 backend golden-safe bump story F-2/3/4/5; (a) 1 lockfile-only @babel/core story F-6; (c) F-1 starlette needs a FastAPI-bump story FIRST | CARRIED (remediation run) |
-| should_fix | 10-docs | § risks | US-42.1 file now Status Done but still has "Draft for human review / not owner-approved" banner + stale "Open decisions" (quant sign-off — owner resolved: no) — clear at close-out (order 13) | OPEN — 13 absorbs |
-| finding | 10-docs | docs/product/dependency-advisory-assessment-2026-08.md | NEW findings doc: F-1..F-6, bucket (a) 5 safe / (b) 0 needs-quant / (c) 1 blocked (starlette); live pip-audit + GH Advisory DB (network available); manifests byte-identical; AC1-AC11 ticked | OPEN — 12 review + 13 PRD fold-in |
-| status | 08-backend | verification | PARTIAL/FAIL is EXOGENOUS — sole fail was red-before roadmap guard (06 has since swapped the blocks); 08 wrote nothing, manifests byte-identical (AC9 holds) | CLOSED — full suite b3ug4z39e exit 0 "All tests passed" after 06 landed; 07 guard now GREEN |
+| quant_referral | 06-docs / 13-docs (F-10) | financial-methodology.md:2425/581/587/2427 vs US-34.3 | −$53.13 (US-34.3) unreconciled with −$58.11/−$19.98 (methodology); scout § F 2026-08-27, still live; needs a standalone quant-lane look — barred from every docs order this run | CARRIED |
+| plan | 10-docs / 13-docs (Epic 42 PRD) | Epic 42 forward plan | remediation stories NOT authored (deferred run): (a) 1 backend golden-safe bump story F-2/F-3/F-4/F-5; (a) 1 lockfile-only apps/desktop story F-6; (c) a FastAPI-bump story must land before F-1 starlette | CARRIED |
+| finding | 09/10/13-docs | Epic 42 scope | broader apps/desktop advisories (vite, esbuild, postcss, nanoid, @vitest/mocker, vite-node) are in Epic 42 scope but UNASSESSED — need their own US-42.x assessment story; do NOT `npm audit fix` F-6 blindly | CARRIED |
+| finding | 08-backend | assessment doc + Epic 42 PRD | pip-audit found 37 advisory records across the 5 backend packages (22 for pypdf) — the "6 advisories" framing undercounts; one-finding-per-package structure holds, real count recorded | CARRIED |
+| limitation | 08-backend / 12-review | assessment doc provenance | US-42.1 AC5 golden/analytic impact assessed on a 16-file/437-test sensitive subset, not the full suite — a bump moving an output covered only by an excluded test would not have been caught; disclosed in the doc | CARRIED |
+| story | 13-docs | US-41.1 | stays Backlog under Epic 41 — a Dashboard-trust chart-annotation feature, needs its own build run; dead-branch DELETE decision already made (2026-08-27) | CARRIED |
+| should_fix | 13-docs | § risks | US-41.1 + US-41.2 story files keep stale in-body prose ("Backlog, no epic yet" / "shipped as a standalone Backlog story") — order 13 flipped only the Epic: field; a later docs pass could reconcile the prose | CARRIED |
 
-## Closed
+## Closed  (absorbed / resolved this run)
 | kind | from | absorbed by | one-line |
 |---|---|---|---|
+| context | prev run | 01-brief, 13-docs | Epic 41 recommendation + US-41.2 "no epic home" → Epic 41 opened, US-41.2 record migrated into its roadmap section |
+| decision | 01-brief § Open decisions | user 2026-08-28 | Story B → Epic 42 (new); US-41.1 → Epic 41 with widened charter line; Story B → audit-only this run; US-42.1 quant sign-off → not required |
+| decision | 01-brief § Open decisions | 04-design | US-41.3 guard test → SHIPS (test_roadmap_epic_ordering.py) |
+| draft | 02/03-story | 04/05 DESIGN → build → gates | US-41.3 + US-42.1 both approved as-is, designed, built, integration PASS, acceptance PASS |
+| plan | 04-design | 06-docs / 07-test | US-41.3: AC1 confirmation, AC2 one-line citation, AC4 Epic 23/24 block swap, guard shipped — all landed |
+| risk | 04-design § risks | 06-docs | AC6 in-place-only rule respected; prd/README.md needed no edit (residue already closed by prior runs) |
+| plan | 05-design | 08/09/10 | US-42.1: 3-lane split, worktree-isolated trial bumps, offline degrade path — all executed (network was available, real bumps ran) |
+| risk | 05-design § risks | 08-backend | pypdf placeholder GHSA not carried into F-2; starlette → bucket (c) blocked as predicted |
+| risk | 05-design § risks | 08-backend | AC5 guardrail-1: trial bumps moved ZERO goldens/analytic outputs → nothing to carry to remediation quant-audit |
+| status | 07-test | b3ug4z39e | roadmap guard red-before (Epic 23<24) → GREEN after 06's swap; final suite exit 0 |
+| status | 08-backend | b3ug4z39e | PARTIAL/FAIL was exogenous (red-before guard); manifests byte-identical, findings transcribed verbatim by 10 |
+| finding | 09-frontend | 10-docs / Epic 42 PRD | F-6 @babel/core GHSA-4x5r-pxfx-6jf8 (low), build-time only, lockfile-only bump → bucket (a) |
+| finding | 06-docs | 11 integration / 12 review | US-41.3 six items landed; AC3 body re-audit found NO methodology/trust staleness |
+| finding | 08-backend | 10-docs / Epic 42 PRD | F-1..F-5: pypdf/multipart/pydantic-settings/python-dotenv golden-safe (a); starlette blocked (c) |
+| risk | 06-docs § risks | 11 integration | AC3 "~16→~25 service files" edit ruled correct factual-staleness fix (dir has 25 modules) |
+| finding | 10-docs | 12 review / 13 PRD fold-in | dependency-advisory-assessment-2026-08.md written; AC1-AC11 ticked; folded into Epic 42 PRD |
+| CR-1 | 11 integration | 13-docs | US-42.1 draft banner cleared, Open-decisions resolved |
+| CR-2 | 11 integration | 13-docs | US-41.3 → Status Done + close-out block, AC7 + T-41.3.4 ticked |
 
 ## Rounds
 | finding | lane | round | of |
@@ -79,7 +79,8 @@ gates:        quant-audit — SKIPPED (US-41.3 AC3 re-audit found no methodology
 ## Cost
 | metric | value |
 |---|---|
-| dispatches | — |
-| rounds | — |
-| by model | — |
-| escalations | — |
+| dispatches | 13 |
+| rounds | 0 |
+| by model | sonnet 13 |
+| escalations | none |
+| notes | 2 SHOULD_FIX CRs (CR-1/CR-2) applied in the existing close-out order 13, not re-dispatch rounds. 3 background suite runs by the orchestrator (b3ug4z39e mid-run, b7u7xx3df final, + one earlier). 10-integration ran on a session that briefly hit a rate-limit in an earlier run — not this run. |

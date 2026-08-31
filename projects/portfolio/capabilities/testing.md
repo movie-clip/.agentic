@@ -70,11 +70,22 @@ instead of raw output: a failing suite comes back as a list of
 
 - `run_tests(scope, path=None, k=None)` — scope is `backend` | `frontend` |
   `typecheck` | `full`. `backend` sets `SKIP_GOLDEN_FRESHNESS_CHECK=1` for you;
-  `full` deliberately does not, because that is the gate.
+  `full` deliberately does not, because that is the gate. A subprocess that
+  exceeds its per-scope budget (`TIMEOUTS` dict local to `tools/testing.py`:
+  full 1800 / backend 600 / frontend 600 / typecheck 300 / gate 300 / git 30 s)
+  comes back as a structured timeout result (`timed_out: True`, `scope`,
+  `command`, `timeout_seconds`) rather than raising; a normal result now carries
+  `timed_out: False`.
 - `check_gates()` — dead-code, `tsc`, goldens drift and commit-gate freshness in
   one call. Ask it *before* you try to commit, not after the hook blocks you.
+  Each gate runs in its own isolated subprocess, so a per-gate timeout is
+  reported while the gates that completed still return real results; the result
+  dict carries a top-level `timeouts` key naming whichever gates timed out.
 - `reset_goldens()` — the `git checkout --` on `dashboardGoldens.ts` described
-  under **Gotchas**.
+  under **Gotchas**. It first captures `git diff --stat` and a bounded `git
+  diff` of the file *before* the checkout and returns both (`diff_stat` /
+  `diff`, plus `diff_truncated` / `discarded`); the capture survives a failed
+  checkout, and a no-drift reset reports nothing discarded.
 - `probe_engine` / `build_snapshot` — see **Shared fixtures**.
 
 The raw commands above are still correct and still work. Reach for them when you
@@ -151,9 +162,14 @@ Two of these are also exposed as tools, which is the cheaper way in:
   what a route actually returns instead of writing a throwaway script. It
   derives the module to patch from the route, so the "patch the engine module,
   not the service module" gotcha above cannot bite you through this path.
-  It does **not** validate the payload shape: engine routes take three different
-  shapes and a mismatched one returns 200 with `trust: "unavailable"`, never
-  422. The backend pack carries the route-to-shape table.
+  It classifies the route's expected request-body shape (`flat` /
+  `snapshot-wrapped` / `bare-snapshot` / `unclassified`) via live FastAPI route
+  introspection, reports `request_shape` + `request_model`, and emits a
+  warn-only `shape_mismatch` when the supplied payload has or omits a top-level
+  `snapshot` key against what the route expects. It still **never returns 422 and
+  never raises on a mismatch** — it POSTs and returns the real response, which
+  for a genuinely mismatched payload is a 200 with `trust: "unavailable"`. The
+  backend pack carries the route-to-shape table.
 
 **One caveat that does not apply to pytest.** `probe_engine` runs outside a
 pytest session, so `pytest.ini`'s `--disable-socket` guard is not protecting it

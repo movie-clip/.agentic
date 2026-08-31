@@ -163,10 +163,26 @@ Flat routes take `{"benchmark_symbol": ..., "positions": [...], "cash_balances":
 directly — `build_snapshot`'s output goes at the top level, not under a key.
 **Always read `trust` before believing a 200.**
 
-**The response is not truncated.** Unlike `run_tests`, `probe_engine` returns the
-route's JSON whole — a drawdown probe over 750 days is ~8.5k tokens, nearly all
-of it `underwater_series`. Probe with the shortest history that still exercises
-what you are checking, and do not re-probe to re-read a value you already have.
+`probe_engine` now helps you catch the mismatch instead of leaving it to you: it
+classifies the route's expected shape from live FastAPI route introspection and
+reports `request_shape` (`flat` / `snapshot-wrapped` / `bare-snapshot` /
+`unclassified`) plus `request_model`, and emits a **warn-only** `shape_mismatch`
+when your payload carries or omits a top-level `snapshot` key against what the
+route expects. It never raises on a mismatch and never returns 422 — it still
+POSTs and hands back the real response — so the mismatch shows up as a populated
+`shape_mismatch` next to the `trust: "unavailable"` body it explains.
+
+**Long arrays in the response are bounded.** `probe_engine` bounds any array
+longer than 11 elements to its first `PROBE_ARRAY_HEAD` and last
+`PROBE_ARRAY_TAIL` elements (both = 5), replacing the elided middle with a single
+`{"__probe_truncated__": {original_count, dropped, kept_head, kept_tail, note}}`
+sentinel; the route itself still returned every element. The envelope's
+`truncation` key lists the dotted path of every array bounded this way. A
+`fields=` arg filters the body to named top-level keys (every `trust` / `*_trust`
+key is retained regardless) and is applied *before* the array bounding. Even so,
+probe with the shortest history that still exercises what you are checking — a
+drawdown probe over 750 days is still large — and do not re-probe to re-read a
+value you already have.
 
 The module to patch is derived from the route (`/engines/<name>/run` →
 `app.services.<name>_engine`), so the "patch the engine module, not the service
@@ -175,7 +191,19 @@ module" trap cannot bite you through this path. Pass `engine_module=` to overrid
 Also available: `run_tests(scope, path, k)` for your `verification` command,
 returning parsed failures rather than the full dump; `check_gates()` to see
 whether the dead-code gate and `tsc` will pass before you commit; and
-`reset_goldens()`.
+`reset_goldens()`. All three bound a hung child process: `run_tests` and
+`check_gates` return a **structured timeout result** (naming the scope, command
+and limit — they do not raise) when a subprocess exceeds its per-scope budget,
+held in a `TIMEOUTS` dict local to `tools/testing.py` (full 1800 / backend 600 /
+frontend 600 / typecheck 300 / gate 300 / git 30 s). A normal `run_tests` result
+now also carries `timed_out: False`. `check_gates` runs each gate in its own
+isolated subprocess, so a per-gate timeout is reported while the gates that
+completed still return results, and its result dict carries a top-level
+`timeouts` key listing whichever gates timed out. `reset_goldens` captures `git
+diff --stat` and a bounded `git diff` of `dashboardGoldens.ts` *before* the `git
+checkout --` and returns both (`diff_stat` / `diff`, alongside `diff_truncated`
+and `discarded`); the capture survives a failed checkout, and a no-drift reset
+reports nothing discarded.
 
 **Nothing here is only doable through a tool.** Every one wraps a command you can
 still run under `Bash`, and the pack names those commands too. What the server

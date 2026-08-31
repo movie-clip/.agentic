@@ -183,6 +183,15 @@ A probe that came back `trust: "unavailable"` is not a finding. Comparing it
 against a real recomputation manufactures a discrepancy that does not exist —
 fix the payload and probe again before you report anything.
 
+**The probe body may be bounded.** `probe_engine` truncates any array in the
+response longer than 11 elements to its first 5 and last 5, with a
+`{"__probe_truncated__": {original_count, dropped, ...}}` sentinel where the
+middle was (the envelope's `truncation` key lists which arrays); a `fields=` arg
+further filters the body to named top-level keys. When your recomputation needs a
+full series, probe the shortest history that still yields it, or take the series
+from your own fixture inputs — never treat a `__probe_truncated__` sentinel as an
+engine value.
+
 Your recomputation must still be written from the methodology doc, not from the
 engine's output. The tool gets you the number to compare against; it does not
 get you the number to trust.

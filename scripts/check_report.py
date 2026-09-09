@@ -5,6 +5,7 @@
     python scripts/check_report.py runs/<run-id>/            # every artifact
     python scripts/check_report.py <artifact> --emit-head    # print the head
     python scripts/check_report.py <artifact> --head head.txt
+    python scripts/check_report.py runs/<run-id>/ --require-heads   # close-out
 
 Exit 0 = valid. Exit 1 = violations, printed one per line. Lines prefixed `~`
 are advisory and do not fail the run.
@@ -18,6 +19,14 @@ a downstream order that never gets written.
 count typed by hand is a count that can be wrong in the one direction that
 matters: too low, silently dropping work the orchestrator would have routed.
 Derive it, don't write it.
+
+`--require-heads` exists because deriving a head is worthless if nobody checks
+it against the artifact. § 4 makes `--head` mandatory per dispatch, but a
+mandate the close-out cannot see is a mandate that quietly lapses: across runs
+2026-08-31 through 2026-09-03, not one head was saved and `--head` was never
+run, so `rounds: 0` meant "nothing was sent back" and "nothing was checked"
+indistinguishably. This flag makes the omission a failure the sweep reports,
+for every numbered dispatch slot, in one command.
 
 Dependency-free by design: it runs anywhere the network runs.
 """
@@ -510,6 +519,21 @@ def _flag_value(argv: list[str], flag: str) -> str | None:
     return argv[i + 1]
 
 
+HEAD_SLOT = re.compile(r"^(\d+)-")
+
+
+def head_path_for(artifact: Path) -> Path | None:
+    """The head file a numbered dispatch slot must have saved beside it.
+
+    `01-recon.md` -> `01-head.txt`, the name SKILL.md § "Validate the artifact
+    against its head" tells the orchestrator to write. Returns None for an
+    artifact that is not a numbered slot -- ticket-named artifacts are not
+    dispatches and have no head to check.
+    """
+    m = HEAD_SLOT.match(artifact.name)
+    return artifact.with_name(f"{m.group(1)}-head.txt") if m else None
+
+
 def main(argv: list[str]) -> int:
     # Reports quote file paths, arrows and dashes; Python on Windows encodes
     # stdout as cp1252 and raises on the first character outside it. That
@@ -522,6 +546,7 @@ def main(argv: list[str]) -> int:
     lane = _flag_value(argv, "--lane")
     head_path = _flag_value(argv, "--head")
     emit = "--emit-head" in argv
+    require_heads = "--require-heads" in argv
 
     # Drop flags and the values they consume *by position*, so an artifact whose
     # name happens to match a lane is not silently swallowed.
@@ -564,6 +589,10 @@ def main(argv: list[str]) -> int:
         print(f"no report artifacts found in {target}")
         return 2
 
+    if require_heads and head_path:
+        print("--require-heads finds each head by name; do not also pass --head")
+        return 2
+
     head = None
     if head_path:
         if len(files) > 1:
@@ -575,7 +604,25 @@ def main(argv: list[str]) -> int:
     failed = False
     for f in files:
         notes: list[str] = []
-        problems = check(f, lane or lane_from_name(f), head, notes)
+        f_head = head
+        if require_heads:
+            hp = head_path_for(f)
+            if hp is None:
+                notes.append(f"{f.name} is not a numbered dispatch slot - "
+                             "no head required")
+            elif not hp.is_file():
+                # Not an advisory. A dispatch whose head was never saved was
+                # never validated against its artifact, and an unvalidated
+                # head is the one failure that does not announce itself.
+                failed = True
+                print(f"FAIL {f}")
+                print(f"  - no head saved at {hp.name} - PROTOCOL.md " "§ 4 "
+                      "requires one per dispatch, and without it nothing "
+                      "checked this artifact against its own summary")
+                continue
+            else:
+                f_head = hp.read_text(encoding="utf-8")
+        problems = check(f, lane or lane_from_name(f), f_head, notes)
         if problems:
             failed = True
             print(f"FAIL {f}")

@@ -316,6 +316,53 @@ b, _ = _split(_bul(700), "quant-audit")
 check("quant-audit keeps the strict ceiling, unlike quant",
       any("chars (max 400)" in x for x in b), str(b))
 
+print("F8 - --require-heads: a dispatch with no saved head is a failure, not a note")
+
+
+def _sweep(files: dict[str, str], *flags: str):
+    """Run the real CLI over a temp run dir; returns (exit_code, stdout)."""
+    with tempfile.TemporaryDirectory() as d:
+        run = Path(d)
+        for name, body in files.items():
+            (run / name).write_text(body, encoding="utf-8")
+        proc = subprocess.run(
+            [sys.executable, str(Path(cr.__file__)), str(run), *flags],
+            capture_output=True, text=True)
+        return proc.returncode, proc.stdout
+
+
+_HEAD_OK = HEAD.replace("artifact:        /x/01.md", "artifact:        01-lane.md")
+
+code, out = _sweep({"01-lane.md": BLOCK})
+check("without the flag, a missing head still passes", code == 0, out)
+
+code, out = _sweep({"01-lane.md": BLOCK}, "--require-heads")
+check("with the flag, a missing head fails", code == 1, out)
+check("the failure names the file it wanted", "01-head.txt" in out, out)
+
+code, out = _sweep({"01-lane.md": BLOCK, "01-head.txt": _HEAD_OK}, "--require-heads")
+check("a saved, agreeing head passes", code == 0, out)
+
+# The failure this whole flag exists to catch: a head that undercounts is
+# routable-looking but silently drops work. It must fail even when saved.
+under = _HEAD_OK.replace("handoff:         1", "handoff:         0")
+code, out = _sweep({"01-lane.md": BLOCK, "01-head.txt": under}, "--require-heads")
+check("a saved head that undercounts still fails", code == 1, out)
+check("undercount is reported as such", "undercounts" in out, out)
+
+# Ticket-named artifacts are not dispatch slots and have no head to demand.
+code, out = _sweep({"T-43.1.5-note.md": BLOCK}, "--require-heads")
+check("a non-numbered artifact needs no head", code == 0, out)
+check("and says so as an advisory", "no head required" in out, out)
+
+code, out = _sweep({"01-lane.md": BLOCK}, "--require-heads", "--head", "x.txt")
+check("--require-heads and --head together are refused", code == 2, out)
+
+check("head_path_for maps slot to head file",
+      cr.head_path_for(Path("/r/07-review.md")).name == "07-head.txt")
+check("head_path_for returns None off-slot",
+      cr.head_path_for(Path("/r/pack-corrections.md")) is None)
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

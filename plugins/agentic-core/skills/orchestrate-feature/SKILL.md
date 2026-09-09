@@ -77,6 +77,16 @@ say so in your first sentence.
 This line is not decoration. It is the only signal the user has that the network
 ran at all, and which one.
 
+**Say whether the project tool server is bound.** Append `· tools <n>` when the
+`mcp__project__*` tools are present in this session, or `· tools none` when they
+are not. It costs one clause and settles a question that is otherwise
+undecidable after the fact: a run in which no lane called a tool reads
+identically whether the lanes preferred `Bash` or the server never connected.
+The tools load at session start from the bound repo's `.mcp.json`, so a session
+rooted outside that repo has none of them and no lane can be faulted for it.
+Do not dispatch differently on the answer — every pack names the raw command
+beside the tool, and a lane that shells out is following the pack, not failing.
+
 1. Find `.agentic.json` by walking up from the working directory; resolve
    `agenticRoot` against the directory holding it. Missing → stop and say so.
    **Record the resolved absolute path** and build every later path by appending
@@ -333,7 +343,14 @@ After each head:
    not to do. It is the only defence against a head that undercounts — and an
    undercount does not fail loudly, it silently drops work you never learn
    existed. If a lane returned no head, that lane is not closed: re-dispatch it,
-   or read the artifact in full and say in the ledger that you did.
+   or derive one yourself with `--emit-head` — that is the standing step for the
+   three Bash-less lanes anyway, and it costs one command.
+
+   **Reading the artifact instead does not close the lane.** That escape was in
+   this step for one run and became the default for four: 2026-08-31 through
+   2026-09-03 saved no head at all, and the close-out sweep now fails on it
+   (Step 10). Reading is what you do *in addition*, when you doubt a head that
+   validated — not instead of the check that would have told you to.
 
 2. **Read the status and the `detail` honestly.** `PARTIAL` and `BLOCKED` are
    information. Do not proceed as though a lane succeeded because the next lane
@@ -475,6 +492,20 @@ a closed run has been missing:
       `pack-corrections.md`, **and** `docs/product/` — the epic's own record
       included. Epic 40 got no PRD because the order fenced that directory out,
       which was a scoping error here, not a docs-lane miss.
+- [ ] **Every dispatch's head was saved and validated** — run
+
+      ```bash
+      python <agentic_root>/scripts/check_report.py <run_dir>/ --require-heads
+      ```
+
+      It must exit 0. This is the sweep that catches what Step 6.1 lets slip:
+      a head that was never saved was never checked against its artifact, and
+      a head that undercounts routes less work than the lane did without
+      failing loudly. Across runs 2026-08-31 to 2026-09-03 no head was saved
+      at all, so `rounds: 0` could not distinguish "nothing came back" from
+      "nothing was looked at". A non-zero exit is not a close-out blocker you
+      may note and move past — re-derive the missing head with `--emit-head`,
+      or re-dispatch the lane, then run it again.
 - [ ] **`Cost` is filled and `run_cost.py` exits 0** (below).
 - [ ] **`next:` says `none — CLOSED`**, so a resumed session does not re-dispatch
       a lane that already ran.

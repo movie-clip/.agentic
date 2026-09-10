@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-09-risk-annualized-volatility/06
+artifact:        C:\projects\investments\.agentic\runs\2026-09-09-risk-annualized-volatility\06-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          ruff clean on all 3 files. pytest 983 passed, 0 failed, 50 warnings in 95.74s. The order anticipated diagnostics/golden fixture failures on the new required field; none surfaced in app/tests — the bac
+changed:         3
+contract_notes:  5
+pack_corrections: 0
+handoff:         6
+risks:           4
+headline:        Added the RISK_TAB_ANNUALIZED_VOL_MIN_OBSERVATIONS=60 floor, the RiskTabAnnualizedVolatility contract, and the server-side 60-observation gate wired into both diagnostics build paths.

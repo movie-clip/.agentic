@@ -343,8 +343,17 @@ After each head:
    not to do. It is the only defence against a head that undercounts — and an
    undercount does not fail loudly, it silently drops work you never learn
    existed. If a lane returned no head, that lane is not closed: re-dispatch it,
-   or derive one yourself with `--emit-head` — that is the standing step for the
-   three Bash-less lanes anyway, and it costs one command.
+   or derive one yourself with `--emit-head` — the standing step for the three
+   Bash-less lanes, and available to you for any lane, at one command.
+
+   **This step runs for every lane, not only the shell-less three.** A lane that
+   has `Bash` was *told* to validate its own artifact; that is not evidence that
+   it did, and a skipped self-check returns a head that looks exactly like a
+   passed one. Run 2026-09-09-risk-annualized-volatility validated only the two
+   shell-less lanes and hand-transcribed heads for `producer` and
+   `quant-analyst` — so `01-delivery-brief.md` and `02-quant-research.md` were
+   routed from, and a story was drafted on top of them, with the validator never
+   once run against either file.
 
    **Reading the artifact instead does not close the lane.** That escape was in
    this step for one run and became the default for four: 2026-08-31 through

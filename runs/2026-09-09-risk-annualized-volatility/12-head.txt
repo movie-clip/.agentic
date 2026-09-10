@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-09-risk-annualized-volatility/12
+artifact:        C:\projects\investments\.agentic\runs\2026-09-09-risk-annualized-volatility\12-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          Read-only doc reconciliation; no verification command in the work order and this lane has no Bash. Canonical suite was green at the review gate (11-review.md: run_all_tests.py exit 0, backend 1001 pas
+changed:         15
+contract_notes:  0
+pack_corrections: 0
+handoff:         8
+risks:           3
+headline:        US-44.1 docs close-out: methodology amendment + four contract/product docs + the story file reconciled to the shipped 60-observation Risk-tab volatility gate; contract notes absorbed.

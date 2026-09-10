@@ -253,27 +253,49 @@ if you need them. Do not read the document.
 The sections you skip are not lost — they reach the lane that needs them as an
 `inputs` path, which is the entire point of the relay rule.
 
-### A head you cannot derive
+### Validate every artifact, derive every head
 
-`scout`, `docs-engineer` and `story-author` have no `Bash`, by design. They
-cannot run the validator on what they just wrote, so the head they hand back is
-a courtesy, not a measurement. **Derive it yourself before you route anything.
-This is a standing step on every dispatch from those three lanes, not a
-response to something looking wrong:**
+**Every artifact gets checked before you route from it. Every dispatch, every
+lane, whether or not that lane has `Bash`.** Where the head comes from is the
+only thing that varies:
 
-```bash
-python <agenticRoot>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --emit-head
-```
+- **A lane returned a head** — transcribe it verbatim into `<run_dir>/<nn>-head.txt`
+  and validate it against the artifact with `--head` (Step 1 of the skill's
+  after-each-head sequence). Transcribing is not deriving: the file is a copy of
+  a claim until the script has measured it against the document.
+- **A lane returned no head, or the check rejects the one it did** — derive it:
 
-Use that head. Keep the lane's `headline` — it is the one line the script
-cannot produce and the lane can. Everything else comes from the artifact.
+  ```bash
+  python <agenticRoot>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --emit-head > <run_dir>/<nn>-head.txt
+  ```
 
-The alternative was tried and it is expensive. Their agent files used to say
-"check the block against `PROTOCOL.md` § 3 by eye", which asks a model to count
-list items and slice a string to an exact length. Across the closed runs those
-three lanes returned a mismatched head 11 times, and each one cost a full
-artifact read — the read the head exists to avoid. A head cost one Bash call to
-derive the whole time.
+  Then paste the lane's `headline` over the placeholder the script leaves in
+  angle brackets — it is the one line the script cannot produce and the lane
+  can. Everything else comes from the artifact.
+
+**The head is a file, not a paragraph in your ledger.** A run whose `<nn>-head.txt`
+is missing has an Artifacts row backed by nothing: the row says `DONE` and the
+evidence for it was never written down. Close-out cannot audit what is not on
+disk, and Step 10's `--require-heads` sweep will fail on it.
+
+**The check is not scoped to the shell-less lanes.** It is tempting to read it
+that way — a lane with `Bash` was told to validate its own artifact, so its head
+looks already-earned — but "the lane was supposed to" is not a measurement. A
+lane that skipped its own check returns a head indistinguishable from one that
+passed, and a head you transcribed into a file is still that lane's claim about
+its own work. One command per dispatch is the entire cost of not having to trust
+it. Writing `<nn>-head.txt` and moving on without running the validator is the
+same omission as not writing the file at all — you have recorded the claim and
+skipped the measurement.
+
+The alternative was tried and it is expensive. The shell-less lanes' agent files
+used to say "check the block against `PROTOCOL.md` § 3 by eye", which asks a
+model to count list items and slice a string to an exact length. Across the
+closed runs those three lanes returned a mismatched head 11 times, and each one
+cost a full artifact read — the read the head exists to avoid. A head cost one
+Bash call to derive the whole time. Lanes that *have* `Bash` are not exempt from
+that arithmetic: § 4 of the core measures 26 of 59 heads disagreeing with their
+own artifact **in every lane but one, whether or not that lane had a shell.**
 
 **If a head is missing, malformed, or its counts disagree with the artifact**,
 that lane is not closed. From a shell-less lane, derive it as above and carry

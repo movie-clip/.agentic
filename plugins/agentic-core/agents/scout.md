@@ -66,6 +66,35 @@ Do not propose an implementation. Do not estimate. Do not decide whether the
 change is a good idea. You establish facts; the orchestrator and the user decide
 what to do with them.
 
+## Your artifact opens with an orchestrator brief
+
+Your report block is followed by a real document — the map itself, section by
+section. The orchestrator does not read that document end to end, and should not
+have to: it dispatches from it, and the lanes that need a region of the map
+receive it as an `inputs` path.
+
+So immediately after the report block, write:
+
+```markdown
+## Orchestrator brief
+<at most 15 lines>
+```
+
+It is an **index with verdicts**, not a summary of what you explored:
+
+- what you established, one line each, stated as findings not as a narrative
+- the shortest path you found, if the order asked for one
+- **every `##` section that appears below, by name**, and what each contains
+- anything that blocks dispatch, or that contradicts the order's premise
+
+Write it so a dispatcher who reads only these 15 lines routes correctly. The
+map stays below, in full, for the lane that has to build from it — nothing is
+being cut, only moved out of the coordinator's path.
+
+`check_report.py` enforces the heading, the 15-line cap, and that the brief
+names the sections below it. It cannot tell you whether the brief is *useful*;
+that is the part only you can get right.
+
 ---
 
 ## Required output format
@@ -88,8 +117,9 @@ Two obligations, both mandatory:
 **You have no `Bash`, by design** — so you cannot run `scripts/check_report.py`
 on your own artifact, and you are not asked to. **The orchestrator derives your
 head from your artifact with `--emit-head` before it routes anything** (its
-standing post-dispatch step, `protocol/orchestrator.md` § "A head you cannot
-derive"). Your counts are a courtesy; the derived ones are what gets used.
+standing post-dispatch step, `protocol/orchestrator.md` § "Validate every
+artifact, derive every head"). Your counts are a courtesy; the derived ones are
+what gets used.
 
 So spend your effort on the artifact, not on the block. Get every section
 present and every bullet in the right one — that is what the derived head is

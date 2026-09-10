@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-09-risk-annualized-volatility/08
+artifact:        C:\projects\investments\.agentic\runs\2026-09-09-risk-annualized-volatility\08-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          Exit 0. Backend pytest 1001 passed (was 983; +18 new), 50 warnings. Frontend vitest 369 passed / 41 files (incl. AnnualizedVolatilityCard.test.tsx 10, RiskPanel.test.tsx 6, designSystem.audit 5). tsc
+changed:         5
+contract_notes:  0
+pack_corrections: 0
+handoff:         14
+risks:           4
+headline:        Added backend + frontend + cross-surface coverage for the US-44.1 Risk-tab annualized volatility publication gate; canonical suite green.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-09-risk-annualized-volatility/04
+artifact:        C:\projects\investments\.agentic\runs\2026-09-09-risk-annualized-volatility\04-story.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          Order verification field is NONE; story-author is a shell-less drafting lane with no command to run.
+changed:         1
+contract_notes:  3
+pack_corrections: 0
+handoff:         7
+risks:           5
+headline:        Drafted story US-44.1 (Backlog): Risk-tab annualized volatility held below a 60-day floor, 12 acceptance criteria, 5 provisional tickets, 4 open decisions carried for the human.

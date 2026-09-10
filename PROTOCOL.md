@@ -265,8 +265,11 @@ fixes it. The script counts; the lane judges.
 
 Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this.
 The orchestrator derives their head for them as a standing post-dispatch step —
-`protocol/orchestrator.md` § "A head you cannot derive" — so those lanes write
-the artifact and leave the counting alone.
+`protocol/orchestrator.md` § "Validate every artifact, derive every head" — so
+those lanes write the artifact and leave the counting alone. That same section
+binds the orchestrator to validate **every** artifact before routing from it,
+including those from lanes that do have `Bash`: a lane's own check is something
+it was told to run, not something you can see it ran.
 
 **Why the head and not the body.** The orchestrator's context is the scarcest
 resource in a run, and it is the one thing every dispatch spends. A body

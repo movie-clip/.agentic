@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-09-risk-annualized-volatility/07
+artifact:        C:\projects\investments\.agentic\runs\2026-09-09-risk-annualized-volatility\07-frontend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          tsc: 7 errors, all in T-44.1.3-owned test/fixture files, 0 in my 4 source files — 6x RiskPanel.test.tsx TS2741 missing new required 'diagnosticsAnalysis' prop; 1x src/test/portfolioFixtures.ts:994 TS2
+changed:         4
+contract_notes:  3
+pack_corrections: 0
+handoff:         7
+risks:           4
+headline:        Mirrored the risk_tab_volatility contract into types.ts and added a prop-driven AnnualizedVolatilityCard to the Risk tab rendering the synthetic/withheld/unavailable states per plan.

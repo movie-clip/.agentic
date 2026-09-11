@@ -10,6 +10,7 @@
 | Protocol | `PROTOCOL.md` + `protocol/*.md` | message shapes, binding, gates | anything about a specific repo, anything about a specific role's craft |
 | Role | `plugins/agentic-core/agents/<name>.md` | what this lane judges, tool discipline | any path, framework or convention from a specific repo |
 | Capability | `projects/<project>/capabilities/<lane>.md` | paths, frameworks, fixtures, commands, gotchas, external anchors | message shapes, role definitions |
+| Skill | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — which lane runs when, the routes, the order of steps | any rule the protocol states; it cites them |
 
 If you are tempted to write `pytest` in an agent file, that line belongs in a
 capability pack. If you are tempted to paste the report block into a pack, it
@@ -33,6 +34,16 @@ add a rule, place it in exactly one file, chosen by *who needs it*:
 
 A rule that seems to belong in two places is usually two rules stated at the
 wrong level of abstraction. Split it before duplicating it.
+
+**A skill is not a fifth place to put a rule.** It is the only layer that can
+restate one without looking like a copy, because a step reads naturally as
+"here is what to do now" rather than as a second definition. The test is
+whether the text would still be true if the run happened in a different order:
+if it would, it is a rule and belongs in the protocol, and the step cites it.
+`orchestrate-feature` opens by telling you to read `orchestrator.md` and that
+everything below assumes it — so a step that re-argues an extension's rule is
+arguing with a file the reader has already read, and the two copies drift
+against a reader who cannot tell which is current.
 
 ## Choosing a model for an agent
 

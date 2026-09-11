@@ -566,6 +566,47 @@ def _gate_rows(arts: list[list[str]]) -> dict[str, str]:
     return seen
 
 
+# `Open` holds what is still open (protocol/orchestrator.md § 1). A row that has
+# been absorbed moves to `## Closed`; resolved is not a state a row sits in.
+# Prose was not enough to hold that: the rule was superseded in v0.4.2 and two
+# files went on instructing the old one, so a run could follow the documented
+# procedure and still grow the table without bound - which is the cost the
+# correction was made to stop, every row being re-read on every ledger update.
+OPEN_STATES = {"OPEN", "CARRIED"}
+RESOLVED_STATES = {"ABSORBED", "CLOSED"}
+
+
+def check_open_table(ledger: Path) -> list[str]:
+    """No row sits in `Open` in a state that means it should have left.
+
+    Judged on the leading token, not the whole cell. Real ledgers qualify these
+    - `ABSORBED by 06`, `CARRIED - deferred code nit` - and a `CARRIED` row is
+    *supposed* to carry its reason to the human at close-out. Demanding a bare
+    enum here would fail rows that are doing exactly what the protocol asks.
+    """
+    rows = _ledger_table(ledger.read_text(encoding="utf-8"), "Open")
+    problems = []
+    for row in rows:
+        if len(row) < 5:
+            continue
+        cell = row[4].strip()
+        if not cell:
+            continue
+        head = re.split(r"[^A-Za-z]", cell.upper(), 1)[0]
+        if head in OPEN_STATES:
+            continue
+        ref = row[2].strip() or row[1].strip() or "?"
+        if head in RESOLVED_STATES:
+            problems.append(f"`Open` row {ref} is {head} - a resolved row moves "
+                            f"to `## Closed` with the dispatch that absorbed "
+                            f"it; leaving it here is what grows the table")
+        else:
+            problems.append(f"`Open` row {ref} has state {cell!r} - "
+                            f"{sorted(OPEN_STATES)} are the states a row can "
+                            f"still be open in")
+    return problems
+
+
 def check_gates(ledger: Path) -> list[str]:
     """Every gate either ran and is recorded, or is accounted for as skipped.
 
@@ -692,7 +733,8 @@ def main(argv: list[str]) -> int:
     failed = False
 
     # Close-out also validates the ledger itself: the `gates:` line has to
-    # account for all three delivery gates. It is checked here rather than in
+    # account for all three delivery gates, and `Open` has to hold only rows
+    # that are still open. It is checked here rather than in
     # its own script because close-out is the only moment the answer is knowable
     # and the only moment anyone runs a sweep - a check with its own command is
     # a check that gets skipped.
@@ -701,14 +743,14 @@ def main(argv: list[str]) -> int:
         if not ledger.is_file():
             print(f"  ~ no run.md in {target} - `gates:` not checked")
         else:
-            gate_problems = check_gates(ledger)
-            if gate_problems:
+            ledger_problems = check_gates(ledger) + check_open_table(ledger)
+            if ledger_problems:
                 failed = True
                 print(f"FAIL {ledger}")
-                for g in gate_problems:
+                for g in ledger_problems:
                     print(f"  - {g}")
             else:
-                print(f"ok   {ledger} (gates)")
+                print(f"ok   {ledger} (gates, open)")
 
     for f in files:
         notes: list[str] = []

@@ -17,13 +17,10 @@ validator.
 
 ## Your extension — read exactly one, or none
 
-| Your role | Also read |
-|---|---|
-| orchestrator (main session) | `protocol/orchestrator.md` — ledger, relay rule, reading discipline |
-| `tech-lead`, `reviewer`, `quant-analyst` | `protocol/gates.md` — verdicts, gate independence, change requests |
-| `docs-engineer`, on a close-out order | `protocol/packs.md` — applying `pack_corrections` |
-| every other lane | nothing else |
-| authoring a new agent or pack | `protocol/authoring.md` |
+Which one is yours is the table at the top of `PROTOCOL.md`, and only there. It
+is not repeated here: a routing table with two copies sends some lane to the
+wrong extension the first time the copies drift, and the lane cannot tell,
+because a missing row reads exactly like "nothing else".
 
 The core and the extensions are **disjoint**. No rule appears in two of them, so
 reading only yours loses nothing — and reading one that is not yours costs

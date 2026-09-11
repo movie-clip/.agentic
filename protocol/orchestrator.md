@@ -172,9 +172,9 @@ not discipline, is what keeps an artifact small.
 
 So: **one row per item, five columns, `one-line` under 120 characters.** If an
 item needs more than that, the detail is already in the artifact `ref` points
-at — the row is a pointer, not a record. `state` is `OPEN`, `ABSORBED` (a
-downstream order carried it) or `CARRIED` (surfaced to the human at close-out).
-Nothing leaves the table by being deleted; it changes `state`.
+at — the row is a pointer, not a record. `state` is `OPEN` or `CARRIED`
+(surfaced to the human at close-out); an absorbed row is not a state, it is a
+row that has moved to `## Closed`.
 
 ### Two field rules
 
@@ -210,15 +210,24 @@ open only that part:
 sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/04-backend.md
 ```
 
-**Planning artifacts are read by their brief.** `04-stories.md` and
-`05-technical-plan.md` ran to 546 and 454 lines in the first full run — half of
-all artifact volume — and were read end to end to extract roughly thirty lines
-of routing decisions. Every such artifact now opens with a `## Orchestrator
-brief` of at most 15 lines. Read the brief. Read the sections the brief names,
-if you need them. Do not read the document.
+**Planning artifacts are read by their brief.** `product`, `design`, `story` and
+`quant` RESEARCH produce artifacts far longer than the report block — in the
+first full run the stories and the technical plan came to 1,000 lines, half of
+all artifact volume, read end to end to extract roughly thirty lines of routing
+decisions. Every such artifact opens with a `## Orchestrator brief` of at most
+15 lines. Read the brief. Read the sections the brief names, if you need them.
+Do not read the document.
+
+**This is safe because the brief is checked for completeness, not just length.**
+`check_report.py` fails an artifact whose brief does not name every section
+below it. Reading all 546 lines is what used to guarantee you saw every story;
+the check is what guarantees it now, so routing from a brief the validator has
+not passed gives you neither guarantee.
 
 The sections you skip are not lost — they reach the lane that needs them as an
-`inputs` path, which is the entire point of the relay rule.
+`inputs` path with a `§ section` suffix, which is the entire point of the relay
+rule: you can name a section of a plan you have not read yourself, and the
+engineer who needs it reads the specialist's own words rather than your summary.
 
 ### Validate every artifact, derive every head
 
@@ -227,8 +236,8 @@ lane, whether or not that lane has `Bash`.** Where the head comes from is the
 only thing that varies:
 
 - **A lane returned a head** — transcribe it verbatim into `<run_dir>/<nn>-head.txt`
-  and validate it against the artifact with `--head` (Step 1 of the skill's
-  after-each-head sequence). Transcribing is not deriving: the file is a copy of
+  and validate it against the artifact with `--head`. Transcribing is not
+  deriving: the file is a copy of
   a claim until the script has measured it against the document.
 - **A lane returned no head, or the check rejects the one it did** — derive it:
 
@@ -255,14 +264,11 @@ it. Writing `<nn>-head.txt` and moving on without running the validator is the
 same omission as not writing the file at all — you have recorded the claim and
 skipped the measurement.
 
-The alternative was tried and it is expensive. The shell-less lanes' agent files
-used to say "check the block against `PROTOCOL.md` § 3 by eye", which asks a
-model to count list items and slice a string to an exact length. Across the
-closed runs those three lanes returned a mismatched head 11 times, and each one
-cost a full artifact read — the read the head exists to avoid. A head cost one
-Bash call to derive the whole time. Lanes that *have* `Bash` are not exempt from
-that arithmetic: § 4 of the core measures 26 of 59 heads disagreeing with their
-own artifact **in every lane but one, whether or not that lane had a shell.**
+Checking a head by eye is the alternative, and it does not work: it asks a model
+to count list items and slice a string to an exact length. A mismatch costs a
+full artifact read — the read the head exists to avoid — where deriving one
+costs a single Bash call. That arithmetic does not change for a lane that has a
+shell, which is why this applies to all of them.
 
 **If a head is missing, malformed, or its counts disagree with the artifact**,
 that lane is not closed. From a shell-less lane, derive it as above and carry

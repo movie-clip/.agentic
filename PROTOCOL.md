@@ -4,7 +4,7 @@
 
 # Agentic protocol — core
 
-Version 0.4. Read this in full. It is short on purpose.
+Read this in full. It is short on purpose.
 
 Then read **your extension**, and only yours:
 

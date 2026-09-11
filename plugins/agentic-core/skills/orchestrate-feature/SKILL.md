@@ -338,28 +338,9 @@ After each head:
    Send it back with the script's output as the input, and do not route
    `contract_notes` out of a report that failed the check.
 
-   **The `--head` half is not optional.** Without it you are trusting a summary
-   the agent wrote about its own work, which is the thing this network exists
-   not to do. It is the only defence against a head that undercounts — and an
-   undercount does not fail loudly, it silently drops work you never learn
-   existed. If a lane returned no head, that lane is not closed: re-dispatch it,
-   or derive one yourself with `--emit-head` — the standing step for the three
-   Bash-less lanes, and available to you for any lane, at one command.
-
-   **This step runs for every lane, not only the shell-less three.** A lane that
-   has `Bash` was *told* to validate its own artifact; that is not evidence that
-   it did, and a skipped self-check returns a head that looks exactly like a
-   passed one. Run 2026-09-09-risk-annualized-volatility validated only the two
-   shell-less lanes and hand-transcribed heads for `producer` and
-   `quant-analyst` — so `01-delivery-brief.md` and `02-quant-research.md` were
-   routed from, and a story was drafted on top of them, with the validator never
-   once run against either file.
-
-   **Reading the artifact instead does not close the lane.** That escape was in
-   this step for one run and became the default for four: 2026-08-31 through
-   2026-09-03 saved no head at all, and the close-out sweep now fails on it
-   (Step 10). Reading is what you do *in addition*, when you doubt a head that
-   validated — not instead of the check that would have told you to.
+   `protocol/orchestrator.md` § 2 "Validate every artifact, derive every head"
+   is the rule: every dispatch, every lane, `Bash` or not, and what to do when
+   a head is missing or rejected. It is not restated here.
 
 2. **Read the status and the `detail` honestly.** `PARTIAL` and `BLOCKED` are
    information. Do not proceed as though a lane succeeded because the next lane
@@ -391,10 +372,11 @@ After each head:
    under 120 characters, detail left in the artifact the row points at.
 
 5. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
-   naming the path and the section. Keep each one under **Open** with
-   `state: OPEN` until a downstream order absorbs it, then flip it to
-   `ABSORBED`. An unabsorbed contract note is shipped inconsistency. If no
-   downstream order exists to absorb one, create it.
+   naming the path and the section. Keep each one under **Open** until a
+   downstream order absorbs it, then move the row to **Closed** — the table
+   rules are in `protocol/orchestrator.md` § 1. An unabsorbed contract note is
+   shipped inconsistency. If no downstream order exists to absorb one, create
+   it.
 
 6. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
    arrive. They are the docs lane's close-out order.
@@ -409,25 +391,10 @@ After each head:
 
 ### Planning lanes return documents — read their brief, not the document
 
-`product`, `design`, `story` and `quant` RESEARCH produce artifacts far longer
-than the report block. Every such artifact opens with a `## Orchestrator brief`
-of at most 15 lines, and the validator enforces it.
-
-**Read the brief. Read a named section if you need it. Do not read the
-document.** In the first full run, `04-stories.md` and `05-technical-plan.md`
-came to 1,000 lines — half of all artifact volume — and were read end to end to
-extract about thirty lines of routing decisions.
-
-This is safe only because the brief is checked for **completeness**, not just
-length: `check_report.py` fails an artifact whose brief does not name every
-section below it. Reading 546 lines is what used to guarantee you saw every
-story; the check is what guarantees it now. If you ever route from a brief the
-validator has not passed, you have neither guarantee.
-
-The sections you skip are not lost. They reach the lane that needs them as an
-`inputs` path with a `§ section` suffix, which is what the relay rule is for:
-you can name a section of a plan you have not read yourself, and the engineer
-who needs it reads the tech lead's own words rather than your summary of them.
+`product`, `design`, `story` and `quant` RESEARCH return documents, not report
+blocks. Read the `## Orchestrator brief` and the sections it names; do not read
+the document. Why that is safe, and what the validator guarantees about a brief,
+is `protocol/orchestrator.md` § 2.
 
 ## Step 7 — Quant audit, before the engineering gate
 
@@ -495,8 +462,9 @@ a closed run has been missing:
 - [ ] **`gates:` accounts for all three** — `quant-audit`, `integration`,
       `review` — each with its verdict or `skipped` and why. Two runs closed
       without an acceptance gate; one said nothing about it anywhere.
-- [ ] **Every `Open` row is `ABSORBED`, `CLOSED`, or deliberately `CARRIED`** —
-      a `CARRIED` row is a handoff to the human and belongs in your report.
+- [ ] **Every remaining `Open` row is deliberately `CARRIED`** — everything
+      absorbed has moved to `Closed`, and a `CARRIED` row is a handoff to the
+      human that belongs in your report.
 - [ ] **The docs close-out order actually ran**, scoped to the contract notes,
       `pack-corrections.md`, **and** `docs/product/` — the epic's own record
       included. Epic 40 got no PRD because the order fenced that directory out,
@@ -537,14 +505,11 @@ Then set `run.md` `status: CLOSED` and report to the user:
 
 **You never commit.** The repo's mechanical gates own that boundary.
 
-**And you never offer to do a lane's work yourself.** When a brief resolves into
-"write two debt-register entries" or "reconcile four docs", those are `docs`
-lane orders — dispatch them. Offering to do it directly is how the isolation
-erodes: it always looks cheaper in the moment, and the work lands without a
-pack, without a scope fence, and without a report anything downstream can read.
-
-The same applies to reaching for a repo skill the profile marks as superseded.
-If the routing table names an agent for a job, that agent does the job.
+**And close-out is where you will be offered the last chance to do a lane's work
+yourself** — a brief that resolves into "write two debt-register entries" or
+"reconcile four docs" is a `docs` order, not a favour. `protocol/orchestrator.md`
+§ 5 says why. The same applies to reaching for a repo skill the profile marks as
+superseded: if the routing table names an agent for a job, that agent does it.
 
 ## Degrading gracefully
 

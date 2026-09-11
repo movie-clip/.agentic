@@ -414,6 +414,54 @@ _ok = _gates("quant-audit PASS · integration skipped (express route) · "
              "review skipped (no story to accept)")
 check("skipping a gate on purpose is clean", _ok == [], str(_ok))
 
+# `Open` holds what is still open. The rule changed in v0.4.2 and two files went
+# on instructing the superseded one, so prose alone did not hold it.
+_OPEN_HEAD = "\n## Open\n| kind | from | ref | one-line | state |\n|---|---|---|---|---|\n"
+
+
+def _open(rows):
+    """Problems reported for an `## Open` table holding `rows`."""
+    d = Path(tempfile.mkdtemp())
+    (d / "run.md").write_text(LEDGER + _OPEN_HEAD + "".join(rows),
+                              encoding="utf-8")
+    return cr.check_open_table(d / "run.md")
+
+
+_still = _open(["| contract_note | 04-backend | schemas/h.py | lags | OPEN |\n",
+                "| should_fix | CR-2 | cr/CR-2.md | untested | CARRIED |\n"])
+check("OPEN and CARRIED are the states `Open` is for", _still == [], str(_still))
+
+_absorbed = _open(
+    ["| contract_note | 04-backend | schemas/h.py | lags | ABSORBED |\n"])
+check("an ABSORBED row left in `Open` is caught",
+      any("moves to `## Closed`" in x for x in _absorbed), str(_absorbed))
+
+# The states real ledgers actually write. Judged on the leading token, because
+# a CARRIED row is supposed to carry its reason to the human at close-out.
+_qualified = _open(
+    ["| contract_note | 05-plan | 06-backend.md | landed | ABSORBED by 06 |\n",
+     "| debt | 09 + 12 | risk.py:2120 | pre-existing | CARRIED - out of scope |\n"])
+check("a qualified ABSORBED is caught and a qualified CARRIED is not",
+      len(_qualified) == 1 and "ABSORBED" in _qualified[0], str(_qualified))
+
+# The close-out checklist invented this one; no file ever defined it, and the
+# one closed v0.5.x run used it for rows a gate had resolved.
+_bogus = _open(["| risk | 06-backend | 10-integration.md | ok | CLOSED (noted) |\n"])
+check("a resolved row written as CLOSED is caught too",
+      any("is CLOSED" in x for x in _bogus), str(_bogus))
+
+_unknown = _open(["| partial | 06-frontend | 06-frontend.md | unwired | PENDING |\n"])
+check("a state no file defines is caught",
+      any("'PENDING'" in x for x in _unknown), str(_unknown))
+
+check("an empty `Open` table is clean", _open([]) == [], str(_open([])))
+
+_d = Path(tempfile.mkdtemp())
+(_d / "run.md").write_text(LEDGER, encoding="utf-8")
+_no_table = cr.check_open_table(_d / "run.md")
+check("a ledger with no `Open` table at all is clean",
+      _no_table == [], str(_no_table))
+
 # Wired into the sweep, not just importable: the close-out command is the only
 # one anybody runs, so a check reachable only from Python is a check nobody runs.
 _run = Path(tempfile.mkdtemp())
@@ -424,8 +472,8 @@ _proc = subprocess.run(
     [sys.executable, str(Path(cr.__file__)), str(_run), "--require-heads"],
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
-check("and the sweep says it checked the gates",
-      "(gates)" in _proc.stdout, _proc.stdout)
+check("and the sweep says it checked the gates and the open table",
+      "(gates, open)" in _proc.stdout, _proc.stdout)
 
 (_run / "run.md").write_text(
     LEDGER.replace(" · review skipped (none)", ""), encoding="utf-8")

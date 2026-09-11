@@ -36,7 +36,8 @@ Three self-checks, and none of them is optional:
 **Before your first `Edit` or `Write` to any file in the bound repo — stop.**
 That edit belongs to a lane. There is no size below which this stops being true;
 "it is only one line in a doc" is exactly how the first no-op justified itself.
-The only files you write are `run.md` and `pack-corrections.md` in the run dir.
+The only files you write are `run.md`, `decisions.md` and `pack-corrections.md`
+in the run dir.
 
 **Before stating a conclusion, ask whose it is.** "This is one unit of work,
 not three." "These four are duplicates of what's already tracked." "This
@@ -281,6 +282,18 @@ findings file with its own numbering is invisible to every later story, and to
 the lane that next checks whether something is already known. The profile names
 where they go; follow it rather than inventing an artifact.
 
+### Every human stop ends by writing the ruling down
+
+Before the next dispatch, append what the human decided to
+`<run_dir>/decisions.md` — the ruling in **their words**, the artifact and
+section that raised it, and the phase it unblocked. Then name
+`decisions.md § D-<n>` in the `inputs` of every order that depends on it.
+
+`orchestrator.md` § 5 is the rule and the shape. The short version: a lane that
+receives your restatement of a human decision is working from a paraphrase, and
+that is the one thing the relay rule exists to prevent. It is also the only
+part of the run that does not otherwise survive a compaction.
+
 ### `framing` — the verdict is the human's
 
 A request that arrives as "add X" is a request to change the plan, and the plan
@@ -291,15 +304,23 @@ reason, that is usually the whole answer.
 When you are unsure whether this phase fires, it fires. One extra dispatch is
 cheaper than work with no place in the plan.
 
-### `specification` — the one hard stop
+### `specification` — the one hard stop, when it fires
 
-Hand the draft to the user and wait. Acceptance criteria are the contract
-everything downstream is measured against; a slice built from criteria nobody
-reviewed cannot be verified, only described. The lane drafts — the human
-approves.
+**Check the trigger before you dispatch.** The profile's `story` row is narrower
+than `framing`'s: a slice that is one build lane, crosses no contract and
+touches no mathematics is already specified by the delivery brief the human
+approved, and drafting a story for it spends a dispatch and a second human stop
+restating a decision already made. Record the row `not triggered` with the
+clause, and expect `review` not to fire either.
+
+When it does fire, hand the draft to the user and wait. Acceptance criteria are
+the contract everything downstream is measured against; a slice built from
+criteria nobody reviewed cannot be verified, only described. The lane drafts —
+the human approves.
 
 **Every open decision the specification lanes escalated must be resolved by the
-user before the next dispatch.** They come back reproduced as open; proceeding
+user before the next dispatch, and written into `decisions.md`.** They come back
+reproduced as open; proceeding
 while one is unresolved makes the decision by omission.
 
 Nothing writes to the plan's own index at this stage — that records what
@@ -395,6 +416,9 @@ Before you set `status: CLOSED`, walk the ledger once:
       a resumed session reads, every `## Phases` row, `spent` against the
       dispatches on disk, the `gates:` line against the gates **the profile
       declares**, and the `Open` table.
+- [ ] **Every human stop the run passed has an entry in `decisions.md`** —
+      and every order that depended on one named it in `inputs`. The sweep
+      fails a satisfied human-stop phase with no decisions file.
 - [ ] **`next:` says `none — CLOSED`**, so a resumed session does not
       re-dispatch a lane that already ran.
 

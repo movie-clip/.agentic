@@ -19,6 +19,7 @@ Every slice gets a directory:
 ```
 <agenticRoot>/projects/<project>/runs/<YYYY-MM-DD>-<slug>/
   run.md                        the ledger
+  decisions.md                  what the human ruled at each stop, in their words
   01-recon.md                   lane reports, numbered in dispatch order
   02-product.md
   03-design.md
@@ -539,6 +540,41 @@ document its order actually depends on, and it is the mechanism that lets you
 name a section of a plan you have not read yourself.
 
 The one exception: `goal` and `non_goals` are your own words, and should be.
+
+### The human's ruling is a path too
+
+Every judgment in a run reaches the lane that needs it as a file — except the
+most consequential one. A human stop produces a decision in the chat, and the
+chat is not a path, so it reaches the next lane the one way the relay rule
+forbids: as your restatement of it.
+
+`2026-09-11` is what that costs. The story lane's own `risks` block: *"this
+story assumes the work order's framing of the human's ruling is accurate — I did
+not see a separate signed ruling document, only the work order's own restatement
+of the producer's brief's two open items as resolved."* The lane was right to
+flag it, had no way to check it, and drafted against a paraphrase anyway.
+
+So **write the ruling down before the next dispatch**, in
+`<run_dir>/decisions.md`:
+
+```markdown
+# Decisions — <run-id>
+
+## D-1 · framing · 2026-09-11
+open decision:  epic placement — new Risk-tab epic, or Backlog sibling?
+raised by:      02-delivery-brief.md § Open decisions (a)
+ruling:         "no epic, keep it a one-off toggle"
+by:             the human, in session
+```
+
+One entry per decision the human actually resolved, the ruling in **their
+words**, and the artifact and section that raised it. Then every downstream
+order names `decisions.md § D-1` in `inputs`, the same as any other input.
+
+This costs a paragraph per stop and closes the last place where a lane works
+from your summary of someone else's judgment. It is also the only record that
+survives the session: a run resumed after a compaction has the ledger, the
+artifacts and — without this — no idea what the human said.
 
 ---
 

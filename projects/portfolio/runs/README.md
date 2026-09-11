@@ -10,6 +10,17 @@ paraphrase.
 
 Shape and rules: `../../../protocol/orchestrator.md` § 1 "The run ledger".
 
-Runs are committed. A closed run is the record of why the code looks the way it
-does — which gates ran, what was requested and refused, which pack premises
-turned out to be false. That is worth more than the disk it costs.
+## Retention
+
+Runs are committed, and **closed runs are pruned once what they taught is in the
+protocol.** A run earns its disk while it is open, while its work is
+uncommitted, or while it is the evidence for a change not yet made. After that
+it is a transcript of a decision already encoded in `PROTOCOL.md`,
+`protocol/`, the profile or a capability pack — and a reader who needs it can
+get it from git history.
+
+So: **cite a pruned run by its id, never by a path.** `ARCHITECTURE.md` names
+run ids as provenance for every version entry and opens none of them; that is
+the durable form. A capability pack or a protocol file that tells a lane to
+*read* a run artifact has a dangling reference the moment that run is pruned,
+and the claim it was supporting has to stand on its own instead.

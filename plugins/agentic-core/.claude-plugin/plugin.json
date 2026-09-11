@@ -1,6 +1,6 @@
 {
   "name": "agentic-core",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Orchestrated agent network for vertical-slice delivery: works out which phases a request actually needs, then dispatches focused specialist subagents one at a time against a run ledger, with review gates.",
   "author": {
     "name": "movie-clip"

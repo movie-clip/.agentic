@@ -480,8 +480,8 @@ _proc = subprocess.run(
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
 check("and the sweep says which ledger checks it ran",
-      "(header, phases, budget, gates, open, authoring)" in _proc.stdout,
-      _proc.stdout)
+      "(header, phases, budget, decisions, gates, open, authoring)"
+      in _proc.stdout, _proc.stdout)
 
 # The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
 # close-out pack-corrections dispatch is an authoring order - the only order in
@@ -669,6 +669,61 @@ check("a ledger with no phase table has no budget to check",
       cr.check_budget(_d2 / "run.md") == [])
 check("the derivation after the number does not confuse it",
       cr._leading_int("7 — 5 triggered phases + 2 gates") == 7)
+
+print("a human stop the run passed leaves the ruling on disk")
+
+_STOP_PROFILE = """# Project profile: `demo`
+
+## Phases
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| framing | 1 | product | the request changes what the product does | **yes** |
+| build | 1..n | frontend | anything that edits the repo | — |
+| verify | 1 | integration | any build lane was dispatched | — |
+
+## Lane routing
+"""
+
+_STOP_TABLE = """
+## Phases
+| phase | lane | fires when | state |
+|---|---|---|---|
+| framing | product | the request changes what the product does | satisfied — 01 |
+| build | frontend | anything that edits the repo | satisfied — 02 |
+"""
+
+
+def _decisions(table=_STOP_TABLE, decisions=None, profile=_STOP_PROFILE):
+    """Problems for a run whose profile declares a human stop on `product`."""
+    droot = Path(tempfile.mkdtemp())
+    ddir = droot / "projects" / "demo" / "runs" / "2026-01-01-x"
+    ddir.mkdir(parents=True)
+    (droot / "projects" / "demo" / "project.md").write_text(
+        profile, encoding="utf-8")
+    body = LEDGER.replace("route:        full",
+                          "route:        full\nproject:      demo") + table
+    (ddir / "run.md").write_text(body, encoding="utf-8")
+    if decisions is not None:
+        (ddir / "decisions.md").write_text(decisions, encoding="utf-8")
+    return cr.check_decisions(ddir / "run.md")
+
+
+check("a stop passed with no decisions.md is caught",
+      any("no decisions.md" in x for x in _decisions()), str(_decisions()))
+_ok = _decisions(decisions="# Decisions\n\n## D-1 · framing\nruling: no epic\n")
+check("and writing the ruling down settles it", _ok == [], str(_ok))
+_blank = _decisions(decisions="\n  \n")
+check("an empty decisions.md does not count",
+      any("no decisions.md" in x for x in _blank), str(_blank))
+_notrig = _decisions(table=_STOP_TABLE.replace(
+    "satisfied — 01", "not triggered (defect in shipped behaviour)"))
+check("a stop the run never reached owes nothing", _notrig == [], str(_notrig))
+_nostop = _decisions(profile=_STOP_PROFILE.replace("**yes**", "—"))
+check("a project declaring no stop is not asked for one",
+      _nostop == [], str(_nostop))
+check("and an unresolvable profile cannot be judged on it",
+      cr.check_decisions(_d2 / "run.md") == [])
 
 print("the gate set comes from the project profile, not this script")
 

@@ -715,16 +715,19 @@ def _verify_lanes(profile: str) -> tuple[str, ...]:
     return tuple(lanes)
 
 
-def profile_gates(ledger: Path) -> tuple[str, ...]:
-    """The gates this run's project declares, or the fallback set.
+def _stop_lanes(profile: str) -> set[str]:
+    """Lanes whose phase carries a human stop, from the profile's last column."""
+    stops = set()
+    for row in _ledger_table(profile, "Phases"):
+        if len(row) < 5:
+            continue
+        if "yes" in row[4].strip().lower():
+            stops.add(row[2].strip().lower())
+    return stops
 
-    Two ways to the profile, both cheap. The ledger names `project:` and
-    `agentic_root:`, which is the explicit route; and a run dir living at
-    `<agenticRoot>/projects/<project>/runs/<run-id>/` knows its own profile from
-    its path, which is the route that survives a ledger missing the field.
-    Neither existing is not an error - the fallback is a real set, and a script
-    that refuses to run without a profile is a script the close-out skips.
-    """
+
+def _profile_text(ledger: Path) -> str | None:
+    """This run's project profile, or None if it cannot be resolved."""
     text = ledger.read_text(encoding="utf-8")
     root = _ledger_field(text, "agentic_root")
     project = _ledger_field(text, "project")
@@ -735,11 +738,27 @@ def profile_gates(ledger: Path) -> tuple[str, ...]:
     for cand in candidates:
         try:
             if cand.is_file():
-                lanes = _verify_lanes(cand.read_text(encoding="utf-8"))
-                if lanes:
-                    return lanes
+                return cand.read_text(encoding="utf-8")
         except OSError:
             continue
+    return None
+
+
+def profile_gates(ledger: Path) -> tuple[str, ...]:
+    """The gates this run's project declares, or the fallback set.
+
+    Two ways to the profile, both cheap. The ledger names `project:` and
+    `agentic_root:`, which is the explicit route; and a run dir living at
+    `<agenticRoot>/projects/<project>/runs/<run-id>/` knows its own profile from
+    its path, which is the route that survives a ledger missing the field.
+    Neither existing is not an error - the fallback is a real set, and a script
+    that refuses to run without a profile is a script the close-out skips.
+    """
+    profile = _profile_text(ledger)
+    if profile:
+        lanes = _verify_lanes(profile)
+        if lanes:
+            return lanes
     return DEFAULT_LEDGER_GATES
 
 
@@ -837,6 +856,49 @@ def check_phases(ledger: Path) -> list[str]:
                         f"`satisfied`, `pending`, or "
                         f"`not triggered (<clause>)`")
     return problems
+
+
+def check_decisions(ledger: Path) -> list[str]:
+    """A human stop the run passed leaves the ruling on disk, in their words.
+
+    The relay rule makes every judgment in a run a path, with one exception that
+    the rule never named: the human's. A decision made in the chat reaches the
+    next lane as the orchestrator's restatement of it, which is the exact shape
+    the relay rule exists to forbid - and `2026-09-11`'s story lane said so in
+    its own `risks`, having drafted against a paraphrase it could not check.
+
+    The profile says which phases carry a stop (its `Human stop` column), so
+    this needs no list of its own: a satisfied phase whose lane the profile
+    marks as a stop owes an entry in `decisions.md`.
+    """
+    profile = _profile_text(ledger)
+    if profile is None:
+        return []
+    stops = _stop_lanes(profile)
+    if not stops:
+        return []
+    text = ledger.read_text(encoding="utf-8")
+    passed = []
+    for row in _ledger_table(text, "Phases"):
+        if len(row) < 4:
+            continue
+        lane = row[1].strip().lower()
+        if lane in stops and _SATISFIED.match(row[3].strip()):
+            passed.append(lane)
+    if not passed:
+        return []
+    decisions = ledger.parent / "decisions.md"
+    try:
+        written = decisions.is_file() and decisions.read_text(
+            encoding="utf-8").strip()
+    except OSError:
+        written = False
+    if written:
+        return []
+    return [f"{sorted(set(passed))} carried a human stop and the run passed it, "
+            f"but there is no decisions.md - write what the human ruled, in "
+            f"their words, or the next lane works from your restatement of it "
+            f"and a resumed session has no record at all"]
 
 
 def check_budget(ledger: Path) -> list[str]:
@@ -1000,8 +1062,8 @@ def main(argv: list[str]) -> int:
             print(f"  ~ no run.md in {target} - `gates:` not checked")
         else:
             ledger_problems = (check_header(ledger) + check_phases(ledger)
-                               + check_budget(ledger) + check_gates(ledger)
-                               + check_open_table(ledger)
+                               + check_budget(ledger) + check_decisions(ledger)
+                               + check_gates(ledger) + check_open_table(ledger)
                                + check_authoring_gate(target))
             if ledger_problems:
                 failed = True
@@ -1009,8 +1071,8 @@ def main(argv: list[str]) -> int:
                 for g in ledger_problems:
                     print(f"  - {g}")
             else:
-                print(f"ok   {ledger} "
-                      f"(header, phases, budget, gates, open, authoring)")
+                print(f"ok   {ledger} (header, phases, budget, decisions, "
+                      f"gates, open, authoring)")
 
     for f in files:
         notes: list[str] = []

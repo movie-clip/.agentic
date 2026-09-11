@@ -173,9 +173,10 @@ All ten roles live, each with a capability pack for `portfolio`.
 **One shape of run is validated.** A `review` run (health-review fold-in) went through
 end to end on 2026-08-20: skill loaded, banner printed, ledger written, two
 lanes dispatched, zero repo edits by the orchestrator, both artifacts conforming
-to Shape 2 on first contact, stopped correctly at the human gate. Its ledger and
-artifacts are in `projects/portfolio/runs/2026-08-20-health-review-fold-in/` — read them before
-changing the protocol, they are the only ground truth this design has.
+to Shape 2 on first contact, stopped correctly at the human gate. That run has
+since been pruned; what it established is in `ARCHITECTURE.md`, and its
+artifacts are in git history. **The live ground truth is whatever is in
+`projects/<name>/runs/` now** — read that before changing the protocol.
 
 That run also produced the argument for the whole thing. The same request run
 *without* the network (v0.2.3, which silently no-op'd) took **25 minutes**,
@@ -203,6 +204,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | Every gate either ran or was skipped on purpose | **script** — `check_report.py <run_dir>/ --require-heads` checks the ledger's `gates:` line against the Artifacts rows at close-out. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. **Which gates are owed is read from the project profile's `## Phases` verify rows**, not from a list inside the script, so a second project is not measured against this one's. It cannot tell you a skip was *wise*. |
 | Every phase is accounted for before a run closes | **script** — `check_report.py <run_dir>/ --require-heads` fails a CLOSED ledger with a `pending` row, or a `not triggered` written without the clause that was false. Real, and added because the first run under the phase model closed with four `pending` rows against four completed dispatches and passed every check there was. |
 | `spent` is the dispatches that actually happened | **script** — the same sweep compares `spent` against the Artifacts rows. Real. It is what makes the failure the ledger exists to prevent — a dispatch nobody recorded — visible at all; a dispatch that returned nothing owes a `LOST` row rather than a gap. |
+| A human decision reaches the lane that needs it | **script** — the same sweep fails a run that passed a human stop the profile declares and left no `decisions.md`. Real. It checks that the ruling was written down, not that it was written down faithfully — but a paraphrase nobody can compare against the original was the actual failure, and that one is closed. |
 | A resumed session reads a coherent header | **script** — the same sweep checks `status` against its enum, `BLOCKED` against `blocked_on`, and a `CLOSED` run against a `next:` that still names a dispatch. Real. |
 | A run's cost matches what the route promised | nothing, by choice. `run_cost.py` re-derived a `Cost` block from the rows until v0.5.7; the tally was never read, so the block and the script went. The `model` column stays — it is one fact per dispatch, written when the row is. |
 | Every lane runs on a chosen model | **agent frontmatter** — all eleven pinned explicitly, no `inherit`. Real. |
@@ -213,7 +215,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
 | A work order's factual claims are true | prose only — `orchestrator.md` § 6 requires every claim in an order to be something the orchestrator read this turn or something a path in `inputs` says, and needing one with neither is the `ground-truth` trigger. Nothing checks it; the first run under the phase model asserted a file existed that never had. |
-| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 143 cases. Real, and it exists because a review pass found six bugs in the validator. |
+| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 149 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | The hooks do what they claim | **tests** — `scripts/hooks/test_hooks.py`, 20 cases, each driving the hook the way Claude Code does: a JSON payload on stdin, a decision in the exit code. Real. What it cannot pin is that the hooks are *installed* — that lives in the bound repo's `.claude/settings.json`, and an uninstalled hook is silent. The close-out sweep is the backstop. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six lanes, narrowly (`reviewer` gets nothing that mutates). **Not yet exercised by a run** — the tools are tested, the lanes using them are not. |

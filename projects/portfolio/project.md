@@ -128,7 +128,7 @@ copies it into the run ledger at intake and records a verdict beside every row.
 | ground-truth | 1 | recon | the area is unfamiliar, or the run would otherwise build on an unverified claim — a bug report, a findings doc, a "this number looks wrong" | — |
 | framing | 1 | product | the request changes what the product does: a new capability, new scope, or a re-prioritisation | **yes** — the brief is relayed and the verdict is the human's |
 | specification | 1 | quant (RESEARCH) | the work introduces or changes a metric, formula, weighting, return basis or trust classification | — |
-| specification | 2 | story | framing produced scope that no approved, ticketed story covers | **yes** — the one hard stop |
+| specification | 2 | story | framing produced scope that no approved, ticketed story covers, **and** the slice needs ticketing — more than one build lane, a contract crossing, or mathematics | **yes** — the one hard stop |
 | design | 1 | design | the change crosses a contract boundary, or more than one build lane touches it | — |
 | build | 1..n | backend, frontend, test | anything that edits the repo. One order per lane: contracts before consumers, implementation before tests | — |
 | verify | 1 | quant-audit | any lane touched `analytics/`, a formula, a weighting, a return basis or a trust label | — |
@@ -136,7 +136,16 @@ copies it into the run ledger at intake and records a verdict beside every row.
 | verify | 3 | review | the run carries a story whose acceptance criteria someone must accept | — |
 | close | 1 | docs | always — contract notes against `docs/`, and `pack-corrections.md` against `capabilities/` **when a lane emitted one** | — |
 
-### Three orderings that are not negotiable
+### Four orderings that are not negotiable
+
+**`ground-truth` before `framing`.** When both fire, recon's artifact is an
+`inputs` on the producer's order. Run the other way round, the producer
+establishes the facts itself and recon re-derives them — which is what happened
+on `2026-09-09`: the brief's own `risks` block conceded *"'Already covered'
+rests on claims I opened myself"*, the scout ran two dispatches later over the
+same territory, and it **contradicted the brief** (the Dashboard volatility path
+has no 20-observation floor; the brief said it did). Two dispatches, one of them
+wrong, and the correction surfaced only because a third lane read both.
 
 **`quant` RESEARCH before `story`.** The research brief is what makes acceptance
 criteria groundable. Written the other way round, the story states an outcome
@@ -153,6 +162,28 @@ implementation was built from is a consistency check, not an independent one.
 **`review` last.** It judges the story, not the code, and only once engineering
 coherence has passed — so a `FAIL` there is about acceptance rather than
 something `integration` would have caught anyway.
+
+### When the brief is the specification
+
+The `story` row's trigger is narrower than `framing`'s on purpose. A slice that
+is one build lane, crosses no contract and touches no mathematics does not need
+a ticketed story: the delivery brief already states the outcome, the slice
+boundary and what is out of scope, and the human approved it at the framing
+stop. Record the row as `not triggered (single-lane slice; the delivery brief in
+<nn> is the specification)`, and `review` does not fire either — its own clause
+asks for a story to accept, and there is none.
+
+The evidence is `2026-09-11`: a story of 28 lines and two tickets, carrying no
+contract notes, restating a brief the human had already approved. It was not
+wrong. It was a dispatch and a human stop spent re-stating a decision already
+made, and the `review` gate that followed judged acceptance criteria written
+from that restatement.
+
+**What still fires it, however small the change looks:** anything under
+`schemas/`, anything under `analytics/`, anything that adds or removes a field
+in `docs/contracts/<area>-fields.md`, and anything two build lanes touch. Those
+are the cases where "what does done mean" is a question the brief did not
+answer.
 
 ### What the gates run
 

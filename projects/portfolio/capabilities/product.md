@@ -223,3 +223,10 @@ call, and a brief that presents a new epic as settled removes them from it.
 - [ ] Any prior recorded decision the brief would reverse is surfaced, not overridden
 - [ ] Open decisions for the human listed explicitly
 - [ ] No story files written, no implementation specified
+- [ ] **Every claim about the code cited from a `recon` artifact named in your
+      `inputs`, or marked as unverified in `risks`** — you read the *plan*:
+      roadmap, stories, epics, the shipped-state inventory. Reading source files
+      to establish what the code does is the `recon` lane's dispatch, and when
+      you do it anyway the network runs it again and the two answers can
+      disagree. If the fact you need is not in an input, say which fact and let
+      the orchestrator dispatch for it.

@@ -473,7 +473,50 @@ _proc = subprocess.run(
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
 check("and the sweep says it checked the gates and the open table",
-      "(gates, open)" in _proc.stdout, _proc.stdout)
+      "(gates, open, authoring)" in _proc.stdout, _proc.stdout)
+
+# The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
+# close-out pack-corrections dispatch is an authoring order - the only order in
+# which a lane writes inside <agenticRoot> - and arriving inside a delivery run
+# is what excused it from the one gate that judges what it wrote.
+
+
+def _authoring(corrections, gates_line=None):
+    """Problems reported for a run dir holding this `pack-corrections.md`."""
+    d = Path(tempfile.mkdtemp())
+    body = LEDGER if gates_line is None else LEDGER.replace(
+        "quant-audit PASS · integration skipped (none) · "
+        "review skipped (none)", gates_line)
+    (d / "run.md").write_text(body, encoding="utf-8")
+    if corrections is not None:
+        (d / "pack-corrections.md").write_text(corrections, encoding="utf-8")
+    return cr.check_authoring_gate(d)
+
+
+check("no pack-corrections.md means no authoring gate is owed",
+      _authoring(None) == [], str(_authoring(None)))
+_BLANK = "\n \n"
+check("an empty pack-corrections.md owes nothing either",
+      _authoring(_BLANK) == [], str(_authoring(_BLANK)))
+
+_ENTRY = "- capabilities/product.md - the plan section is false\n"
+_unlinted = _authoring(_ENTRY)
+check("corrections with no protocol-lint in `gates:` is caught",
+      any("does not account for protocol-lint" in x for x in _unlinted),
+      str(_unlinted))
+
+_linted = _authoring(
+    _ENTRY,
+    "quant-audit PASS · integration skipped (none) · review skipped (none) · "
+    "protocol-lint PASS")
+check("naming the gate with a verdict satisfies it", _linted == [], str(_linted))
+
+_skipped = _authoring(
+    _ENTRY,
+    "quant-audit PASS · integration skipped (none) · review skipped (none) · "
+    "protocol-lint skipped (human reviewed the two-line edit directly)")
+check("deciding to skip it satisfies it too - a human decided",
+      _skipped == [], str(_skipped))
 
 (_run / "run.md").write_text(
     LEDGER.replace(" · review skipped (none)", ""), encoding="utf-8")

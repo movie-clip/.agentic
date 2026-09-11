@@ -86,9 +86,10 @@ services/quant-engine/app/
   importers/              broker parsers (IBKR, Freedom24, ESPP)
   tests/                  pytest suite
 docs/
-  product/prd/            one PRD per epic
-  product/stories/        one file per story
-  product/epic-roadmap.md            epic snapshot + slice log
+  product/planning.md     how stories/epics/roadmap work - read first
+  product/stories/        one file per story (frontmatter carries status)
+  product/epics/          optional grouping, one file per epic
+  product/ROADMAP.md                 GENERATED index - never hand-edited
   product/current-product-state.md   shipped-state inventory
   finance/financial-methodology.md   formula source of truth
   architecture/                       seams, routes, truth classes
@@ -101,7 +102,7 @@ docs/
 |---|---|
 | How is this computed? | `docs/finance/financial-methodology.md` |
 | What is shipped today? | `docs/product/current-product-state.md` |
-| Which epic is current? | `docs/product/epic-roadmap.md` — **the authority**; PRD pointers in CLAUDE.md go stale |
+| What work exists, and what state is it in? | `docs/product/ROADMAP.md` — **generated** from story frontmatter by `scripts/build_roadmap.py`, so it cannot be stale. The rules are in `docs/product/planning.md`. Epics are optional; most stories have none. |
 | Where does this field come from? | `docs/contracts/<area>-fields.md` |
 | What are the backend seams? | `docs/architecture/system-architecture.md` |
 | How does testing actually work? | `docs/architecture/testing-architecture.md` + `capabilities/testing.md` |
@@ -186,9 +187,9 @@ frontmatter) now opens "SUPERSEDED - do not use for implementation" and
 explicitly routes "build US-X.Y" / "pick up ticket T-..." / "implement the
 next story" to `orchestrate-feature`, so the trigger collision is closed at
 the skill itself. The residual prose that once told agents to run `build-story`
-in `docs/product/stories/README.md` and `docs/product/prd/README.md` has since
-been reconciled to `orchestrate-feature` / `write-story`, so the collision is
-now closed both at the skill and across the repo docs.
+lived in `docs/product/stories/README.md` and `docs/product/prd/README.md`,
+both deleted at commit `ce9c97d`, so the collision is now closed both at the
+skill and across the repo docs.
 
 **If `build-story` loads for a request that belongs to this network, stop and
 route to `orchestrate-feature` instead.** A slice built through it has no run

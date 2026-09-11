@@ -25,9 +25,8 @@ convention you never read is not.
 | The second close-out order: applying pack corrections | your order is a close-out pack-corrections order |
 | Step 1 — Read the story and the diff | your order is a story close-out |
 | Step 2 — Never tick an unsatisfied box | your order is a story close-out |
-| You own the roadmap and the index — nobody upstream does | your order is a story close-out |
-| Step 3 — The slice log | your order is a story close-out |
-| Step 4 — Contract docs | your order changes a contract doc |
+| You own the story's status field — nobody upstream does | your order is a story close-out |
+| Step 3 — Contract docs | your order changes a contract doc |
 
 ---
 
@@ -35,9 +34,10 @@ convention you never read is not.
 
 | Path | What lives there |
 |---|---|
-| `docs/product/stories/<story>.md` | status, ACs, tickets, last-updated |
-| `docs/product/stories/README.md` | story index with status column |
-| `docs/product/epic-roadmap.md` | epic snapshot table + slice log + epic header |
+| `docs/product/planning.md` | how stories/epics/roadmap work - read first |
+| `docs/product/stories/<story>.md` | frontmatter (`status:`, `closed:`), ACs, tickets |
+| `docs/product/epics/EP-<n>-<slug>.md` | optional epic grouping; most stories have none |
+| `docs/product/ROADMAP.md` | GENERATED index - never hand-edited |
 | `docs/product/current-product-state.md` | shipped-state inventory by tab/area |
 | `docs/finance/financial-methodology.md` | formula sections |
 | `docs/contracts/<area>-fields.md` | schema field tables (backend ↔ TS ↔ UI) |
@@ -47,11 +47,11 @@ convention you never read is not.
 
 The split is deterministic-vs-judgment, and it is not negotiable.
 
-**Auto:** story status → `Done`; `Last updated:` → today (ISO 8601); tick ACs and
-tickets that the reviewer marked satisfied; story index status; epic snapshot
-row; slice log entry; `current-product-state.md` entry; contract field table
-when fields were added or removed; epic Active → Completed when every story is
-done.
+**Auto:** story frontmatter `status: done` + `closed:` → today (ISO 8601); tick
+ACs and tickets that the reviewer marked satisfied; regenerate
+`docs/product/ROADMAP.md` with `python scripts/build_roadmap.py`;
+`current-product-state.md` entry; contract field table when fields were added
+or removed; an epic file's own `status:` when every story in it is done.
 
 **Flag for a human — methodology content you would have to compose.** If an
 order names a section of `financial-methodology.md` but leaves you to phrase the
@@ -77,12 +77,11 @@ fact. Across five dispatches that touched `financial-methodology.md`, five wrote
 it and none withheld — and the human accepted the content every time. The
 protection was real; where it was placed was not.
 
-**Auto (close-out only):** create the epic PRD file when none exists for a
-newly-closed epic, dated the day of closure — a retrospective record of what
-shipped, mirroring `docs/product/prd/epic-37-*.md`'s shape. This is distinct
-from any pre-implementation planning document story-authoring might produce;
-this project's convention treats the PRD as written after the epic closes, not
-before.
+**Never auto-create an epic file.** `docs/product/epics/` is optional grouping
+and most stories correctly have no epic at all (`planning.md` § The three
+artifacts). Opening one so a closed story has a parent is exactly the inflation
+the generated roadmap removed the incentive for. If a grouping genuinely
+belongs, say so in `handoff` and let the human open it.
 
 ## The second close-out order: applying pack corrections
 
@@ -145,41 +144,40 @@ If the reviewer marked any AC as `GAP` or `DRIFTED`, **abort and report**. The
 story is not done, and ticking its boxes makes it permanently look done. This is
 the one place where a docs error is unrecoverable by later inspection.
 
-## You own the roadmap and the index — nobody upstream does
+## You own the story's status field — nobody upstream does
 
-The story author does not touch `epic-roadmap.md` or `stories/README.md`, and
-neither does the producer. Those files record what **shipped**, so they are
-written here, at close-out, from the diff.
+The story author does not flip `status:`, and neither does the producer. That
+field records what **shipped**, so it is written here, at close-out, from the
+diff — together with `closed:`, which `build_roadmap.py` requires once the
+status is `done`.
 
-If you arrive and find a roadmap entry already exists for this story, that is a
-finding: someone upstream wrote an intention into a state record. Report it in
-`risks` and reconcile the entry against what actually shipped rather than
-assuming it is correct.
+If you arrive and find the story already marked `done`, that is a finding:
+someone upstream wrote an intention into a state record. Report it in `risks`
+and reconcile the field against what actually shipped rather than assuming it
+is correct.
 
-Watch for two specific corruptions this causes: an epic marked `Active` while
-its only story is still `Next phase`, and two epics marked active at once
-because a new section was inserted above a closed one without flipping it.
+**There is no separate index to update.** `docs/product/ROADMAP.md` is
+generated from these fields by `python scripts/build_roadmap.py`, and
+`run_all_tests.py` fails while it is stale. Regenerate it in the same edit and
+commit the result; do not hand-edit it.
 
-## Step 3 — The slice log
+**The slice narrative still gets written — into the story file, not the index.**
+The old `epic-roadmap.md` slice log recorded more than what shipped: premise
+corrections caught before implementing, defects the work surfaced, decisions
+deliberately not taken and why. That is the most valuable thing a close-out
+produces and it does not survive in a one-row generated table, so write it as a
+short delivered-block at the top of the story, the way
+`US-44.1-risk-tab-annualized-volatility.md` does: run id, lane outcomes, gate
+verdicts, suite counts, and what was found. Draft it from the diff and the run
+ledger; confirm the counts against the last verification run rather than
+recalling them.
 
-`epic-roadmap.md` slice entries in this project carry real narrative weight —
-read the existing ones before writing. They record not just what shipped but
-what was *found*: premise corrections caught before implementing, defects
-surfaced by the work, decisions deliberately not taken and why.
+The two corruptions the old hand-maintained roadmap produced — an epic marked
+active while its only story was not, and two epics active at once because a new
+section was inserted above a closed one — are now unreachable by construction:
+there is one status field per file and nothing restates it.
 
-Row form:
-
-```
-| YYYY-MM-DD | US-X.Y | <what shipped + test count delta> |
-```
-
-Test totals come from the last verification run. Draft the one-liner from the
-diff and the story; confirm with the user before writing.
-
-If every story in the epic is now done, flip
-`## Active Epic: Epic N — <title>` to `## Completed Epic: …`.
-
-## Step 4 — Contract docs
+## Step 3 — Contract docs
 
 For each schema change named in the backend lane's `contract_notes`, update
 `docs/contracts/<area>-fields.md`: the backend field, the TS type, the UI

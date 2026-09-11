@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-11-risk-summary-audit-foldable/10
+artifact:        C:\projects\investments\.agentic\runs\2026-09-11-risk-summary-audit-foldable\10-frontend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          exit_code 0, 0 failures reported.
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+risks:           2
+headline:        Requalified the risk-contribution-basis sentence so "Verified" no longer reads as unqualified; sectionTrustLabel untouched, tsc clean.

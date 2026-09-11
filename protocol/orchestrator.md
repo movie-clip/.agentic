@@ -40,7 +40,8 @@ blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
 next:         <the single next action, always current — see below>
 route:        recon | express | audit | review | story | full
 express:      yes | no
-gates:        <each of quant-audit, integration, review — verdict, or skipped and why>
+gates:        <quant-audit, integration, review — each a verdict, or skipped and
+              why; plus protocol-lint when pack-corrections.md is non-empty>
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |
@@ -86,19 +87,16 @@ The order matters because the two natural stopping points both come *after* the
 head and both feel like completion. You read the brief and you now know what to
 do next, so you go do it; or you tell the human what came back and the turn
 ends. Either way the dispatch happened, the artifact is on disk, and the ledger
-does not know. It happened in `2026-08-21-epic38-followups-and-etf`: the
-producer returned, the orchestrator validated its head, read its brief and
-reported it — and the Artifacts table still showed one row, while `next:` still
-said `awaiting 02-delivery-brief.md from producer`.
+does not know.
 
 That failure is quiet in a way the others are not. The artifact is fine; the
-work is fine; only the record is wrong, so nothing downstream complains until a
-resume re-dispatches a lane that already ran, or close-out reads a table that is
-missing rows. **Updating the ledger before a
-dispatch does not discharge this** — a pre-dispatch edit records intent, and
-intent is exactly what a stale ledger already has too much of.
+work is fine; only the record is wrong, so nothing complains until a resume
+re-dispatches a lane that already ran, or close-out reads a table missing rows.
+**Updating the ledger before a dispatch does not discharge this** — a
+pre-dispatch edit records intent, and intent is exactly what a stale ledger
+already has too much of.
 
-### `gates:` accounts for all three, including the ones you skipped
+### `gates:` accounts for every gate, including the ones you skipped
 
 ```
 gates:        quant-audit PASS · integration PASS · review skipped (no story to
@@ -107,32 +105,36 @@ gates:        quant-audit PASS · integration PASS · review skipped (no story t
 
 Name **every** gate, every run. A gate that ran carries its verdict, and the
 verdict must match its Artifacts row. A gate that did not run carries `skipped`
-and the reason. Neither `quant-audit` nor `review` is required by route alone —
-one waits on the substance being mathematical, the other on there being a story
-to accept — so a missing row is not by itself wrong. A missing row nobody
-*decided* on is.
+and the reason. None of them is required by route alone, so a missing row is not
+by itself wrong — **a missing row nobody *decided* on is.**
 
-Three, not the four in `gates.md`. `protocol-lint` gates authoring orders
-against the network's own files and has nothing to say about a run that changes
-the bound repo — a line that would read `skipped (not an authoring order)` every
-time is a line nobody reads.
+| Gate | Accountable on a run that |
+|---|---|
+| `integration` | dispatched a build lane |
+| `quant-audit` | changed mathematical substance — a formula, a derived number, a trust classification |
+| `review` | carries a story whose criteria someone must accept |
+| `protocol-lint` | left a non-empty `pack-corrections.md` |
 
-That is the failure this closes. `2026-08-24-sbio-still-unclassified-bug` ran
-DESIGN, four build lanes, an AUDIT that returned `FAIL`, a change request and an
-INTEGRATION pass, then closed — with no acceptance gate and nothing anywhere
-saying so. `2026-08-25-leftover-findings-fold-in` skipped the same gate and only
-caught it because the docs lane happened to notice at close-out and put it in a
-`handoff` bullet. The skill already required you to report which gates did not
-run and why; it required you to say it to the human, once, in prose that is gone
-by the next run. Say it in the ledger, where it survives and
-`check_report.py <run_dir>/ --require-heads` checks it at close-out.
+`protocol-lint` judges the network's own files, so on an ordinary run against
+the bound repo it has nothing to say and does not appear at all — a line reading
+`skipped (not an authoring order)` every time is a line nobody reads. The
+close-out corrections dispatch is the one exception, because `packs.md` § 3
+makes it the only order in which a lane writes inside `<agenticRoot>` outside
+the run dir: an authoring order arriving inside a delivery run. So the trigger
+is the file, not the route — corrections on disk, therefore the gate is
+accountable, by verdict or by `skipped` and why.
+
+Record this in the ledger and not only in your close-out report. The report is
+prose said once to a human and gone by the next run; the ledger line is read
+back by `check_report.py <run_dir>/ --require-heads`, which matches it against
+the Artifacts rows and against `pack-corrections.md` and fails close-out on a
+gate that quietly did not run.
 
 ### `next:` is what makes a run resumable
 
 `status: DISPATCHING` says a run is mid-flight. It does not say *what to
-dispatch*, so resuming means reconstructing intent from twelve artifact rows —
-and the first real end-to-end run ended exactly there, stopped by a session
-limit at dispatch 12 with the ledger saying only `DISPATCHING`.
+dispatch*, so a session that ends at dispatch twelve leaves its successor
+reconstructing intent from twelve artifact rows.
 
 So `next:` carries the one action a fresh session would take, rewritten every
 time you update the ledger:
@@ -151,24 +153,23 @@ artifacts, which is the failure the ledger exists to prevent.
 dispatch that absorbed it, and drop the `state` column — being in `Closed` *is*
 the state. `CARRIED` and `OPEN` rows stay in `Open` until close-out.
 
-This is a correction to how v0.4.1 stated the rule ("nothing leaves the table by
-being deleted; it changes state"). That preserved the audit trail and let the
-working table grow without bound: the first real run finished with **57 rows in
-`Open`, 20 of them already `ABSORBED`**, all re-read on every ledger update. The
-audit trail is preserved either way — `Closed` keeps it, and the artifact the
-row points at holds the detail.
+Marking a row resolved and leaving it in place is the tempting alternative, and
+it costs you the table: `Open` is re-read on every ledger update, so rows that
+are done but still present are paid for again at every dispatch. Nothing is lost
+by moving them — `Closed` keeps the trail, and the artifact `ref` points at
+holds the detail.
 
-**One fact, one row.** That run recorded the same tombstone twice, once from the
-lane that hit it and once from a later pass that noticed it again. Before adding
-a row, check whether `ref` already appears; if it does, update that row rather
-than appending a second account of the same fact.
+**One fact, one row.** The same finding reaches you twice — from the lane that
+hit it, and from a later pass that notices it again. Before adding a row, check
+whether `ref` already appears; if it does, update that row rather than appending
+a second account of the same fact.
 
 ### Why `Open` and `Rounds` are tables
 
-Because prose bullets grow and typed rows do not. The report block has a schema
-and lane reports stayed between 25 and 81 lines; the ledger's `Open` section had
-none and reached 705 words with single bullets over 700 characters. Structure,
-not discipline, is what keeps an artifact small.
+Because prose bullets grow and typed rows do not. Everything in this network
+that holds its size holds it by having a schema: the report block has one and
+lane reports stay between 25 and 81 lines. Structure, not discipline, is what
+keeps an artifact small.
 
 So: **one row per item, five columns, `one-line` under 120 characters.** If an
 item needs more than that, the detail is already in the artifact `ref` points
@@ -211,18 +212,17 @@ sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/04-backend.md
 ```
 
 **Planning artifacts are read by their brief.** `product`, `design`, `story` and
-`quant` RESEARCH produce artifacts far longer than the report block — in the
-first full run the stories and the technical plan came to 1,000 lines, half of
-all artifact volume, read end to end to extract roughly thirty lines of routing
-decisions. Every such artifact opens with a `## Orchestrator brief` of at most
-15 lines. Read the brief. Read the sections the brief names, if you need them.
-Do not read the document.
+`quant` RESEARCH produce artifacts far longer than the report block — a plan and
+its stories run to hundreds of lines, and perhaps thirty of them are routing
+decisions you act on. Every such artifact opens with a `## Orchestrator brief`
+of at most 15 lines. Read the brief. Read the sections the brief names, if you
+need them. Do not read the document.
 
 **This is safe because the brief is checked for completeness, not just length.**
 `check_report.py` fails an artifact whose brief does not name every section
-below it. Reading all 546 lines is what used to guarantee you saw every story;
-the check is what guarantees it now, so routing from a brief the validator has
-not passed gives you neither guarantee.
+below it. Reading every line is what would otherwise guarantee you saw every
+story; the check is what guarantees it instead, so routing from a brief the
+validator has not passed gives you neither guarantee.
 
 The sections you skip are not lost — they reach the lane that needs them as an
 `inputs` path with a `§ section` suffix, which is the entire point of the relay
@@ -279,10 +279,11 @@ Do not infer the head in either case.
 
 **A `detail` mismatch is never cosmetic.** `verification.detail` is the evidence
 behind a `PASS`, and the head must carry it verbatim. When the two disagree, the
-validator names the character they diverge at — read that, then decide. Six
-ledger rows across two runs recorded this class as a recurring em-dash encoding
-quirk and waved it through; none of them was an encoding problem, and two were a
-lane abridging its own evidence line.
+validator names the character they diverge at — read that, then decide. The
+reading to distrust is "a dash or encoding quirk, cosmetic": both sides open
+identically in that case *and* in the case where a lane abridged its own
+evidence line, which is precisely what putting `detail` in the head exists to
+catch. The diverging character tells you which one you have. Nothing else does.
 
 ---
 

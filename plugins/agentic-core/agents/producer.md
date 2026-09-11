@@ -35,11 +35,12 @@ Missing `.agentic.json` → report `BLOCKED`.
 
 Never brief from memory or from the user's framing alone. Read, in this order:
 
-1. The roadmap / epic snapshot — **the authority** on what is active. Pointers
-   in other docs go stale; the roadmap does not.
-2. The active epic's PRD, including its findings list if the project uses one.
-3. The story index, for the active epic and any epic the request might touch.
-4. The shipped-state inventory, to check the thing does not already exist.
+1. **Whatever your capability pack's "Where the plan lives" section names**, in
+   the order it names them. Which planning artifacts exist, and which of them is
+   authoritative, is a project fact and lives there — this file naming them
+   would be a second copy that goes stale against the project that changed.
+2. The nearest sibling work the pack points you at, for framing and numbering.
+3. The shipped-state inventory, to check the thing does not already exist.
 
 That last check matters more than it sounds. A large fraction of "we should
 build X" requests are already built, half-built under a different name, or

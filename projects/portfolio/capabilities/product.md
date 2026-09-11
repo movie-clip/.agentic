@@ -27,70 +27,75 @@ convention you never read is not.
 
 ## Where the plan lives
 
+Read `docs/product/planning.md` first. It is the one hand-written page that
+states this model, and it is short.
+
 | Doc | Role |
 |---|---|
-| `docs/product/epic-roadmap.md` | **the authority.** Living execution snapshot: active epic, story snapshot table, slice log, open items. Every pointer elsewhere goes stale; this does not. |
-| `docs/product/prd/epic-<n>-<slug>.md` | one PRD per epic: problem, goals, non-goals, findings |
-| `docs/product/stories/US-<epic>.<n>-<slug>.md` | one file per story |
-| `docs/product/stories/README.md` | story index, grouped by epic, with scope summaries |
+| `docs/product/stories/US-<n>.<m>-<slug>.md` | one file per story — statement, ACs, test plan, tickets. The sole product-doc record of its slice. |
+| `docs/product/epics/EP-<n>-<slug>.md` | **optional** grouping, one per epic — problem, goals, non-goals, findings |
+| `docs/product/ROADMAP.md` | **generated** index of every story by status. Never hand-edited. |
 | `docs/product/current-product-state.md` | canonical shipped-state inventory |
 | `docs/tech-debt-register.md` | deferred improvements, not stories |
 
-Read the roadmap **first**, every time. It states which epic is active and lists
-open items that were deliberately left open.
+The earlier `epic-roadmap.md` / `prd/**` / `stories/README.md` corpus was
+deleted at commit `ce9c97d` ("cleanup", 2026-09-07) and is not coming back in
+that shape: the roadmap was hand-maintained, reached 2,090 lines, and about
+nine tenths of it was completed-epic prose. `ROADMAP.md` replaces it by being
+*derived* from story frontmatter rather than written, so it cannot go stale and
+shipped work costs one row. Do not propose recreating the old corpus.
 
-### Navigating the roadmap without reading 1,700 lines
+### An epic is optional, and that is the default
 
-`epic-roadmap.md` is ~1,721 lines and roughly nine tenths of it is completed-epic
-history. Reading it end to end is the single most expensive habit available to
-this lane, and it buys almost nothing — the part that changes is at the top.
+A story omits `epic:` unless two or more stories share a rationale a reader
+would otherwise have to infer. **Do not propose an epic so that a story has a
+parent.** Epic inflation used to be invisible because a roadmap row made a new
+epic feel free; it is not free — each one is a file someone must open, close
+and keep true.
 
-Its shape, which is stable:
+Where you do propose one, say in your brief's `## Placement` which existing
+story or epic it is a sibling of. A grouping with no stated precedent is
+usually inflation, and naming the sibling is the cheapest check against that.
 
-| Lines | What is there |
-|---|---|
-| ~1–69 | the **live snapshot** — active epic, story snapshot table, slice log, open items |
-| ~70 onward | one section per epic, **newest first**, headed `## Completed Epic: Epic <n> — <name>` |
+### Finding precedent
 
-So:
+```bash
+cat docs/product/ROADMAP.md          # every story, by status, one row each
+ls docs/product/epics/               # groupings that exist, if any
+```
 
-1. **Read the snapshot** (roughly the first 70 lines). Always. This is the part
-   that is authoritative about *now*.
-2. **Locate the epics you actually need** rather than scrolling to them:
-   ```bash
-   grep -n "^## .*Epic " docs/product/epic-roadmap.md   # every epic, with line numbers
-   ```
-3. **Read only those sections**, by line range.
+`ROADMAP.md` is the index the old `grep '^## .*Epic '` used to substitute for.
+Read it, shortlist one or two siblings by title, then open those story files —
+not the whole directory.
 
-A brief that cites the snapshot plus two named precedent epics is doing the job.
-A brief that read all 1,721 lines is doing the same job having paid twenty times
-for it.
+**Every `US-` and `Epic` named in this pack below `US-44.1` is
+git-history-only.** The story and PRD corpus was deleted at commit `ce9c97d`;
+the two files under `docs/product/stories/` are the only ones on disk. The
+citations are kept because the precedents are real and still worth reading —
+but read them out of Git, not off the filesystem, and do not report a missing
+file as a pack correction:
 
-### Finding the precedent epic
-
-Placement here is **precedent-driven** — this project has strong house patterns
-(findings-first epics, doc-hygiene epics, mechanical-gate stories) and the right
-question is almost always *"which existing epic is this a sibling of?"* rather
-than *"is this a new kind of thing?"*.
-
-The epic-heading grep above is how you answer it: the titles are descriptive
-enough to shortlist candidates, and then you read one or two sections to check
-the shape matches. Name that precedent in your brief's `## Placement`. An epic
-proposed with no stated precedent is usually epic inflation, and saying which
-epic it resembles is the cheapest check against that.
+```bash
+git ls-tree -r --name-only ce9c97d^ docs/product/stories/ | grep US-15.1
+git show "ce9c97d^:docs/product/stories/US-15.1-drawdown-decomposition-engine.md"
+```
 
 ## Story lifecycle
 
-| Status | Meaning |
+Four states, and they are the enum `scripts/build_roadmap.py` enforces — not
+labels. A fifth word fails the suite.
+
+| `status:` | Meaning |
 |---|---|
-| **Backlog** | Defined: statement + ACs + rough test plan. Not ticketed. |
-| **Next phase** | Pulled into the active phase, broken into ordered tickets. |
-| **In progress** | Being delivered. |
-| **Done** | Every AC met, full test plan passing, docs updated. |
+| `backlog` | Defined: statement + ACs + rough test plan. Not ticketed. |
+| `active` | Ticketed and being delivered. |
+| `done` | Every AC met, full test plan passing, docs updated. Requires `closed:`. |
+| `dropped` | Decided against. Stays as a file so the decision is findable. |
 
-Naming: `US-<epic>.<n>-<slug>.md`. Tickets: `T-<epic>.<story>.<n>`.
+Naming: `US-<n>.<m>-<slug>.md`. Tickets: `T-<n>.<m>.<k>`. The `<n>` is a series
+number, not a required epic: `US-45.1` does not imply an `EP-45` exists.
 
-Only a **ticketed** story can be dispatched. A Backlog story needs a ticketing
+Only a **ticketed** story can be dispatched. A `backlog` story needs a ticketing
 pass first.
 
 ## The house pattern: findings-first epics
@@ -100,8 +105,9 @@ that you must apply it deliberately rather than defaulting to a normal feature
 epic.
 
 **When an epic addresses something suspected wrong with shipped behaviour, its
-first story is an audit.** `US-<epic>.1` is audit-only: it investigates, records
-findings as `F-1`, `F-2`, … in the PRD, and ships no behaviour change. Each
+first story is an audit.** `US-<n>.1` is audit-only: it investigates, records
+findings as `F-1`, `F-2`, … in the epic file where one exists and in the audit
+story itself where it does not, and ships no behaviour change. Each
 subsequent story closes one or more findings and names them in its scope line.
 
 Epics 33 and 34 both work this way. It exists because scoping a fix before the
@@ -128,8 +134,9 @@ healthy here: implementation surfaces real problems, and the honest response is
 a new epic rather than scope-creeping the current story.
 
 So when an implementation lane reports a finding outside its scope, that is a
-producer input, not noise. Brief it: new epic, new story in an existing epic, or
-debt-register entry.
+producer input, not noise. Brief it: a new standalone story, a story joined to
+an existing epic, a new epic where two or more stories will share the rationale,
+or a debt-register entry.
 
 Note also that epic creation **corrects the framing**, it does not just copy the
 complaint. Epic 35's own description records that the original framing was
@@ -166,33 +173,36 @@ decisions specifically:
 
 ## Where findings live
 
-Findings from an audit or health review belong **in the epic PRD** as `F-1`,
-`F-2`, … — that is the findings-first pattern above, and it is what makes them
+Findings from an audit or health review belong as `F-1`, `F-2`, … **in the epic
+file when the work is grouped into one, and in the audit story itself when it is
+not** — that is the findings-first pattern above, and it is what makes them
 discoverable to later stories and to your own "already covered" check.
 
 Do not accept a standalone findings file with its own numbering scheme as the
-record. If one exists (a review was run outside the epic structure), your job is
-to fold its findings into a proper epic PRD, deduplicating against what is
-already recorded in the tech-debt register and in prior epics' open findings.
+record. If one exists (a review was run outside this structure), your job is to
+fold its findings into whichever of the two homes applies, deduplicating against
+what is already recorded in the tech-debt register and in prior open findings.
 
 A finding that duplicates a known-open item is not a new finding — say so, and
 point at the existing record.
 
 ## Epic inflation
 
-A one-story epic needs a reason beyond "this request needs somewhere to live".
-Epic 16 justified itself as a *quick win* — small, self-contained, no open
-design questions. If the story you are proposing is small-to-medium with an
-unresolved design decision, that precedent does not apply, and "Backlog until it
-has siblings" is often the more honest verdict.
+A one-story epic needs a reason beyond "this request needs somewhere to live",
+and under the current model it usually has none: `epic:` is optional, so a story
+with no grouping is already well-formed. Epic 16 justified itself as a *quick
+win* — small, self-contained, no open design questions. If the story you are
+proposing is small-to-medium with an unresolved design decision, that precedent
+does not apply, and `status: backlog` with no epic is the more honest verdict.
 
 When you do propose a new epic, say who decides. Epic placement is the owner's
 call, and a brief that presents a new epic as settled removes them from it.
 
 ## Sequencing conventions
 
-- **Recommended order is stated explicitly** at the end of each epic's story
-  index. Follow the existing convention: state the order and the reason.
+- **Recommended order is stated explicitly** in your brief, and in the epic
+  file where one exists. `ROADMAP.md` is generated and carries no ordering, so
+  if you do not state the order nothing else will.
 - **Risk-first.** Put the story that could invalidate the others first.
   US-34.2 was first in its epic and immediately surfaced three hidden defects
   that reshaped the rest.
@@ -201,7 +211,8 @@ call, and a brief that presents a new epic as settled removes them from it.
 
 ## Definition of done for this lane
 
-- [ ] Roadmap, active PRD, story index and shipped-state inventory all actually read
+- [ ] `ROADMAP.md`, the nearest sibling stories, any open epic file and the
+      shipped-state inventory all actually read
 - [ ] Checked whether the request is already shipped, already storied, or deliberately open
 - [ ] Verdict stated plainly, including "already covered", "defer to Backlog" or "decline" when true
 - [ ] Value claim checked against real project data where the repo contains it, not asserted

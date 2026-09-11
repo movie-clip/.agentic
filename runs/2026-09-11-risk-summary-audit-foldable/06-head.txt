@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-11-risk-summary-audit-foldable/06
+artifact:        C:\projects\investments\.agentic\runs\2026-09-11-risk-summary-audit-foldable\06-technical-plan.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          Order's verification field was NONE (design pass, read-only). Plan derived from direct reads of trust_gate.py, diagnostics_engine.py, risk.py, RiskSummaryCard.tsx, dashboard-fields.md, financial-metho
+changed:         0
+contract_notes:  4
+pack_corrections: 0
+handoff:         4
+risks:           3
+headline:        Technical plan for the 4 Risk Summary trust fixes: Fix 1/2/4 backend-only, Fix 3 frontend-only, no schema changes; doc corrections and test coverage named per fix.

@@ -221,7 +221,8 @@ Two things this gets wrong when improvised:
 **Findings need a home the rest of the project already reads.** A standalone
 findings file with its own numbering is invisible to every later story, and to
 the producer next time it checks whether something is already known. If the
-project records findings inside an epic PRD, that is where they go.
+project records findings inside an epic or PRD file, that is where they go —
+and where it has no such file, they stay in the audit story itself.
 
 **Findings must be dispatched, not improvised.** Split the review by lane and
 send each to the specialist that owns it — contract drift to `tech-lead`,
@@ -284,8 +285,9 @@ the docs lane reconciles them at close-out.
 ## Step 4 — Tech lead: design pass
 
 With an approved, ticketed story in hand, run `scout` if the area is unfamiliar,
-then dispatch `tech-lead` in `mode: DESIGN`. Inputs: the story, the PRD section,
-the scout map's path, and any methodology doc the profile flags as mandatory.
+then dispatch `tech-lead` in `mode: DESIGN`. Inputs: the story, the epic or PRD
+section **where the project has one**, the scout map's path, and any methodology
+doc the profile flags as mandatory.
 
 Its technical plan is what you turn into work orders. Reference it by path and
 section on every lane it touches:
@@ -459,9 +461,11 @@ Dispatch the `docs` lane twice, or once with both inputs:
 Before you set `status: CLOSED`, walk the ledger once. Every line is something
 a closed run has been missing:
 
-- [ ] **`gates:` accounts for all three** — `quant-audit`, `integration`,
-      `review` — each with its verdict or `skipped` and why. Two runs closed
-      without an acceptance gate; one said nothing about it anywhere.
+- [ ] **`gates:` accounts for every gate** — `quant-audit`, `integration`,
+      `review`, and `protocol-lint` too if you wrote anything into
+      `pack-corrections.md` above — each with its verdict or `skipped` and why
+      (`orchestrator.md` § 1). Two runs closed without an acceptance gate; one
+      said nothing about it anywhere.
 - [ ] **Every remaining `Open` row is deliberately `CARRIED`** — everything
       absorbed has moved to `Closed`, and a `CARRIED` row is a handoff to the
       human that belongs in your report.

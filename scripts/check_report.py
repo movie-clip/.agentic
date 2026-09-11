@@ -68,6 +68,9 @@ CR_LANES = {"integration"}
 # to write `protocol-lint skipped (not an authoring order)` would be a line that
 # is always the same and therefore never read.
 LEDGER_GATES = ("quant-audit", "integration", "review")
+# Not in LEDGER_GATES - required only when the run produced pack
+# corrections. See check_authoring_gate.
+AUTHORING_GATE = "protocol-lint"
 
 # PROTOCOL.md § 3 "Bullet discipline". One fact per bullet, short enough that
 # the orchestrator can route it without re-reading the artifact.
@@ -607,6 +610,36 @@ def check_open_table(ledger: Path) -> list[str]:
     return problems
 
 
+def check_authoring_gate(run_dir: Path) -> list[str]:
+    """A run that rewrote the network's own files names the authoring gate.
+
+    `protocol-lint` is deliberately outside `LEDGER_GATES`: it gates authoring
+    orders, and a line reading `skipped (not an authoring order)` on every
+    delivery run is a line nobody reads.
+
+    But `pack-corrections.md` is an authoring order. It is the one dispatch
+    that *always* writes inside `<agenticRoot>` - `packs.md` § 3 says so
+    explicitly - and because it arrives at close-out inside a delivery run, the
+    rule above excused the only gate that judges what it wrote.
+    `2026-09-11-risk-summary-audit-foldable` is what that looks like: the docs
+    lane rewrote 51 lines of `capabilities/product.md`, disclosed in `risks`
+    that the edit went past what `packs.md` permits, and no gate saw it.
+
+    So the trigger is the file, not the route: corrections exist, therefore the
+    gate is accountable. `skipped` with a reason still satisfies this - the
+    point is that a human decided, not that the gate ran.
+    """
+    corrections = run_dir / "pack-corrections.md"
+    if not corrections.is_file() or not corrections.read_text(encoding="utf-8").strip():
+        return []
+    stated = _ledger_field((run_dir / "run.md").read_text(encoding="utf-8"), "gates")
+    if stated and AUTHORING_GATE in stated.lower():
+        return []
+    return [f"pack-corrections.md is non-empty, so this run edited the "
+            f"network's own files, but `gates:` does not account for "
+            f"{AUTHORING_GATE} - name it with its verdict, or `skipped` and why"]
+
+
 def check_gates(ledger: Path) -> list[str]:
     """Every gate either ran and is recorded, or is accounted for as skipped.
 
@@ -743,14 +776,15 @@ def main(argv: list[str]) -> int:
         if not ledger.is_file():
             print(f"  ~ no run.md in {target} - `gates:` not checked")
         else:
-            ledger_problems = check_gates(ledger) + check_open_table(ledger)
+            ledger_problems = (check_gates(ledger) + check_open_table(ledger)
+                               + check_authoring_gate(target))
             if ledger_problems:
                 failed = True
                 print(f"FAIL {ledger}")
                 for g in ledger_problems:
                     print(f"  - {g}")
             else:
-                print(f"ok   {ledger} (gates, open)")
+                print(f"ok   {ledger} (gates, open, authoring)")
 
     for f in files:
         notes: list[str] = []

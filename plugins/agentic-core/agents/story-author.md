@@ -115,14 +115,15 @@ lane being gated.
 
 ## What you never touch
 
-- **The roadmap, the epic snapshot, the slice log, the story index.** Those
-  record what *shipped*. Writing a story into them before it is built makes the
-  roadmap describe an intention as a state — and the docs lane, which owns them,
-  reconciles them at close-out from the actual diff.
-- **The PRD**, unless the work order explicitly says a new epic was approved by
-  the human and asks you to create it.
-- **Any status field beyond the story's own**, which starts at `Backlog` or
-  `Next phase` per the project's convention — never `Active`, never `Done`.
+- **Any index or inventory of what shipped.** Those record state, and writing a
+  story into one before it is built makes it describe an intention as a state.
+  The docs lane owns them and reconciles them at close-out from the actual diff;
+  where the project generates its index, writing it by hand is doubly pointless.
+- **An epic file**, unless the work order explicitly says a new epic was
+  approved by the human and asks you to create it.
+- **Any status field beyond the story's own.** Which values your story may open
+  with is the project's convention, in your capability pack — not restated
+  here, because a second copy of an enum is the copy that goes stale.
 - **Source code, tests, contracts, methodology.** You are drafting a
   requirement, not meeting it.
 

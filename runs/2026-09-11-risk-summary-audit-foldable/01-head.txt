@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-11-risk-summary-audit-foldable/01
+artifact:        C:\projects\investments\.agentic\runs\2026-09-11-risk-summary-audit-foldable\01-quant-audit.md
+status:          DONE
+verdict:         FAIL
+verification:    NOT_RUN
+detail:          Order's verification field was NONE (read-only audit). Independent recomputation done via ad-hoc Python against `app.analytics.risk`, logged in § Independent recomputation log. 3 CRITICAL, 1 MATERIAL,
+changed:         0
+contract_notes:  2
+pack_corrections: 0
+handoff:         4
+risks:           3
+headline:        3 CRITICAL trust-honesty defects on Risk Summary card: two fields always withheld despite doc claiming otherwise, one badge can overstate synthetic data as "Verified".

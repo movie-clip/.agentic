@@ -1,0 +1,89 @@
+REPORT 2026-09-11-risk-summary-audit-foldable/03
+status:      DONE
+verdict:     NONE
+
+changed:
+  - none
+
+verification:
+  command:   NONE
+  result:    NOT_RUN
+  detail:    Order's verification field was NONE (read-only research). Findings grounded in git history (`git log -S`, `git show`), methodology.md, contracts, tech-debt-register.md, current-product-state.md, and direct source reads of trust_gate.py / diagnostics_engine.py / risk.py — see § Grounding log.
+
+contract_notes:
+  - docs/contracts/dashboard-fields.md:238,287 ("a separate, unwithheld path") should be corrected to match whichever resolution the owner picks for FINDING 1 — either the code changes to actually be unwithheld, or the doc is corrected to describe the real (permanently withheld) behavior.
+  - docs/contracts/dashboard-fields.md:242 should be corrected to match whichever resolution the owner picks for FINDING 2, for the same reason.
+  - If drawdown is unwithheld per my recommendation, docs/contracts/risk-fields.md's "no withheld rung" language for the sibling Risk-tab drawdown engine (line 548) should be cross-referenced from dashboard-fields.md so the two synthetic-drawdown surfaces are documented as following one policy.
+
+pack_corrections:
+  - none
+
+handoff:
+  - Both gates recommended for unwithholding (option a), see § Recommendations, with exact conditions specified per finding.
+  - `docs/product/epic-roadmap.md`, named as "the authority" in project.md's Sources-of-truth table, does not exist in this repo (`docs/product/` contains only `current-product-state.md` and `stories/`) — I did not chase this further since it is outside this order's scope, but it means project.md's own index is currently wrong on that path; a docs lane should confirm and correct at some point.
+
+risks:
+  - No test exercises a diagnostics run with fully `verified_adjusted_close` benchmark+factor basis; my conditions are derived from reading code, not an observed test output — the implementing lane should add that fixture case regardless of which resolution is chosen.
+  - `diagnostics_engine.py`'s `investor_economics_partial_unlock` field reuses the DASHBOARD's categorical policy object verbatim (`withheld_families` includes `"drawdown_family"`) — possible evidence of deliberate inheritance of that policy, with no comment or doc confirming intent either way; see FINDING 1 caveat.
+
+## Orchestrator brief
+- Both FINDING 1 (diagnostics drawdown) and FINDING 2 (diagnostics IR/active-return) are, on the evidence gathered, **bugs/regressions against the codebase's own documented design**, not deliberate policy — recommend (a) unwithhold for both.
+- Grounds: zero rationale in code comments, tests, git history, or docs for either gate (contrast with the dashboard's own drawdown gate, which carries a 14-line justification, a documented correction (US-34.7), and an explicit owner-decision requirement) — see § Grounding log.
+- Methodology's own § "Two drawdown constructions" (US-34.7) and the sibling Risk-tab drawdown engine (`docs/contracts/risk-fields.md:548`, "no withheld rung") both establish that this project's actual policy for synthetic-basis drawdown is publish-with-disclosed-bias, not categorical withholding — see § Findings, FINDING 1.
+- Methodology's own Contract rule for IR/active_return_pct (`financial-methodology.md:1141-1149`) says these fields "carry the same trust/withholding semantics as `tracking_error_pct`" — but `tracking_error_pct` is never run through the categorical gate; only IR/active_return are. The gate breaks the doc's own stated equivalence — see § Findings, FINDING 2.
+- § Findings has the full evidence chain per finding, with exact conditions to wire in if the owner accepts unwithholding.
+- § Grounding log lists every source read and what each established, for traceability.
+- No new formulas, trust classes, or metrics inventory rows are proposed — this order is a determination on two existing gates, not new analytics.
+
+## Findings
+
+### FINDING 1 — `allow_diagnostics_drawdown_outputs` (trust_gate.py:244-245)
+
+**Determination: bug/regression. Recommend (a) unwithhold.**
+
+Evidence:
+
+1. **No rationale anywhere.** `git log -S"_allow_diagnostics_drawdown_outputs"` finds exactly one commit (`8f7e602`, message "changes", 2026-04-20) that introduces the function — already as a bare `return False`, no comment, inside a large undifferentiated commit. It was relocated verbatim into `trust_gate.py` in `18e54eb` (US-43.3) with the docstring explicitly promising "no formula lives here — every function body is verbatim from its former engine home" — i.e. US-43.3 was a pure move, not a review of the gate's correctness. Contrast: `allow_dashboard_drawdown_outputs` (same file, lines 136-161) carries a 14-line comment naming the exact policy (`drawdown_family` in `investor_economics_partial_unlock.withheld_families`), the epic it's blocked on (Epic 34 F-10), and a documented correction of its own past-wrong justification (US-34.7). The diagnostics gate has never received this kind of attention.
+2. **The methodology doc's own position on synthetic-path drawdown is publish-with-disclosed-bias, not withholding.** `financial-methodology.md` § "Two drawdown constructions, only one of which is a price drawdown" (line 954) documents that the synthetic construction (current holdings × historical prices, flat cash, no ledger) overstates losses by "roughly the yield across the lookback," measures the bound on the committed fixture ("negligible... PYPL... 0.006% of NAV"), and concludes: "the construction is documented rather than adjusted" (line 986) — i.e. the doc's resolution for this exact bias is disclosure, not a categorical block.
+3. **A sibling engine computing the same synthetic-drawdown concept has no withheld rung at all.** `docs/contracts/risk-fields.md:548`: "the sibling engines (stress, drawdown, distribution) are unchanged and still carry no `withheld` rung" — this is the Risk tab's dedicated Drawdown Analytics engine (US-13.2, `POST /engines/drawdown/run`), trust class `synthetic`, publishing real negative percentages in its documented example payload (`current_drawdown_pct: -1.8`, `max_drawdown_pct: -12.4`, lines 278-279). It is the same current-holdings-×-history construction diagnostics uses on its `market_data_history` branch. There is no recorded reason diagnostics' copy of this same computation should be treated differently.
+4. **Diagnostics runs on two distinct bases, and the gate ignores both.** `diagnostics_engine.py:684-692`: on `historical_basis == "imported_portfolio_history"`, `daily_states = build_daily_portfolio_states(...)` — the real ledger replay, which US-34.7 already established is total-return-like (dividends land in replayed cash) and therefore not subject to the unadjusted-close concern at all. On `historical_basis == "market_data_history"`, `daily_states = build_synthetic_snapshot_history_states(...)` — the biased-but-bounded construction from point 2/3 above. `allow_diagnostics_drawdown_outputs()` takes **no arguments** — it cannot see which branch produced the data it is nulling, even though `historical_basis` is a live local in the same calling function (`build_historical_diagnostics_result`, `diagnostics_engine.py:248-...`).
+5. **The plumbing to condition it correctly already exists and is unused by this gate.** `build_diagnostics_section_trust` (trust_gate.py:217-241), called in the same function immediately above the gate, already computes `benchmark_return_basis`/`factor_return_basis`-derived trust (`verified_adjusted_close` vs `degraded_unverified_return_basis`) from data available at the same call site. `allow_diagnostics_drawdown_outputs` reads none of it. This is the identical shape of bug `trust_gate.py`'s own docstring for `classify_portfolio_return_basis` (lines 84-101) describes fixing elsewhere in this file: "This was a hardcoded `"unavailable"` literal, which no input could change... that literal suppressed the ENTIRE cumulative series and every headline scalar."
+6. **Caveat pointing the other way (see risks):** `diagnostics_engine.py`'s `investor_economics_partial_unlock` field is built by calling `build_dashboard_investor_economics_partial_unlock()` — the *dashboard's* categorical-policy object, whose `withheld_families` list includes `"drawdown_family"` — verbatim inside the diagnostics result. If this reuse were deliberate, it would be evidence the gate is intentionally inheriting the dashboard's categorical policy. I found no comment, test, doc, or commit message asserting that intent; every other piece of evidence above points to an unexamined default. On balance I read this as the copy-paste of a shared builder function across a US-43.3 relocation, not a considered policy extension, but the owner should confirm.
+
+Recommended condition if unwithheld: gate should accept `historical_basis` (or simply be removed and the volatility-regime/drawdown-summary values passed through unmodified) whenever `historical_sections_available` is true — mirroring the Risk-tab sibling engine's "publish or unavailable, no withheld rung" policy. The existing math-layer null handling in `risk.py`/`drawdown.py` (N<2 paired states, etc.) already prevents fabrication at the analytics layer; the categorical gate adds no further protection today, since it fires unconditionally regardless of data quality.
+
+If instead the owner rules to keep it withheld (option b): `dashboard-fields.md:238,287` must be corrected to state plainly that diagnostics drawdown is *also* permanently withheld, using language matching the pack's existing "no amount of data-quality work un-gates this" framing for the dashboard sibling — and the gate itself should gain the same kind of dated, reasoned comment the dashboard gate carries, naming the epic/decision it is blocked on. A silent, uncommented `return False` cannot be the permanent state of a guardrail-scale trust decision either way.
+
+### FINDING 2 — `_allow_diagnostics_relative_return_outputs` (diagnostics_engine.py:187-188)
+
+**Determination: bug/regression. Recommend (a) unwithhold.**
+
+Evidence:
+
+1. **Same birth pattern as Finding 1.** `git log -S"_allow_diagnostics_relative_return_outputs"` also finds only `8f7e602` ("changes", no message, no comment) as the introducing commit — bare `return False`, immediately preceded and followed by unrelated code with no explanatory comment anywhere in the function or its docstring. Unlike the drawdown gate, this one was **not** relocated to `trust_gate.py` in US-43.3 — it remains a private function in `diagnostics_engine.py`, so the module that owns the gate has never even been through the recent trust-gate review pass.
+2. **The analytics layer already computes and correctly null-handles these fields on its own — the gate discards correctly-computed data.** `risk.py:744-770` (`build_relative_risk_summary`): `active_return_pct` is computed whenever `paired_returns` is non-empty (unconditional line 768, no gate); `information_ratio` is `None` only when `tracking_error is None or tracking_error == 0 or mean_active is None` (lines 750-757) — this is exactly and only the methodology doc's own documented edge cases (`financial-methodology.md:1111-1116`: "fewer than 2 paired returns... tracking_error = 0"). `test_analytics.py:4241-4242` (cited in the audit's recomputation log item 2) proves this produces real non-null values from real inputs. `_apply_diagnostics_relative_return_output_policy` (diagnostics_engine.py:191-204) then unconditionally nulls both fields regardless of this already-correct output.
+3. **The methodology doc's own contract rule for these fields is violated by the unconditional gate, not merely the contract doc.** `financial-methodology.md:1141-1149` ("Contract rule"): "`information_ratio` and `active_return_pct` carry the same trust/withholding semantics as `tracking_error_pct` in the same `RelativeRiskSummary` struct." But `tracking_error_pct` is never routed through `_apply_diagnostics_relative_return_output_policy` — it is published directly from `build_relative_risk_summary`'s output whenever computable (`volatility_summary.tracking_error_pct`, `risk.py:750` per the audit's metrics inventory row 2). So the two withheld fields do **not** in fact carry the same semantics as `tracking_error_pct` today — they carry strictly weaker (permanently-null) semantics, directly contradicting the doc section that governs their formula, not just the downstream contract-doc row the prior audit flagged.
+4. **The visible product consequence is the exact incoherence the component was built to avoid.** `RiskSummaryCard.tsx:58-60`'s own comment (per the prior audit, FINDING 2) states the card's `showRelativeRisk` gate exists to avoid showing "n/a" beside a real number — but because `tracking_error_pct` is real while `information_ratio`/`active_return_pct` are always null, that is precisely what ships.
+5. **`investor_economics_status` cannot ever report "available" for diagnostics, which is itself informative.** `build_diagnostics_investor_economics_status` (trust_gate.py:289-301) returns `"available"` only when *both* `allow_drawdown_outputs` and `allow_relative_return_outputs` are true — both are permanently false, so this branch is structurally unreachable for diagnostics today. `InvestorEconomicsStatus.status: Literal["available", "withheld"]` (schemas/dashboard_history.py:15) is a real, tested enum value elsewhere, but `grep` across `test_routes.py` finds no diagnostics test ever asserting `"available"` — nor any test exercising a fully-`verified_adjusted_close` diagnostics run at all. Dead branch, unexercised in either direction, consistent with a stub nobody has revisited since April.
+
+Recommended condition if unwithheld: pass `active_return_pct`/`information_ratio` through unmodified from `build_relative_risk_summary`'s output — i.e. drop the categorical policy application entirely, since the analytics layer's own null handling (point 2 above) already implements exactly the edge-case discipline the methodology doc specifies. This makes their withholding behavior actually match the doc's stated equivalence to `tracking_error_pct` (point 3), rather than contradicting it.
+
+If instead the owner rules to keep it withheld (option b): the contract doc must be corrected at `dashboard-fields.md:242` to state that these two fields are unconditionally withheld pending an investor-economics unlock decision for diagnostics specifically (distinct from and independent of `tracking_error_pct`'s own math-only nullability) — and `financial-methodology.md:1141-1149`'s "Contract rule" must be corrected too, since it currently asserts an equivalence to `tracking_error_pct` that the code does not honor. Both doc corrections are required together; fixing only the contract doc would leave the methodology doc internally wrong about its own formula's governing rule.
+
+## Grounding log
+
+| # | Source read | What it established |
+|---|---|---|
+| 1 | `trust_gate.py:136-302` (full file) | Both gates are argument-less, unconditional; `allow_dashboard_drawdown_outputs` (dashboard sibling) carries an extensive dated rationale comment, `allow_diagnostics_drawdown_outputs` carries none |
+| 2 | `git log --oneline --all -S"_allow_diagnostics_relative_return_outputs"` / `-S"_allow_diagnostics_drawdown_outputs"` | Both gates introduced in one undifferentiated commit (`8f7e602`, "changes"), already unconditional, no comment then or since; relocated verbatim (not reviewed) in US-43.3 (`18e54eb`) for the drawdown gate only |
+| 3 | `git show 18e54eb -- diagnostics_engine.py` | Confirms US-43.3 was a pure relocation ("no formula lives here") — not an opportunity where the gate's correctness was examined |
+| 4 | `financial-methodology.md:954-986` (§ Two drawdown constructions) | Doc's own resolution for the synthetic-path drawdown bias is disclosure + bounding, not withholding |
+| 5 | `financial-methodology.md:1082-1149` (§ Information Ratio) | Full formula + edge cases match `risk.py`'s implementation exactly (methodology-doc consistency); Contract rule asserts IR/active_return share `tracking_error_pct`'s semantics |
+| 6 | `docs/contracts/risk-fields.md:122-163,544-548` | Risk-tab's own drawdown engine (US-13.2) publishes real synthetic drawdown values with "no withheld rung"; sibling-engine precedent |
+| 7 | `docs/contracts/dashboard-fields.md:238-242,287` | The two contradicted claims the prior audit flagged (Finding 1, 2 `claim:` lines) |
+| 8 | `docs/tech-debt-register.md:14` | "broker-replay investor-economics and drawdown outputs... withheld... insufficient evidence" — language matches the dashboard's F-10 policy, not diagnostics; no diagnostics-specific entry exists |
+| 9 | `docs/product/current-product-state.md:20-61` | "Some investor-economics and drawdown outputs remain withheld **when** replay or return-basis evidence is insufficient" — conditional language, inconsistent with an unconditional gate |
+| 10 | `diagnostics_engine.py:94-118,165-168,611-741` | Diagnostics runs on two distinct bases (`imported_portfolio_history` = real ledger replay, `market_data_history` = synthetic snapshot history); gates receive neither as input |
+| 11 | `risk.py:744-770` (`build_relative_risk_summary`) | Confirms the analytics layer already implements the doc's IR/active-return edge cases correctly and independently of the diagnostics-engine gate |
+| 12 | `services/quant-engine/app/tests/test_trust_gate.py` | US-43.3's own test only pins object-identity of the relocation, never exercises either gate's boolean logic or an `available`/unwithheld outcome |
+| 13 | `grep "verified_adjusted_close" test_routes.py` (no hits) | No diagnostics route test ever exercises the fully-verified-return-basis case — the path where, if the gates were correctly conditioned, drawdown/IR would actually publish, is entirely untested |

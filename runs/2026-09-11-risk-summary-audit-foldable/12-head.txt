@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-11-risk-summary-audit-foldable/12
+artifact: C:\projects\investments\.agentic\runs\2026-09-11-risk-summary-audit-foldable\12-test.md
+status: DONE
+verdict: NONE
+verification: PASS
+detail: Backend: 1004 passed, 0 failed, 50 warnings (all pytest-socket live-network guard warnings, pre-existing/unrelated) in ~95s. Frontend: 42 test files passed (42), 380 tests passed (380) in ~6s. mcp__pr
+changed: 9
+contract_notes: 0
+pack_corrections: 0
+handoff: 5
+risks: 5
+headline: Reconciled 5 remaining backend test assertions and added 4 new tests for Fix 1/2/4; full backend+frontend suites now green.

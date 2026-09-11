@@ -37,33 +37,56 @@ convention you never read is not.
 
 | Path | Your relationship to it |
 |---|---|
-| `docs/product/stories/_TEMPLATE.md` | the shape to follow |
-| `docs/product/stories/US-<epic>.<n>-<slug>.md` | **the one file you create** |
-| `docs/product/stories/README.md` | read for numbering. **Do not edit.** |
-| `docs/product/epic-roadmap.md` | read for context. **Do not edit.** |
-| `docs/product/prd/epic-<n>-<slug>.md` | read the epic's goals and non-goals |
+| `docs/product/planning.md` | the frontmatter contract your file must satisfy |
+| `docs/product/stories/US-<n>.<m>-<slug>.md` | **the one file you create** |
+| `docs/product/ROADMAP.md` | read for numbering and precedent. **Generated — do not edit.** |
+| `docs/product/epics/EP-<n>-<slug>.md` | read the epic's goals and non-goals, *when one exists* |
 | `docs/finance/financial-methodology.md` | read when the story touches a formula |
 | `docs/contracts/<area>-fields.md` | read to see what the contract *is* today |
 
-Numbering: `US-<epic>.<n>-<slug>.md`, tickets `T-<epic>.<story>.<n>`.
+Numbering: `US-<n>.<m>-<slug>.md`, tickets `T-<n>.<m>.<k>`. Open the file with
+the frontmatter block `planning.md` specifies — `id` must match the filename,
+and omit `epic:` unless an `EP-<n>` file already exists. An unparseable block
+fails `run_all_tests.py`, so it is not a formality. `status:` is § Status
+values.
 
 ## Read the nearest sibling story first
 
-Before drafting, read one or two recent stories from the same area. US-15.1 and
-US-15.2 are good models for a full-stack analytics slice: how ACs are phrased,
-how the reconciliation invariant is stated as a checkable criterion, how the
-"Notes / decisions" section records what was considered and rejected.
+Before drafting, read one or two recent stories from the same area. US-45.1 is
+the current-shape model — frontmatter, ACs, test plan, tickets. US-15.1 and
+US-15.2 are the richer models for a full-stack analytics slice: how ACs are
+phrased, how the reconciliation invariant is stated as a checkable criterion,
+how the "Notes / decisions" section records what was considered and rejected.
+
+**Every `US-` and `Epic` named in this pack below `US-44.1` is
+git-history-only.** The story and PRD corpus was deleted at commit `ce9c97d`;
+the two files under `docs/product/stories/` are the only ones on disk. The
+citations are kept because the precedents are real and still worth reading —
+but read them out of Git, not off the filesystem, and do not report a missing
+file as a pack correction:
+
+```bash
+git ls-tree -r --name-only ce9c97d^ docs/product/stories/ | grep US-15.1
+git show "ce9c97d^:docs/product/stories/US-15.1-drawdown-decomposition-engine.md"
+```
 
 Match their register. A story that reads differently from its neighbours makes
 the whole product-docs set harder to trust.
 
 ## Status values
 
-`Backlog` → `Next phase` → `In progress` → `Done`.
+`backlog` → `active` → `done`, plus `dropped` for work decided against. Those
+four words are the enum `scripts/build_roadmap.py` enforces, lower-case, in the
+frontmatter `status:` field — a fifth word fails `run_all_tests.py`.
 
-You write `Backlog`, or `Next phase` if the work order says the human has pulled
-it into the active phase. **Never `Active`** — that is an epic-level word, not a
-story-level one, and using it creates a roadmap contradiction. Never `Done`.
+You write `backlog`, or `active` if the work order says the human has pulled it
+into delivery. **Never `done`** — that is the docs lane's to write at close-out,
+from the diff, together with the `closed:` date it requires. A story that
+arrives already marked `done` is a finding, and the docs lane reports it as one.
+
+The older `Next phase` / `In progress` / `Active` labels are gone: they were
+free text, and `Active` in particular was an epic-level word that a story could
+silently contradict. There is no separate epic status to contradict now.
 
 ## Guardrails as they show up in acceptance criteria
 
@@ -122,6 +145,6 @@ the test lane to hit a number instead of covering the behaviour.
 - [ ] Research-brief constraints carried forward and cited, not restated as schema
 - [ ] Test plan names files and behaviours; no function names, no counts
 - [ ] Tickets ordered, lane-sized, tracing to ACs; **none instructs a commit or a self-gate**
-- [ ] Status is `Backlog` or `Next phase`
-- [ ] Roadmap, story index and PRD untouched
+- [ ] `status:` is `backlog` or `active` - never `done`
+- [ ] `ROADMAP.md`, `current-product-state.md` and any epic file untouched
 - [ ] Report says plainly that this is a draft for human review

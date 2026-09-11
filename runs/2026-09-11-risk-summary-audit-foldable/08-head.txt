@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-11-risk-summary-audit-foldable/08
+artifact:        C:\projects\investments\.agentic\runs\2026-09-11-risk-summary-audit-foldable\08-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          exit_code 0, 0 type errors
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         0
+risks:           0
+headline:        T-45.1.1's fold toggle and T-45.1.2's tests are engineering-coherent: aria/id contract matches across lanes, DrawdownAnalyticsCard convention followed, tsc clean.

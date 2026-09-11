@@ -40,8 +40,11 @@ def _artifact(payload: dict) -> Path | None:
     if not raw:
         return None
     path = Path(raw)
-    # Under <agenticRoot>/runs/<run-id>/. run.md and pack-corrections.md are a
-    # ledger and a queue; neither opens with REPORT, so _is_report drops them.
+    # Under a `runs/<run-id>/` directory, wherever that sits - the network
+    # moved runs under `projects/<project>/` in v0.7.1 and this test did not
+    # need changing, which is the property to keep. run.md and
+    # pack-corrections.md are a ledger and a queue; neither opens with REPORT,
+    # so _is_report drops them.
     if path.suffix != ".md" or path.parent.parent.name != "runs":
         return None
     if not path.is_file() or not cr._is_report(path):

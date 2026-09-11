@@ -13,11 +13,14 @@ So the loop is closed mechanically:
    `pack_corrections` entry naming the pack file, the false premise, and the
    **exact replacement wording**. Not a complaint — a patch.
 2. The orchestrator appends every such entry to `<run_dir>/pack-corrections.md`
-   as it arrives.
+   as it arrives, **creating the file on the first one**. A run where no lane
+   emitted an entry has no corrections file: the lanes' own
+   `pack_corrections: - none` is the record that they looked, and a file opened
+   to say so makes the authoring gate accountable for nothing.
 3. At close-out the orchestrator dispatches the `docs` lane with that file as an
    input and `<agenticRoot>/projects/<project>/capabilities/` in scope, to apply
    them. **This is the only order in which a lane may write inside
-   `<agenticRoot>` outside the run dir.**
+   `<agenticRoot>` outside the run dir.** No file, no such order.
 4. Unapplied corrections are surfaced to the human alongside `SHOULD_FIX` items.
 
 A pack correction is not a side note. It is frequently the most valuable thing

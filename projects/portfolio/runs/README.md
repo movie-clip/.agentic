@@ -8,7 +8,7 @@ other file is an artifact written by the agent that produced it, so that
 relaying a specialist's judgment is a filesystem operation rather than a
 paraphrase.
 
-Shape and rules: `../PROTOCOL.md` § "The run ledger".
+Shape and rules: `../../../protocol/orchestrator.md` § 1 "The run ledger".
 
 Runs are committed. A closed run is the record of why the code looks the way it
 does — which gates ran, what was requested and refused, which pack premises

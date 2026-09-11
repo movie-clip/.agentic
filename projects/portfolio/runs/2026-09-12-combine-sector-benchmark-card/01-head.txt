@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-combine-sector-benchmark-card/01
+artifact:    C:\projects\investments\.agentic\runs\2026-09-12-combine-sector-benchmark-card\01-frontend.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      tsc --noEmit exited 0, no errors printed. Also confirmed via `check_gates`: ruff/vulture/knip dead-code clean, typecheck clean, dashboardGoldens not drifted.
+changed:     5
+contract_notes: 0
+pack_corrections: 0
+handoff:     3
+risks:       2
+headline:    Merged Sector Composition and Benchmark Positioning into one card surface, with Benchmark Positioning foldable via the RiskSummaryCard pattern.

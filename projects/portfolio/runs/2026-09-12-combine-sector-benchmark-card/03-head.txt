@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-combine-sector-benchmark-card/03
+artifact:        C:\projects\investments\.agentic\runs\2026-09-12-combine-sector-benchmark-card\03-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          vitest: 43 files / 390 tests passed, 0 failed. tsc --noEmit: exited clean, no output. detect_deadcode.py --strict: ruff clean, vulture clean, knip clean, "STRICT: no dead-code findings — clean." No dr
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         0
+risks:           3
+headline:        Merged sector/benchmark card is engineering-coherent; all checks pass; PASS.

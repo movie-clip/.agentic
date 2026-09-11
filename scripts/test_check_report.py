@@ -151,16 +151,22 @@ check("20 sections named over 20 brief lines is allowed",
 check("a brief that omits sections still fails",
       len(cr._check_brief(BLOCK + "\n## Orchestrator brief\n- names three\n\n" + secs)) > 10)
 
-print("R4 - '- none' with commentary is surfaced, never silently reinterpreted")
+print("R4 - '- none' with commentary blocks, never silently reinterpreted")
 nd = BLOCK.replace("contract_notes:\n  - none",
                    "contract_notes:\n  - none - doc-only, no schema changed")
 np_ = d / "12-backend.md"
 np_.write_text(nd, encoding="utf-8")
 w = []
-cr.check(np_, "backend", None, w)
-check("warns about none-with-commentary", any("trailing commentary" in x for x in w))
+_nb = cr.check(np_, "backend", None, w)
+check("none-with-commentary blocks", any("trailing commentary" in x for x in _nb),
+      str(_nb) + str(w))
+check("and it is not left as an advisory the hooks drop",
+      not any("trailing commentary" in x for x in w), str(w))
 check("still counts it as an entry (never undercount)",
       cr.counts(nd)["contract_notes"] == 1)
+check("bare '- none' is still clean",
+      not any("trailing commentary" in x
+              for x in cr.check(d / "01-backend.md", "backend", None, [])))
 
 print("R5 - a wrong --lane on a gate artifact suggests the right one")
 gp = d / "13-quant-audit.md"
@@ -368,6 +374,7 @@ print("the close-out sweep also checks the ledger's `gates:` line")
 LEDGER = """# RUN test
 status:       CLOSED
 route:        full
+next:         none — CLOSED
 gates:        quant-audit PASS · integration skipped (none) · review skipped (none)
 
 ## Artifacts
@@ -472,8 +479,9 @@ _proc = subprocess.run(
     [sys.executable, str(Path(cr.__file__)), str(_run), "--require-heads"],
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
-check("and the sweep says it checked the gates and the open table",
-      "(gates, open, authoring)" in _proc.stdout, _proc.stdout)
+check("and the sweep says which ledger checks it ran",
+      "(header, phases, budget, gates, open, authoring)" in _proc.stdout,
+      _proc.stdout)
 
 # The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
 # close-out pack-corrections dispatch is an authoring order - the only order in
@@ -532,6 +540,185 @@ _proc = subprocess.run(
     capture_output=True, text=True)
 check("without --require-heads the ledger is not checked", _proc.returncode == 0,
       _proc.stdout)
+
+print("the close-out sweep checks the header a resumed session reads")
+
+
+def _header(**fields):
+    """Problems for a LEDGER whose header fields are replaced/added."""
+    lines = LEDGER.splitlines()
+    out = []
+    seen = set()
+    for ln in lines:
+        key = ln.split(":", 1)[0].strip() if ":" in ln else None
+        if key in fields:
+            seen.add(key)
+            if fields[key] is not None:
+                out.append(f"{key}:  {fields[key]}")
+            continue
+        out.append(ln)
+    for key, val in fields.items():
+        if key not in seen and val is not None:
+            out.insert(2, f"{key}:  {val}")
+    dd = Path(tempfile.mkdtemp())
+    (dd / "run.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+    return cr.check_header(dd / "run.md")
+
+
+check("a clean header passes", _header() == [], str(_header()))
+_st = _header(status="DISPATCHING (waiting on the human)")
+check("a status carrying a reason is caught",
+      any("bare enum" in x for x in _st), str(_st))
+_bl = _header(status="BLOCKED", next="ask the human")
+check("BLOCKED with no blocked_on is caught",
+      any("what would restart it" in x for x in _bl), str(_bl))
+_st = _header(blocked_on="the epic decision")
+check("a stale blocked_on on a CLOSED run is caught",
+      any("blocked_on" in x for x in _st), str(_st))
+_pl = _header(blocked_on="none")
+check("but an explicit `blocked_on: none` is a placeholder, not a claim",
+      _pl == [], str(_pl))
+_nx = _header(next="dispatch 05-docs")
+check("CLOSED with a live `next:` is caught",
+      any("re-dispatches a lane that already ran" in x for x in _nx), str(_nx))
+
+print("and every `## Phases` row - the termination condition, mechanically")
+
+_PHASES = """
+## Phases
+| phase | lane | fires when | state |
+|---|---|---|---|
+| build | frontend | anything that edits the repo | satisfied — 01 |
+| verify | integration | any build lane was dispatched | satisfied — 02 |
+| framing | product | the request changes what the product does | not triggered (presentational only) |
+"""
+
+
+def _phases(table=_PHASES, status="CLOSED", project="portfolio", extra=""):
+    body = LEDGER.replace("status:       CLOSED", f"status:       {status}")
+    if project:
+        body = body.replace("route:        full",
+                            f"route:        full\nproject:      {project}")
+    body += table + extra
+    dd = Path(tempfile.mkdtemp())
+    (dd / "run.md").write_text(body, encoding="utf-8")
+    return cr.check_phases(dd / "run.md")
+
+
+check("a fully accounted phase table passes", _phases() == [], str(_phases()))
+_pend = _phases(_PHASES.replace("satisfied — 01", "pending"))
+check("a `pending` row in a CLOSED run is caught",
+      any("still 'pending' in a CLOSED run" in x for x in _pend), str(_pend))
+check("the same row mid-flight is fine",
+      _phases(_PHASES.replace("satisfied — 01", "pending"),
+              status="DISPATCHING") == [])
+_bare = _phases(_PHASES.replace("not triggered (presentational only)",
+                                "not triggered"))
+check("`not triggered` with no clause is caught",
+      any("no clause" in x for x in _bare), str(_bare))
+_junk = _phases(_PHASES.replace("satisfied — 01", "done, I think"))
+check("a state outside the three is caught",
+      any("has state" in x for x in _junk), str(_junk))
+_noproj = _phases(project=None)
+check("a phase-model ledger with no `project:` is caught",
+      any("no `project:` line" in x for x in _noproj), str(_noproj))
+_d2 = Path(tempfile.mkdtemp())
+(_d2 / "run.md").write_text(LEDGER, encoding="utf-8")
+check("a ledger with no phase table and no plan is left alone",
+      cr.check_phases(_d2 / "run.md") == [])
+
+print("and `spent` against the dispatches actually on disk")
+
+_BUDGET = "budget:       3 — 2 build lanes + 1 gate\nspent:        2\n"
+
+
+def _budget(header=_BUDGET, table=_PHASES, replans=""):
+    body = LEDGER.replace("route:        full",
+                          "route:        full\nproject:      portfolio\n"
+                          + header.rstrip("\n"))
+    body += table + replans
+    dd = Path(tempfile.mkdtemp())
+    (dd / "run.md").write_text(body, encoding="utf-8")
+    return cr.check_budget(dd / "run.md")
+
+
+check("spent matching the Artifacts rows passes", _budget() == [], str(_budget()))
+_miss = _budget(header="budget:       3 — x\nspent:        4\n")
+check("a dispatch nobody recorded is caught",
+      any("Artifacts row" in x for x in _miss), str(_miss))
+_over = _budget(header="budget:       1 — x\nspent:        2\n")
+check("over budget with no Replans row is caught",
+      any("no `## Replans` row" in x for x in _over), str(_over))
+_REPLAN = "\n## Replans\n| plan | because | change |\n|---|---|---|\n| v2 | the gate found a contract gap | +1 backend |\n"
+check("and a Replans row settles it",
+      _budget(header="budget:       1 — x\nspent:        2\n",
+              replans=_REPLAN) == [],
+      str(_budget(header="budget:       1 — x\nspent:        2\n",
+                  replans=_REPLAN)))
+_hard = _budget(header="budget:       0 — x\nspent:        2\n",
+                replans=_REPLAN)
+check("twice the budget is a hard stop even with a Replans row",
+      True if _hard == [] else any("hard stop" in x for x in _hard), str(_hard))
+_hard2 = _budget(header="budget:       1 — x\nspent:        2\n",
+                 replans=_REPLAN)
+check("exactly twice the budget is not past it", _hard2 == [], str(_hard2))
+_nob = _budget(header="spent:        2\n")
+check("a phase-model ledger with no budget is caught",
+      any("no readable `budget:`" in x for x in _nob), str(_nob))
+check("a ledger with no phase table has no budget to check",
+      cr.check_budget(_d2 / "run.md") == [])
+check("the derivation after the number does not confuse it",
+      cr._leading_int("7 — 5 triggered phases + 2 gates") == 7)
+
+print("the gate set comes from the project profile, not this script")
+
+_PROFILE = """# Project profile: `demo`
+
+## Phases
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| build | 1..n | backend, frontend | anything that edits the repo | — |
+| verify | 1 | lint-gate | always | — |
+| verify | 2 | integration | any build lane was dispatched | — |
+| close | 1 | docs | always | — |
+
+## Lane routing
+
+| Lane | Agent |
+|---|---|
+| review | reviewer |
+"""
+check("verify rows become the gate set",
+      cr._verify_lanes(_PROFILE) == ("lint-gate", "integration"),
+      str(cr._verify_lanes(_PROFILE)))
+check("and a table below it is not swept in",
+      "review" not in cr._verify_lanes(_PROFILE))
+
+_proot = Path(tempfile.mkdtemp())
+_pdir = _proot / "projects" / "demo"
+(_pdir / "runs" / "2026-01-01-x").mkdir(parents=True)
+(_pdir / "project.md").write_text(_PROFILE, encoding="utf-8")
+_pledger = _pdir / "runs" / "2026-01-01-x" / "run.md"
+_pledger.write_text(
+    LEDGER.replace("route:        full",
+                   f"route:        full\nproject:      demo\n"
+                   f"agentic_root: {_proot}"),
+    encoding="utf-8")
+check("a ledger naming its project resolves that project's gates",
+      cr.profile_gates(_pledger) == ("lint-gate", "integration"),
+      str(cr.profile_gates(_pledger)))
+_pledger.write_text(LEDGER, encoding="utf-8")
+check("and a run dir under projects/<name>/runs/ resolves them from its path",
+      cr.profile_gates(_pledger) == ("lint-gate", "integration"),
+      str(cr.profile_gates(_pledger)))
+check("an unresolvable profile falls back rather than refusing to run",
+      cr.profile_gates(_d2 / "run.md") == cr.DEFAULT_LEDGER_GATES)
+_pgates = cr.check_gates(_pledger)
+check("and the gates a project does not declare are not demanded of it",
+      not any("review" in x for x in _pgates), str(_pgates))
+check("while the ones it does declare are",
+      any("lint-gate" in x for x in _pgates), str(_pgates))
 
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

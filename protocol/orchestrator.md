@@ -17,31 +17,42 @@ a lost contract note ships as inconsistency.
 Every slice gets a directory:
 
 ```
-<agenticRoot>/runs/<YYYY-MM-DD>-<slug>/
+<agenticRoot>/projects/<project>/runs/<YYYY-MM-DD>-<slug>/
   run.md                        the ledger
-  01-delivery-brief.md          producer
-  02-quant-research.md          quant-analyst RESEARCH
-  03-technical-plan.md          tech-lead DESIGN
-  04-backend.md                 lane reports, numbered in dispatch order
+  01-recon.md                   lane reports, numbered in dispatch order
+  02-product.md
+  03-design.md
+  04-backend.md
   05-frontend.md
   cr/CR-1.md                    change requests, one file each
   pack-corrections.md           appended as they arrive
 ```
 
-You create `run.md` at Step 0 and update it after every head you receive.
+You create `run.md` at `intake` and update it after every head you receive.
 
 ```markdown
 # RUN <run-id>
 request:      <the user's original words, verbatim>
 agentic_root: <the RESOLVED ABSOLUTE path>
+project:      <the profile this run is bound to — `projects/<project>/project.md`>
 story:        <path, or NONE>
 status:       PLANNING | DISPATCHING | GATING | BLOCKED | CLOSED
+phase:        intake | ground-truth | framing | specification | design | build | verify | close
+plan:         v<n>
+budget:       <n> — <the derivation, from the Phases table>
+spent:        <n>
 blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
 next:         <the single next action, always current — see below>
-route:        recon | express | audit | review | story | full
-express:      yes | no
-gates:        <quant-audit, integration, review — each a verdict, or skipped and
-              why; plus protocol-lint when pack-corrections.md is non-empty>
+gates:        <every gate the project declares under `verify` — each a verdict,
+              or skipped and why; plus protocol-lint when the run wrote a
+              pack-corrections.md>
+
+## Phases
+| phase | lane | fires when | state |
+|---|---|---|---|
+| ground-truth | recon | the area is unfamiliar | satisfied — 01 |
+| framing | product | the request changes what the product does | not triggered (defect in shipped behaviour) |
+| build | backend | anything that edits the repo | satisfied — 03 |
 
 ## Artifacts
 | # | lane | mode | agent | model | artifact | status | verdict |
@@ -74,6 +85,11 @@ it if you are unsure.
 |---|---|---|---|
 | CR-1 | backend | 1 | 2 |
 
+## Replans
+| plan | because | change |
+|---|---|---|
+| v2 | 04-backend found the sector field already nullable upstream | design re-triggered; budget 5 → 7 |
+
 ```
 
 ### The row is written when the head returns, not when you are done with it
@@ -96,6 +112,29 @@ re-dispatches a lane that already ran, or close-out reads a table missing rows.
 pre-dispatch edit records intent, and intent is exactly what a stale ledger
 already has too much of.
 
+### A dispatch that returned nothing still owes a row
+
+`spent` increments when you dispatch. The Artifacts row is written when the head
+comes back. Between those two is the case the table has no natural entry for: a
+subagent that errored, a session interrupted mid-dispatch, a head that never
+arrived. The budget was spent and the ledger has nothing to show for it.
+
+Write the row anyway:
+
+```
+| 05 | frontend | — | frontend-engineer | sonnet | 05-frontend.md | LOST | — |
+```
+
+`LOST` is a ledger status, not a report status — no report exists to carry one.
+Then **re-dispatch as the next slot number**, never as `05` again. The retry is
+a second dispatch and costs a second unit of budget, which is the true account
+of what the run spent; and reusing the number overwrites the only evidence that
+the first attempt happened.
+
+`check_report.py <run_dir>/ --require-heads` compares `spent` against the number
+of Artifacts rows, so a dispatch left out of the table now fails close-out
+rather than quietly making the budget look better than it was.
+
 ### `gates:` accounts for every gate, including the ones you skipped
 
 ```
@@ -103,10 +142,16 @@ gates:        quant-audit PASS · integration PASS · review skipped (no story t
               accept — human approved)
 ```
 
-Name **every** gate, every run. A gate that ran carries its verdict, and the
-verdict must match its Artifacts row. A gate that did not run carries `skipped`
-and the reason. None of them is required by route alone, so a missing row is not
-by itself wrong — **a missing row nobody *decided* on is.**
+Name **every** gate the project declares under `verify` (§ 2), every run. A gate
+that ran carries its verdict, and the verdict must match its Artifacts row. A
+gate that did not run carries `skipped` and the reason. Each has its own trigger
+and none is implied by the shape of the run, so a missing row is not by itself
+wrong — **a missing row nobody *decided* on is.**
+
+`check_report.py` reads **which** gates are owed from the profile's `## Phases`
+verify rows, so the set below is this project's, not the script's. A project
+declaring different gates is measured against its own. The triggers are the
+profile's too; what follows is portfolio's, as an illustration of the shape.
 
 | Gate | Accountable on a run that |
 |---|---|
@@ -121,8 +166,18 @@ the bound repo it has nothing to say and does not appear at all — a line readi
 close-out corrections dispatch is the one exception, because `packs.md` § 3
 makes it the only order in which a lane writes inside `<agenticRoot>` outside
 the run dir: an authoring order arriving inside a delivery run. So the trigger
-is the file, not the route — corrections on disk, therefore the gate is
-accountable, by verdict or by `skipped` and why.
+is the file, not the shape of the run — corrections on disk, therefore the
+gate is accountable, by verdict or by `skipped` and why.
+
+**Which means `pack-corrections.md` exists only when a correction applies.** Do
+not open one to record that there was nothing to correct: a lane's own
+`pack_corrections: - none` is already that record, in the artifact whose head
+the count came from. A file written to say "nothing here" makes the gate
+accountable for nothing, and the reason written beside `skipped` is then a claim
+about the file's contents that no one re-reads — `2026-09-12` closed with
+`protocol-lint skipped (pack-corrections.md is empty)` against a file of eleven
+lines. The gate was right to skip. The ledger's reason for skipping it was
+false, and that is the part a later reader would have believed.
 
 Record this in the ledger and not only in your close-out report. The report is
 prose said once to a human and gone by the next run; the ledger line is read
@@ -159,6 +214,14 @@ are done but still present are paid for again at every dispatch. Nothing is lost
 by moving them — `Closed` keeps the trail, and the artifact `ref` points at
 holds the detail.
 
+**A row can also leave by being dismissed.** Not everything that lands in
+`Open` needs a dispatch: a note about the run's own transient artifacts, a
+finding a later lane showed to be wrong, an item the user waves off. Move it to
+`## Closed` with `absorbed by` reading `dismissed — <reason>`. `CARRIED` means
+the human is owed something after the run ends; a row nobody is owed anything
+for is finished, and leaving it in `Open` to satisfy the close-out checklist
+puts noise in the one table close-out is supposed to make readable.
+
 **One fact, one row.** The same finding reaches you twice — from the lane that
 hit it, and from a later pass that notices it again. Before adding a row, check
 whether `ref` already appears; if it does, update that row rather than appending
@@ -194,7 +257,171 @@ arithmetic across a dozen work orders is how a run ends up dispatching against
 
 ---
 
-## 2. Reading discipline: heads, briefs, and named sections
+## 2. Phases, not a route
+
+A run is a set of **phases**. Each answers one question, is filled by a lane the
+project names, and fires only when its trigger is true of *this* request.
+
+| Phase | The question it answers | Fires when |
+|---|---|---|
+| `intake` | what was asked, and against which project | always |
+| `ground-truth` | what is actually true in the repo right now | the run would otherwise build on an unchecked claim about the repo — a bug report, a findings document, an unfamiliar area |
+| `framing` | should this happen at all, and where does it belong | the request changes what the product does |
+| `specification` | what would make it done, in checkable terms | framing produced scope no approved statement of done covers |
+| `design` | what contract does it commit to | the change crosses a contract boundary, or more than one build lane touches it |
+| `build` | the change itself | anything that edits the repo |
+| `verify` | is it right, by each gate's own criterion | per gate — the project declares each gate's trigger |
+| `close` | reconcile, sweep the ledger, hand back | always |
+
+**The phases are protocol; the lanes that fill them are not.** This file does not
+know what your project calls its lanes, whether it has a mathematics gate, or
+whether its unit of approved scope is a story, a ticket or an issue. Read
+`projects/<project>/project.md` § Phases at intake: it binds each phase to a
+lane, in order, with the clause that decides whether that lane fires.
+
+### A phase that does not fire is recorded, not skipped
+
+Copy the project's table into the ledger's `## Phases` and put a verdict beside
+every row — `satisfied — <nn>`, or `not triggered (<the clause that was false>)`.
+
+That record is what a route name could not give you. `route: express` says a
+short run happened. `framing — not triggered (defect in shipped behaviour, no
+new user-visible scope)` says *which* question went unasked and on what grounds,
+so a later reader can tell a decision from an omission — and so can you, three
+dispatches later, when a lane returns something that makes the clause false.
+
+It also removes the need for a route menu. A run where only `build` and its own
+`verify` fire **is** the short route: nothing has to be named, claimed or
+defended, and nothing has to void itself, because the clause that was false is
+written down and is re-read every turn.
+
+### The order is a dependency, not a schedule
+
+A phase may not run before the phases it reads from are satisfied or ruled out —
+`design` reads `specification`'s output, `verify` judges `build`'s. That is the
+whole of the ordering rule. Within it, a phase runs when its inputs exist, not
+when its number comes up, and a run that revisits `design` because a build lane
+contradicted it is re-planning rather than going backwards.
+
+---
+
+## 3. The control loop
+
+You are not executing a plan. You are running a loop whose state is the ledger —
+and the ledger, not your memory of what you intended, is what each turn reads.
+
+Every turn:
+
+1. **Read `run.md`.** `## Phases`, `## Artifacts`, `## Open`, `spent`.
+2. **Take the earliest phase whose trigger is true and whose state is not
+   `satisfied`.** Earliest by the dependency order in § 2, not by which one you
+   find most interesting.
+3. **If there is none, the phase is `close`.**
+4. **If that phase carries a human stop the human has not given, stop and ask.**
+   Do not dispatch past an unanswered decision; proceeding is deciding.
+5. **Write the ledger before you spend** — `phase:`, `next:`, and the dispatch
+   you are about to make.
+6. **Dispatch exactly one order.**
+7. **Record the head and absorb its output** — § 1 for the row, § 4 for what to
+   open.
+8. **Test the result against the plan**, and re-plan if it disagrees (below).
+
+Then read `run.md` again. The re-read is not ceremony: it is what makes a
+compacted, resumed or restarted session identical to a continuing one. Anything
+you carry between turns that is not in the ledger will not survive the run, so
+put it there or accept losing it.
+
+### Serial by default, and the exception is narrow
+
+One order at a time, and you read its head before you write the next one. The
+relay — naming an upstream artifact as a downstream lane's `inputs` — is the
+highest-value thing you do, and it is only possible when the upstream head
+landed before the downstream order was written. Two orders in flight against a
+ledger that describes neither is how a contract note goes unrouted.
+
+Two dispatches may overlap only when **all three** hold:
+
+- neither reads a file the other writes;
+- neither's `inputs` names an artifact the other produces;
+- both are read-only, **or** the contract they both depend on is already settled
+  and on disk.
+
+In practice that is the read-only lanes early in a run. Everything downstream of
+a contract is serial for the reason the contract exists. If you are arguing with
+one of the three clauses, the answer is serial: the wall-clock saved is worth
+less than one mismatch found at the integration gate.
+
+### The budget is derived, and it is what ends an open-ended run
+
+At intake, once `## Phases` is filled in, the budget falls out of it:
+
+```
+budget:       7 — 5 triggered phases (build is 3 lanes) + 2 gates
+spent:        0
+```
+
+**Derive it, do not pad it.** A budget with slack in it is one a run can only
+come in under, which makes the number unfalsifiable in exactly the direction
+that matters — `2026-09-12` budgeted `4 + 1 slack` and spent 4, and the ledger
+cannot say whether the model was calibrated or the padding absorbed the miss.
+One dispatch over an honest estimate costs a `## Replans` row, and that row is
+the measurement. Buying it off in advance is paying to learn nothing.
+
+Increment `spent` on every dispatch. **At `spent == budget` you do not dispatch
+again until you have written a `## Replans` row** saying what the estimate missed
+and what the new budget is. At twice the original budget, stop and hand back to
+the human regardless of how close the work feels.
+
+A route name was chosen before the run knew anything, from a menu of guesses
+about shape. A budget is derived from which triggers actually fired, which is
+evidence, and it is falsifiable at close-out: `spent` against `budget` measures
+the estimate, and it is the only number in the ledger that says whether the
+phase model is calibrated for this project yet.
+
+### Re-plan on evidence, and version it
+
+Four things a plan cannot absorb silently. Any one of them is a re-plan:
+
+- a head returns `BLOCKED` for a reason that is not a missing input;
+- a lane's result **contradicts** something the plan or an earlier artifact
+  asserted — contradicts, not merely adds to;
+- a phase recorded as `not triggered` turns out to be triggered;
+- `spent` reaches `budget`.
+
+Re-planning is three actions in one edit: bump `plan:` to the next version,
+append a `## Replans` row (`plan | because | change`), and say what changed to
+the user before the next dispatch. An unversioned re-plan is indistinguishable
+from drift — the ledger shows a run that did something other than what it said,
+with nothing recording the moment anyone chose that.
+
+### A resumed session is the same session, or the ledger failed
+
+Compaction is not an exception the loop handles; it is the case the loop was
+designed around. A session that restarts mid-run reads five fields and two
+tables and is where it left off:
+
+`status` says whether the run is mid-flight. `blocked_on` says what would
+restart it. `next` says the one action to take. `spent` says what has been paid.
+`## Phases` says what is left, and `## Artifacts` says what already ran.
+
+Two consequences worth writing down because both are silent when broken. A
+`pending` row for a lane that already ran means a resume dispatches it twice —
+which is why the row is written when the head returns, not at the end. And
+`next:` on a `CLOSED` run must read `none — CLOSED`; a closed ledger still
+naming a dispatch is an instruction to a session that has no other way to know
+the run is over. Both are checked at close-out.
+
+### The loop ends when every phase is accounted for
+
+Not when the work feels finished. `close` is reachable when every `## Phases` row
+reads `satisfied` or `not triggered (<clause>)`, every gate in `gates:` carries a
+verdict or a reason, and every remaining `Open` row is deliberately `CARRIED`.
+Those three are the termination condition; the skill's close-out checklist is how
+you discharge it.
+
+---
+
+## 4. Reading discipline: heads, briefs, and named sections
 
 Your context is the scarcest resource in a run and the only one every dispatch
 spends. Protect it deliberately.
@@ -252,7 +479,7 @@ only thing that varies:
 **The head is a file, not a paragraph in your ledger.** A run whose `<nn>-head.txt`
 is missing has an Artifacts row backed by nothing: the row says `DONE` and the
 evidence for it was never written down. Close-out cannot audit what is not on
-disk, and Step 10's `--require-heads` sweep will fail on it.
+disk, and `close`'s `--require-heads` sweep will fail on it.
 
 **The check is not scoped to the shell-less lanes.** It is tempting to read it
 that way — a lane with `Bash` was told to validate its own artifact, so its head
@@ -287,7 +514,7 @@ catch. The diverging character tells you which one you have. Nothing else does.
 
 ---
 
-## 3. The relay rule: paths, not prose
+## 5. The relay rule: paths, not prose
 
 You carry the producer's brief, the tech lead's plan and every change request
 between lanes, because subagents cannot spawn subagents. If you carry them as
@@ -299,8 +526,8 @@ So: **an `inputs` line names a path, never a quotation.**
 
 ```
 inputs:
-  - runs/2026-08-20-sector-drawdown/03-technical-plan.md   § contract
-  - runs/2026-08-20-sector-drawdown/cr/CR-2.md
+  - projects/portfolio/runs/2026-08-20-sector-drawdown/03-technical-plan.md   § contract
+  - projects/portfolio/runs/2026-08-20-sector-drawdown/cr/CR-2.md
 ```
 
 Not `inputs: - "the tech lead said the field should be nullable"`. The receiving
@@ -315,7 +542,7 @@ The one exception: `goal` and `non_goals` are your own words, and should be.
 
 ---
 
-## 4. Writing a work order
+## 6. Writing a work order
 
 The shape is in core § 2. What the core does not say, because only you write
 one:
@@ -329,10 +556,26 @@ one:
   two orders with a dependency.
 - **Name `inputs` by path and section**, per the relay rule above. You may name
   a section of a document you have only read the brief of.
+- **Every factual claim in the order is sourced.** An order asserts things about
+  the repo — this file has that shape, this spec covers that path, this module
+  already does X. Each one is either something you read this turn, or something
+  a path in `inputs` says, or it does not go in the order. Write what you do not
+  know as a question for the lane, not as a premise for it.
+
+**If you need a claim and have neither, that is the `ground-truth` trigger.**
+The phase exists for this and nothing else. `2026-09-12` skipped it on the
+strength of an intake grep and then told the frontend lane that a spec file
+"still asserts the old DOM shape" — the file did not exist. The lane repeated
+the claim in its handoff, the test lane spent its `risks` block establishing
+that no such file had ever been in git history, and the run carried an `Open`
+row about its own work order to close-out. Nothing shipped wrong; three lanes
+paid for one sentence. An unverified claim reads exactly like a verified one,
+which is why it has to be sourced where it is written rather than caught where
+it hurts.
 
 ---
 
-## 5. Never do a lane's work yourself
+## 7. Never do a lane's work yourself
 
 Doing it always looks cheaper in the moment, and the result is frequently good,
 which is what makes it dangerous. A run that answers its own request in the main

@@ -92,13 +92,23 @@ defect is invisible to every individual lane and visible to you.
 already consumed by a route response or a committed type, that is `BLOCKING`
 unless the story mandated it.
 
-**6. Mechanical gates.** Run what the order asks for; at minimum confirm the
-lanes ran the right commands.
+**6. Mechanical gates.** In `INTEGRATION` mode, run the full suite — always,
+whatever the lanes touched, and whatever narrower command the order happens to
+name. It is the project's acceptance command and the only one that writes
+`.claude/.last-test-pass`, so a gate that runs less passes work the human cannot
+then commit.
+
+```bash
+python scripts/run_all_tests.py            # the gate. Run this one.
+```
+
+If it fails, these three localise the failure faster than re-reading its output
+— they are diagnostics, not substitutes:
 
 ```bash
 cd apps/desktop && npx tsc --noEmit        # type errors are always blocking
+cd apps/desktop && npx vitest run          # frontend only
 python scripts/detect_deadcode.py --strict # ruff + vulture + knip
-python scripts/run_all_tests.py            # the full gate
 ```
 
 Then `git diff apps/desktop/src/test/dashboardGoldens.ts` — if modified and the

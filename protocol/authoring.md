@@ -9,8 +9,8 @@
 |---|---|---|---|
 | Protocol | `PROTOCOL.md` + `protocol/*.md` | message shapes, binding, gates | anything about a specific repo, anything about a specific role's craft |
 | Role | `plugins/agentic-core/agents/<name>.md` | what this lane judges, tool discipline | any path, framework or convention from a specific repo |
-| Capability | `projects/<project>/capabilities/<lane>.md` | paths, frameworks, fixtures, commands, gotchas, external anchors | message shapes, role definitions |
-| Skill | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — which lane runs when, the routes, the order of steps | any rule the protocol states; it cites them |
+| Capability | `projects/<project>/capabilities/<lane>.md`, and `project.md` § Phases | paths, frameworks, fixtures, commands, gotchas, external anchors; **which lane fills each phase and the clause that fires it** | message shapes, role definitions |
+| Skill | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — how a run is opened, what happens between a head returning and the next dispatch, how one is closed | any rule the protocol states, and any lane or trigger the project declares; it cites both |
 
 If you are tempted to write `pytest` in an agent file, that line belongs in a
 capability pack. If you are tempted to paste the report block into a pack, it
@@ -301,3 +301,24 @@ also change the tree it is verifying.
 Create `projects/<name>/project.md` plus capability packs, and drop
 `.agentic.json` in that repo. The `plugins/` layer is untouched — that is the
 entire reason for the split, and the test of whether it holds.
+
+**The profile's `## Phases` table is what makes that true for sequencing.**
+`protocol/orchestrator.md` § 2 fixes the phases and their dependency order;
+the profile binds each one to a lane, in its own order, with the clause that
+decides whether it fires here. A project with no mathematics gate declares no
+lane against that row and the phase never fires; a project whose unit of
+approved scope is an issue rather than a story says so in the `specification`
+row. Neither needs a word changed under `plugins/`.
+
+**And the `verify` rows are machine-read.** `check_report.py` resolves a run's
+profile — from the ledger's `project:` field, or from the run dir's own path
+under `projects/<project>/runs/` — and takes the gate set from that table's
+`verify` rows. So declaring a gate in the profile is what makes close-out demand
+an account of it; there is no second list to keep in step, and no project is
+measured against another's gates.
+
+So the test for a new sequencing rule is: **would it still be true in a repo
+with different lanes?** If yes it belongs in the skill. If it names a lane, a
+directory, a formula or a document this project happens to have, it belongs in
+the `## Phases` table's `fires when` column, where the orchestrator reads it as
+data.

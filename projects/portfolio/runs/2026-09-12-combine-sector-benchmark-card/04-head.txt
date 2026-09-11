@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-combine-sector-benchmark-card/04
+artifact:        C:\projects\investments\.agentic\runs\2026-09-12-combine-sector-benchmark-card\04-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order's verification field is NONE; no command specified for a docs-only close-out.
+changed:         2
+contract_notes:  0
+pack_corrections: 1
+handoff:         2
+risks:           0
+headline:        Updated dashboard-fields.md for the merged foldable card; no pack corrections needed (capabilities pack never described these as separate cards).

@@ -8,12 +8,11 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 ├─ ARCHITECTURE.md                        ← design rationale + provenance (human-facing)
 ├─ PROTOCOL.md                            ← THE contract, core. Everyone reads this.
 ├─ protocol/                              ← role-scoped extensions. Read exactly one.
-│  ├─ orchestrator.md      ledger · relay rule · reading discipline
+│  ├─ orchestrator.md      ledger · phases · control loop · relay rule
 │  ├─ gates.md             verdicts · gate independence · change requests
 │  ├─ packs.md             applying pack_corrections at close-out
 │  └─ authoring.md         rules for writing agents, packs and protocol
-├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
-├─ scripts/check_report.py                ← validates an artifact, its head, and a ledger's gates
+├─ scripts/check_report.py                ← validates an artifact, its head, and the run ledger
 ├─ scripts/test_check_report.py           ← pins the validator's own behaviour
 ├─ scripts/hooks/report_artifact_gate.py  ← PostToolUse: checks an artifact as it is written
 ├─ scripts/hooks/report_head_gate.py      ← SubagentStop: no lane finishes on a bad head
@@ -23,7 +22,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  ├─ .claude-plugin/plugin.json
 │  ├─ commands/feature.md                 ← /agentic-core:feature "..."
 │  ├─ skills/
-│  │  ├─ orchestrate-feature/SKILL.md     ← the router; runs in the main session
+│  │  ├─ orchestrate-feature/SKILL.md     ← the loop; runs in the main session
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
 │     ├─ producer.md        sonnet/high  roadmap · epics · stories · sequencing
@@ -39,6 +38,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │     └─ protocol-linter.md opus/medium   authoring gate — network files vs authoring.md
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
 │  ├─ project.md                          ← the binding profile
+│  ├─ runs/<date>-<slug>/                 ← run ledgers — a slice's state on disk
 │  └─ capabilities/
 │     ├─ product.md               for the producer
 │     ├─ quant.md                 for the quant analyst
@@ -101,7 +101,7 @@ question the current architecture would have handled differently.
 output.** If you do not see
 
 ```
-agentic-core v<version> · project <name> · route <...>
+agentic-core v<version> · project <name> · phases <...> · budget <n>
 ```
 
 then either the skill did not load or you are on a pre-0.3 copy. Either way,
@@ -170,11 +170,11 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 All ten roles live, each with a capability pack for `portfolio`.
 
-**One route is validated.** A `review` run (health-review fold-in) went through
+**One shape of run is validated.** A `review` run (health-review fold-in) went through
 end to end on 2026-08-20: skill loaded, banner printed, ledger written, two
 lanes dispatched, zero repo edits by the orchestrator, both artifacts conforming
 to Shape 2 on first contact, stopped correctly at the human gate. Its ledger and
-artifacts are in `runs/2026-08-20-health-review-fold-in/` — read them before
+artifacts are in `projects/portfolio/runs/2026-08-20-health-review-fold-in/` — read them before
 changing the protocol, they are the only ground truth this design has.
 
 That run also produced the argument for the whole thing. The same request run
@@ -199,8 +199,11 @@ Honest list of what is still enforced by asking an agent nicely:
 |---|---|
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
 | Bullets stay routable | **script** — `check_report.py`, but only on the four gate lanes, where a bullet becomes a dispatch. Real there, advisory everywhere else, and deliberately so: 97 blocking violations off the gate lanes were overridden every time without one being a real defect. |
-| Reports use the protocol shape | **script + hook** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own, and by `report_artifact_gate.py` on every write under `runs/`. The hook is how `scout`, `docs-engineer` and `story-author` get checked at all: they have no `Bash`, so the self-check every agent file tells them to run is one they cannot run. Real. |
-| Every gate either ran or was skipped on purpose | **script** — `check_report.py <run_dir>/ --require-heads` checks the ledger's `gates:` line against the Artifacts rows at close-out. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. It cannot tell you a skip was *wise*. |
+| Reports use the protocol shape | **script + hook** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own, and by `report_artifact_gate.py` on every write under a `runs/` directory. The hook is how `scout`, `docs-engineer` and `story-author` get checked at all: they have no `Bash`, so the self-check every agent file tells them to run is one they cannot run. Real. |
+| Every gate either ran or was skipped on purpose | **script** — `check_report.py <run_dir>/ --require-heads` checks the ledger's `gates:` line against the Artifacts rows at close-out. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. **Which gates are owed is read from the project profile's `## Phases` verify rows**, not from a list inside the script, so a second project is not measured against this one's. It cannot tell you a skip was *wise*. |
+| Every phase is accounted for before a run closes | **script** — `check_report.py <run_dir>/ --require-heads` fails a CLOSED ledger with a `pending` row, or a `not triggered` written without the clause that was false. Real, and added because the first run under the phase model closed with four `pending` rows against four completed dispatches and passed every check there was. |
+| `spent` is the dispatches that actually happened | **script** — the same sweep compares `spent` against the Artifacts rows. Real. It is what makes the failure the ledger exists to prevent — a dispatch nobody recorded — visible at all; a dispatch that returned nothing owes a `LOST` row rather than a gap. |
+| A resumed session reads a coherent header | **script** — the same sweep checks `status` against its enum, `BLOCKED` against `blocked_on`, and a `CLOSED` run against a `next:` that still names a dispatch. Real. |
 | A run's cost matches what the route promised | nothing, by choice. `run_cost.py` re-derived a `Cost` block from the rows until v0.5.7; the tally was never read, so the block and the script went. The `model` column stays — it is one fact per dispatch, written when the row is. |
 | Every lane runs on a chosen model | **agent frontmatter** — all eleven pinned explicitly, no `inherit`. Real. |
 | Every lane runs at a chosen effort | **agent frontmatter** — all eleven pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
@@ -209,13 +212,14 @@ Honest list of what is still enforced by asking an agent nicely:
 | The ledger's `Open` table holds only what is open | **script** - `check_report.py <run_dir>/ --require-heads` fails a row left in `Open` in a resolved state. Real, and it was added because prose did not hold it: the rule changed in v0.4.2 and two files went on teaching the superseded one, so the one closed v0.5.x run followed both at once - a `## Closed` table with 12 rows in it, and 13 of its 18 `Open` rows resolved and still sitting there. It judges the leading token, so `CARRIED - out of scope` passes and `ABSORBED by 06` does not. |
 | Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
-| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 112 cases. Real, and it exists because a review pass found six bugs in the validator. |
+| A work order's factual claims are true | prose only — `orchestrator.md` § 6 requires every claim in an order to be something the orchestrator read this turn or something a path in `inputs` says, and needing one with neither is the `ground-truth` trigger. Nothing checks it; the first run under the phase model asserted a file existed that never had. |
+| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 143 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | The hooks do what they claim | **tests** — `scripts/hooks/test_hooks.py`, 20 cases, each driving the hook the way Claude Code does: a JSON payload on stdin, a decision in the exit code. Real. What it cannot pin is that the hooks are *installed* — that lives in the bound repo's `.claude/settings.json`, and an uninstalled hook is silent. The close-out sweep is the backstop. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six lanes, narrowly (`reviewer` gets nothing that mutates). **Not yet exercised by a run** — the tools are tested, the lanes using them are not. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only, and it has held. Across 8 runs and ~110 dispatches there is no recorded breach — every mention of scope in a ledger is a lane stopping at its fence and reporting what it saw there. The `v0.5` marker that used to sit here proposed enforcing it; the runs say there is nothing yet to enforce. Revisit on the first real breach. |
-| The express lane isn't abused | prose only — but it self-voids on any contract note. |
+| A phase skipped on a false clause stays skipped when the clause turns true | prose, plus half a script. The clause itself is now required — a bare `not triggered` fails close-out — so the thing a re-plan would have to contradict is on disk. Whether anyone re-read it is still prose. |
 | A report's *contents* are true | nothing, and nothing can. The validator checks routability, not honesty — that is what the three gates and your own reading are for. |
 
 Knowing which line is which is the point of the table. A rule you believe is

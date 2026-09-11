@@ -22,6 +22,7 @@ convention you never read is not.
 |---|---|
 | What the product is | this is your first order in this repo |
 | Delivery model | you are the orchestrator or the producer |
+| Phases | you are the orchestrator, at intake |
 | Lane routing | you are choosing which lane owns a piece of work |
 | Repo skills agents may invoke | your order names a repo skill, or you are the orchestrator |
 | Commands | your order names a `verification` command |
@@ -115,13 +116,102 @@ user-visible value, carrying acceptance criteria, a test plan, and
 orchestrator dispatches `story-author` for a draft, then stops for the human to
 approve it. The human approves; the network never self-approves a story.
 
+## Phases
+
+`protocol/orchestrator.md` § 2 defines the phases and § 3 the loop that walks
+them. This table is the binding: which lane fills each phase **here**, in what
+order, and the clause that decides whether it fires at all. The orchestrator
+copies it into the run ledger at intake and records a verdict beside every row.
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| ground-truth | 1 | recon | the area is unfamiliar, or the run would otherwise build on an unverified claim — a bug report, a findings doc, a "this number looks wrong" | — |
+| framing | 1 | product | the request changes what the product does: a new capability, new scope, or a re-prioritisation | **yes** — the brief is relayed and the verdict is the human's |
+| specification | 1 | quant (RESEARCH) | the work introduces or changes a metric, formula, weighting, return basis or trust classification | — |
+| specification | 2 | story | framing produced scope that no approved, ticketed story covers | **yes** — the one hard stop |
+| design | 1 | design | the change crosses a contract boundary, or more than one build lane touches it | — |
+| build | 1..n | backend, frontend, test | anything that edits the repo. One order per lane: contracts before consumers, implementation before tests | — |
+| verify | 1 | quant-audit | any lane touched `analytics/`, a formula, a weighting, a return basis or a trust label | — |
+| verify | 2 | integration | any build lane was dispatched | — |
+| verify | 3 | review | the run carries a story whose acceptance criteria someone must accept | — |
+| close | 1 | docs | always — contract notes against `docs/`, and `pack-corrections.md` against `capabilities/` **when a lane emitted one** | — |
+
+### Three orderings that are not negotiable
+
+**`quant` RESEARCH before `story`.** The research brief is what makes acceptance
+criteria groundable. Written the other way round, the story states an outcome
+nobody has established is computable, and the contradiction surfaces during
+implementation — when three lanes have already built toward it.
+
+**`quant-audit` before `integration`.** A wrong formula can be engineered
+flawlessly and satisfy every acceptance criterion, so the other two gates would
+both pass it. If the mathematics is wrong, the rest of the review is measuring
+the wrong thing. Read its `verification.detail` for **which anchor it checked
+against**: an audit that recomputed from the same methodology doc the
+implementation was built from is a consistency check, not an independent one.
+
+**`review` last.** It judges the story, not the code, and only once engineering
+coherence has passed — so a `FAIL` there is about acceptance rather than
+something `integration` would have caught anyway.
+
+### What the gates run
+
+**`integration` runs `python scripts/run_all_tests.py`.** Not the subset the
+run happened to touch — the whole suite, every time, whatever the lanes changed.
+Write that command into the gate's order, and nothing narrower.
+
+Two reasons, and the second is the one that bites. It is this project's declared
+acceptance command, so a gate running something smaller is gating against a
+weaker standard than the repo itself applies. And it is the only command that
+writes `.claude/.last-test-pass`, which the commit hook checks against every
+changed file — so a run whose gate ran `vitest` + `tsc` + `detect_deadcode.py`
+ends with three green results, a `PASS` verdict, and work the human cannot
+commit until they run the suite themselves. `2026-09-12` ended exactly there.
+
+A build lane's own `verification` is properly narrower: it is checking its own
+change, not the run. The gate is where the project's standard applies.
+
+**`quant-audit` runs whatever recomputes the number independently** — named in
+its order, and its `verification.detail` says which anchor it checked against.
+**`review`** verifies the story's test plan actually ran; the suite is the
+evidence, not the claim.
+
+### The short run — what used to be the express route
+
+There is no express route and none is needed: a run where `framing`,
+`specification` and `design` all fail their triggers **is** the short run. What
+matters is that each false clause is written into the ledger with its reason.
+
+**What makes them false here.** A failing or flaky test (`test` lane). A doc
+reconciliation a gate or a contract note already identified (`docs` lane). A
+rename or a dead-code removal that `detect_deadcode.py` flags. A defect in
+shipped behaviour whose fix sits inside one lane and changes no schema.
+
+**What makes them true, no matter how small it looks.** Anything under
+`services/quant-engine/app/schemas/` — that is the contract source of truth, and
+the schema hook exists because changes there never stay in one lane, so `design`
+fires. Anything under `analytics/` — the quant rows in `specification` and
+`verify` both fire, always; mathematics never takes the short route, and that is
+guardrail one made operational. Anything that adds or removes a field visible in
+`docs/contracts/<area>-fields.md`. Anything a user would describe as a new
+capability — `framing` fires and the verdict is the producer's.
+
+**A false clause is re-read every turn, which is what replaces the old
+self-voiding rule.** When a build lane returns a contract note, `design`'s
+clause has stopped being false: that is a re-plan (`orchestrator.md` § 3), with
+a `## Replans` row and a bumped `plan:`, not a route quietly discovering it was
+the wrong one.
+
+The short run ends the same way as the long one: `python scripts/run_all_tests.py`,
+green, then the human commits. Skipping phases never skips verification.
+
 ## Lane routing
 
 | Lane | Agent | Pack | Owns |
 |---|---|---|---|
-| product | `producer` | `product.md` | roadmap placement, epic/story shaping, sequencing. **Entry point.** |
+| product | `producer` | `product.md` | roadmap placement, epic/story shaping, sequencing |
 | quant | `quant-analyst` (RESEARCH) | `quant.md` | research brief: formulas, grounding, trust-class analysis |
-| story | `story-author` | `story.md` | drafts the ticketed story. **Human approves before dispatch.** |
+| story | `story-author` | `story.md` | drafts the ticketed story |
 | recon | `scout` | — | read-only exploration |
 | design | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, lane split |
 | backend | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test) |
@@ -133,32 +223,10 @@ approve it. The human approves; the network never self-approves a story.
 | review | `reviewer` | — | acceptance gate: PASS / FAIL |
 
 All **ten** roles are live (`plugins/agentic-core/agents/` is the authority on
-that count). Three gates, each checking something the others cannot see:
+that count). This table says what each lane **owns**; § Phases says when it
+fires. Three gates, each checking something the others cannot see:
 `quant-analyst` gates the mathematics, `tech-lead` gates engineering coherence,
 `reviewer` gates acceptance against the story.
-
-**Any change touching `analytics/`, a formula, a weighting, a return basis, or a
-trust classification must go through the quant lane** — in research mode before,
-audit mode after. That is guardrail one made operational. It is also the
-hardest express-lane disqualifier: mathematics never takes the short route.
-
-### The express lane in this repo
-
-`orchestrate-feature` § "The express lane" defines the gate. What it means here:
-
-**Eligible.** A failing or flaky test (`test` lane). A doc reconciliation the
-reviewer or a contract note already identified (`docs` lane). A rename or a
-dead-code removal that `detect_deadcode.py` flags. A defect in shipped behaviour
-whose fix is inside one lane and changes no schema.
-
-**Not eligible, no matter how small it looks.** Anything under
-`services/quant-engine/app/schemas/` — that is the contract source of truth and
-the schema hook exists because changes there never stay in one lane. Anything
-under `analytics/`. Anything that adds or removes a field visible in
-`docs/contracts/<area>-fields.md`. Anything a user would see as new.
-
-Express still ends the same way: `python scripts/run_all_tests.py`, green, then
-the human commits. The short route skips planning, never verification.
 
 ## Repo skills agents may invoke
 

@@ -247,7 +247,7 @@ Re-calling FMP with a fresh ticker sample is not an external anchor for a
 FMP-sourced value. It is the same class of mistake as recomputing from the
 methodology doc: if FMP's taxonomy assignment is wrong, the code and the audit
 inherit the error together and every gate passes. The US-37.1 sector audit
-(`runs/2026-08-21-dynamic-sector-classification/10-quant-audit.md` § log item 1)
+(`projects/portfolio/runs/2026-08-21-dynamic-sector-classification/10-quant-audit.md` § log item 1)
 labelled exactly this `anchor: external`. It was a good check of **map
 coverage** — that every FMP sector string the map claims to handle really is one
 FMP emits — and it should keep being run under that name. It was not evidence

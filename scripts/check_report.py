@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Validate an agent report against PROTOCOL.md § 3, and its head against § 4.
 
-    python scripts/check_report.py runs/<run-id>/01-scout.md [--lane recon]
-    python scripts/check_report.py runs/<run-id>/            # every artifact
-    python scripts/check_report.py <artifact> --emit-head    # print the head
+    python scripts/check_report.py <run_dir>/01-scout.md [--lane recon]
+    python scripts/check_report.py <run_dir>/               # every artifact
+    python scripts/check_report.py <artifact> --emit-head   # print the head
     python scripts/check_report.py <artifact> --head head.txt
-    python scripts/check_report.py runs/<run-id>/ --require-heads   # close-out
+    python scripts/check_report.py <run_dir>/ --require-heads      # close-out
+
+`<run_dir>` is `<agenticRoot>/projects/<project>/runs/<run-id>/`.
 
 Exit 0 = valid. Exit 1 = violations, printed one per line. Lines prefixed `~`
 are advisory and do not fail the run.
@@ -67,7 +69,13 @@ CR_LANES = {"integration"}
 # about a run that changes the bound repo, and requiring every delivery ledger
 # to write `protocol-lint skipped (not an authoring order)` would be a line that
 # is always the same and therefore never read.
-LEDGER_GATES = ("quant-audit", "integration", "review")
+# The profile's `## Phases` table is the authority (`protocol/authoring.md`):
+# its `verify` rows name the lanes that gate *this* project. This tuple is the
+# fallback for a ledger whose profile cannot be resolved - a run dir copied
+# elsewhere, a project.md not yet written - and it is this project's set, which
+# is why resolving beats it wherever resolution is possible.
+DEFAULT_LEDGER_GATES = ("quant-audit", "integration", "review")
+LEDGER_GATES = DEFAULT_LEDGER_GATES
 # Not in LEDGER_GATES - required only when the run produced pack
 # corrections. See check_authoring_gate.
 AUTHORING_GATE = "protocol-lint"
@@ -327,8 +335,20 @@ def check(path: Path, lane: str | None = None, head: str | None = None,
             if len(lines) == 1 and re.match(r"^-\s*none\b.", lines[0], re.I):
                 # Counted as an entry, deliberately: reinterpreting it as empty
                 # could drop a real note hiding behind "none of X, but Y lags".
-                # Say so instead, so the author resolves the ambiguity.
-                warn.append(
+                # So the author resolves the ambiguity, not the script.
+                #
+                # Blocking since v0.7.1, on the evidence of run 2026-09-12: the
+                # docs lane wrote `pack_corrections: - none - verified both
+                # packs, nothing to correct`, its head therefore advertised 1
+                # correction, the orchestrator opened a pack-corrections.md for
+                # it, and the ledger then recorded `protocol-lint skipped
+                # (pack-corrections.md is empty)` about a file that was not.
+                # One ambiguous bullet, three downstream records wrong. It is
+                # also the cheapest violation in the set to fix - delete four
+                # words - and blocking is what reaches the shell-less lanes,
+                # since report_artifact_gate.py drops advisory notes and these
+                # three lanes have no other check.
+                bad.append(
                     f"{name}: '- none' carries trailing commentary, so it counts "
                     "as 1 entry - write bare '- none', or make it a real bullet")
             target, cap = _limits(lane)
@@ -552,7 +572,8 @@ def _ledger_table(text: str, heading: str) -> list[list[str]]:
     return rows[1:] if rows else []   # drop the header row
 
 
-def _gate_rows(arts: list[list[str]]) -> dict[str, str]:
+def _gate_rows(arts: list[list[str]],
+               gates: tuple[str, ...] = DEFAULT_LEDGER_GATES) -> dict[str, str]:
     """Gate lane -> the verdict its last Artifacts row recorded."""
     seen: dict[str, str] = {}
     for row in arts:
@@ -564,7 +585,7 @@ def _gate_rows(arts: list[list[str]]) -> dict[str, str]:
         mode = row[2].strip().lower()
         if lane == "quant" and mode.startswith("audit"):
             lane = "quant-audit"
-        if lane in LEDGER_GATES and verdict and verdict not in {"—", "-"}:
+        if lane in gates and verdict and verdict not in {"—", "-"}:
             seen[lane] = verdict
     return seen
 
@@ -640,7 +661,7 @@ def check_authoring_gate(run_dir: Path) -> list[str]:
             f"{AUTHORING_GATE} - name it with its verdict, or `skipped` and why"]
 
 
-def check_gates(ledger: Path) -> list[str]:
+def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]:
     """Every gate either ran and is recorded, or is accounted for as skipped.
 
     Two runs closed without an acceptance gate and without saying so anywhere
@@ -650,14 +671,15 @@ def check_gates(ledger: Path) -> list[str]:
     where it survives and can be checked.
     """
     text = ledger.read_text(encoding="utf-8")
+    gates = gates if gates is not None else profile_gates(ledger)
     stated = _ledger_field(text, "gates")
-    ran = _gate_rows(_ledger_table(text, "Artifacts"))
+    ran = _gate_rows(_ledger_table(text, "Artifacts"), gates)
     if stated is None:
         return ["no `gates:` line - the ledger cannot say which gates ran and "
                 "which were skipped on purpose"]
     low = stated.lower()
     problems = []
-    for g in LEDGER_GATES:
+    for g in gates:
         if g not in low:
             problems.append(f"`gates:` does not account for {g} - name it with "
                             f"its verdict, or `skipped` and why")
@@ -669,6 +691,206 @@ def check_gates(ledger: Path) -> list[str]:
                             f"mark it skipped - a gate that quietly did not "
                             f"run is the one failure close-out cannot see")
     return problems
+
+
+# The ledger header's own enum (protocol/orchestrator.md section 1). A run
+# whose status is not one of these cannot be resumed by a fresh session, which
+# is the only reason the field exists.
+LEDGER_STATUS = {"PLANNING", "DISPATCHING", "GATING", "BLOCKED", "CLOSED"}
+
+_SATISFIED = re.compile(r"^satisfied\b", re.I)
+_NOT_TRIGGERED = re.compile(r"^not[ _-]triggered\b\s*(.*)$", re.I | re.S)
+_PENDING = re.compile(r"^(pending|planned|queued)\b", re.I)
+
+
+def _verify_lanes(profile: str) -> tuple[str, ...]:
+    """Gate lanes a project profile declares, from its `## Phases` verify rows."""
+    lanes: list[str] = []
+    for row in _ledger_table(profile, "Phases"):
+        if len(row) < 3 or row[0].strip().lower() != "verify":
+            continue
+        lane = row[2].strip().lower()
+        if lane and lane not in lanes:
+            lanes.append(lane)
+    return tuple(lanes)
+
+
+def profile_gates(ledger: Path) -> tuple[str, ...]:
+    """The gates this run's project declares, or the fallback set.
+
+    Two ways to the profile, both cheap. The ledger names `project:` and
+    `agentic_root:`, which is the explicit route; and a run dir living at
+    `<agenticRoot>/projects/<project>/runs/<run-id>/` knows its own profile from
+    its path, which is the route that survives a ledger missing the field.
+    Neither existing is not an error - the fallback is a real set, and a script
+    that refuses to run without a profile is a script the close-out skips.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    root = _ledger_field(text, "agentic_root")
+    project = _ledger_field(text, "project")
+    candidates = []
+    if root and project:
+        candidates.append(Path(root) / "projects" / project / "project.md")
+    candidates.append(ledger.parent.parent.parent / "project.md")
+    for cand in candidates:
+        try:
+            if cand.is_file():
+                lanes = _verify_lanes(cand.read_text(encoding="utf-8"))
+                if lanes:
+                    return lanes
+        except OSError:
+            continue
+    return DEFAULT_LEDGER_GATES
+
+
+def check_header(ledger: Path) -> list[str]:
+    """The header fields a resumed session reads before anything else.
+
+    `status`, `blocked_on` and `next` are the three a fresh session acts on, and
+    each has a failure that is silent at the moment it is written: a status
+    outside the enum cannot be branched on, a `BLOCKED` with no `blocked_on`
+    stops a run without saying what would restart it, and a `CLOSED` run whose
+    `next:` still names a dispatch is how a resume re-runs a lane that already
+    ran.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    status = _ledger_field(text, "status")
+    blocked_on = _ledger_field(text, "blocked_on")
+    nxt = _ledger_field(text, "next")
+    problems = []
+    if status is None:
+        return ["no `status:` line - a run with no status cannot be resumed"]
+    if status not in LEDGER_STATUS:
+        problems.append(f"status {status!r} not in {sorted(LEDGER_STATUS)} - the "
+                        f"field takes the bare enum; a reason goes on "
+                        f"`blocked_on:`")
+    if status == "BLOCKED" and not blocked_on:
+        problems.append("status BLOCKED with no `blocked_on:` - the ledger says "
+                        "the run stopped but not what would restart it")
+    # `blocked_on: none` is an explicit "not blocked", which is a placeholder
+    # and not a claim. A sentence there on a run that is not BLOCKED is a claim,
+    # and it is one about a block that has ended.
+    stale = blocked_on and blocked_on.strip().lower().strip(".") not in {
+        "none", "-", "—", ""}
+    if status != "BLOCKED" and stale:
+        problems.append(f"`blocked_on: {blocked_on}` on a {status} run - it is "
+                        f"written only while BLOCKED, or it describes a block "
+                        f"that is over")
+    if status == "CLOSED" and not (nxt or "").lower().startswith("none"):
+        problems.append(f"status CLOSED with `next: {nxt}` - close-out sets "
+                        f"`next: none - CLOSED`, or a resumed session "
+                        f"re-dispatches a lane that already ran")
+    return problems
+
+
+def check_phases(ledger: Path) -> list[str]:
+    """Every `## Phases` row is accounted for - the termination condition.
+
+    `protocol/orchestrator.md` section 3 says a run may close when every row
+    reads `satisfied` or `not triggered (<clause>)`. That was prose, and prose
+    is what the route enum was replaced for: a `pending` row left in a CLOSED
+    ledger is the run's own record that it stopped early, and nothing read it.
+
+    The clause is required, not decorative. `not triggered` alone records that
+    a question went unasked without recording which one, which is the single
+    thing the phase model exists to give a later reader over a route name.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    rows = _ledger_table(text, "Phases")
+    status = _ledger_field(text, "status")
+    if not rows:
+        if _ledger_field(text, "plan") or _ledger_field(text, "budget"):
+            return ["no `## Phases` table - a phase-model ledger carries one, "
+                    "and without it nothing can check that the run finished "
+                    "what it planned"]
+        return []
+    problems = []
+    if not _ledger_field(text, "project"):
+        problems.append("no `project:` line - the ledger cannot say which "
+                        "profile declared these phases, so the gates it owes "
+                        "cannot be resolved")
+    for row in rows:
+        if len(row) < 4:
+            problems.append(f"`Phases` row {row[0] if row else '?'!r} has "
+                            f"{len(row)} columns - the table is "
+                            f"phase | lane | fires when | state")
+            continue
+        phase, state = row[0].strip(), row[3].strip()
+        if _SATISFIED.match(state):
+            continue
+        m = _NOT_TRIGGERED.match(state)
+        if m:
+            clause = m.group(1).strip().strip("()").strip()
+            if not clause:
+                problems.append(f"phase {phase!r} is `not triggered` with no "
+                                f"clause - write the clause that was false, or "
+                                f"the ledger records an omission where it "
+                                f"means a decision")
+            continue
+        if _PENDING.match(state):
+            if status == "CLOSED":
+                problems.append(f"phase {phase!r} is still {state!r} in a "
+                                f"CLOSED run - dispatch it, or write down the "
+                                f"clause that stopped it firing")
+            continue
+        problems.append(f"phase {phase!r} has state {state!r} - a row reads "
+                        f"`satisfied`, `pending`, or "
+                        f"`not triggered (<clause>)`")
+    return problems
+
+
+def check_budget(ledger: Path) -> list[str]:
+    """`spent` is the dispatches on disk, and `budget` is falsifiable.
+
+    Three invariants, each one a failure the ledger was already supposed to
+    prevent in prose:
+
+    - `spent` equals the number of Artifacts rows. The one failure section 1
+      spends three paragraphs on is a dispatch that happened and was never
+      recorded; this is what notices. A dispatch that produced no artifact -
+      a crashed subagent, a lost head - still owes a row, so the count holds.
+    - over budget without a `## Replans` row is drift. The budget is only
+      falsifiable if exceeding it costs a sentence.
+    - twice the budget is the hard stop, wherever the run thinks it is.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    if not _ledger_table(text, "Phases"):
+        return []
+    problems = []
+    budget_raw = _ledger_field(text, "budget")
+    spent_raw = _ledger_field(text, "spent")
+    budget = _leading_int(budget_raw)
+    spent = _leading_int(spent_raw)
+    if budget is None:
+        problems.append("no readable `budget:` - a phase-model run derives one "
+                        "at intake and it is the only number that measures the "
+                        "plan rather than the work")
+    if spent is None:
+        problems.append("no readable `spent:` - it increments on every dispatch")
+    if budget is None or spent is None:
+        return problems
+    rows = len(_ledger_table(text, "Artifacts"))
+    if spent != rows:
+        problems.append(f"`spent: {spent}` against {rows} Artifacts row(s) - "
+                        f"every dispatch owes a row, including one that "
+                        f"returned nothing; write it with `status: LOST` "
+                        f"rather than leaving the count to disagree")
+    if spent > budget and not _ledger_table(text, "Replans"):
+        problems.append(f"`spent: {spent}` is past `budget: {budget}` with no "
+                        f"`## Replans` row - say what the estimate missed and "
+                        f"what the new budget is")
+    if budget and spent > 2 * budget:
+        problems.append(f"`spent: {spent}` is past twice `budget: {budget}` - "
+                        f"that is the hard stop; hand back to the human")
+    return problems
+
+
+def _leading_int(value: str | None) -> int | None:
+    """`7 - 5 triggered phases + 2 gates` -> 7. The derivation follows the number."""
+    if not value:
+        return None
+    m = re.match(r"\s*(\d+)", value)
+    return int(m.group(1)) if m else None
 
 
 def _flag_value(argv: list[str], flag: str) -> str | None:
@@ -765,18 +987,21 @@ def main(argv: list[str]) -> int:
 
     failed = False
 
-    # Close-out also validates the ledger itself: the `gates:` line has to
-    # account for all three delivery gates, and `Open` has to hold only rows
-    # that are still open. It is checked here rather than in
-    # its own script because close-out is the only moment the answer is knowable
-    # and the only moment anyone runs a sweep - a check with its own command is
-    # a check that gets skipped.
+    # Close-out also validates the ledger itself: the header a resumed session
+    # reads, every `## Phases` row accounted for, `spent` against the dispatches
+    # on disk, the `gates:` line against the gates the profile declares, and an
+    # `Open` table holding only rows that are still open. Checked here rather
+    # than in its own script because close-out is the only moment the answer is
+    # knowable and the only moment anyone runs a sweep - a check with its own
+    # command is a check that gets skipped.
     if require_heads and target.is_dir():
         ledger = target / "run.md"
         if not ledger.is_file():
             print(f"  ~ no run.md in {target} - `gates:` not checked")
         else:
-            ledger_problems = (check_gates(ledger) + check_open_table(ledger)
+            ledger_problems = (check_header(ledger) + check_phases(ledger)
+                               + check_budget(ledger) + check_gates(ledger)
+                               + check_open_table(ledger)
                                + check_authoring_gate(target))
             if ledger_problems:
                 failed = True
@@ -784,7 +1009,8 @@ def main(argv: list[str]) -> int:
                 for g in ledger_problems:
                     print(f"  - {g}")
             else:
-                print(f"ok   {ledger} (gates, open, authoring)")
+                print(f"ok   {ledger} "
+                      f"(header, phases, budget, gates, open, authoring)")
 
     for f in files:
         notes: list[str] = []

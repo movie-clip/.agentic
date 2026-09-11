@@ -99,8 +99,8 @@ Two obligations, both mandatory:
 **You have no `Bash`, by design** — so you cannot run `scripts/check_report.py`
 on your own artifact, and you are not asked to. **The orchestrator derives your
 head from your artifact with `--emit-head` before it routes anything** (its
-standing post-dispatch step, `protocol/orchestrator.md` § "A head you cannot
-derive"). Your counts are a courtesy; the derived ones are what gets used.
+standing post-dispatch step, `protocol/orchestrator.md` § "Validate every
+artifact, derive every head"). Your counts are a courtesy; the derived ones are what gets used.
 
 So spend your effort on the artifact, not on the block. Get every section
 present and every bullet in the right one — that is what the derived head is

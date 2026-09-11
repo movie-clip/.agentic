@@ -15,6 +15,9 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 ├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
 ├─ scripts/check_report.py                ← validates an artifact, its head, and a ledger's gates
 ├─ scripts/test_check_report.py           ← pins the validator's own behaviour
+├─ scripts/hooks/report_artifact_gate.py  ← PostToolUse: checks an artifact as it is written
+├─ scripts/hooks/report_head_gate.py      ← SubagentStop: no lane finishes on a bad head
+├─ scripts/hooks/test_hooks.py            ← pins both hooks' exit codes
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
@@ -196,15 +199,16 @@ Honest list of what is still enforced by asking an agent nicely:
 |---|---|
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
 | Bullets stay routable | **script** — `check_report.py`, but only on the four gate lanes, where a bullet becomes a dispatch. Real there, advisory everywhere else, and deliberately so: 97 blocking violations off the gate lanes were overridden every time without one being a real defect. |
-| Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
+| Reports use the protocol shape | **script + hook** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own, and by `report_artifact_gate.py` on every write under `runs/`. The hook is how `scout`, `docs-engineer` and `story-author` get checked at all: they have no `Bash`, so the self-check every agent file tells them to run is one they cannot run. Real. |
 | Every gate either ran or was skipped on purpose | **script** — `check_report.py <run_dir>/ --require-heads` checks the ledger's `gates:` line against the Artifacts rows at close-out. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. It cannot tell you a skip was *wise*. |
 | A run's cost matches what the route promised | nothing, by choice. `run_cost.py` re-derived a `Cost` block from the rows until v0.5.7; the tally was never read, so the block and the script went. The `model` column stays — it is one fact per dispatch, written when the row is. |
 | Every lane runs on a chosen model | **agent frontmatter** — all eleven pinned explicitly, no `inherit`. Real. |
 | Every lane runs at a chosen effort | **agent frontmatter** — all eleven pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
-| A report head's counts match its artifact | **script** — `check_report.py --head`, and `--emit-head` derives the head so it cannot disagree. Real. |
+| A report head's counts match its artifact | **hook** — `report_head_gate.py` at `SubagentStop`. A lane whose head disagrees with its artifact does not stop; it is held, handed the derived head, and told to return that. Real, and it replaces prose that was not holding — 26 of 59 heads across eight runs disagreed with their own artifact. It also writes the `<nn>-head.txt` the close-out sweep demands, so "nobody saved the heads" stops being possible. Bounded at two holds, then it lets go and lets close-out fail. |
 | Planning artifacts carry a ≤15-line brief | **script** — `check_report.py`. Real. It cannot check the brief is *useful*. |
 | An agent reads only the pack sections it needs | prose + the pack's `## Index`. Trust. |
-| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 79 cases. Real, and it exists because a review pass found six bugs in the validator. |
+| The validator itself is correct | **tests** — `scripts/test_check_report.py`, 100 cases. Real, and it exists because a review pass found six bugs in the validator. |
+| The hooks do what they claim | **tests** — `scripts/hooks/test_hooks.py`, 20 cases, each driving the hook the way Claude Code does: a JSON payload on stdin, a decision in the exit code. Real. What it cannot pin is that the hooks are *installed* — that lives in the bound repo's `.claude/settings.json`, and an uninstalled hook is silent. The close-out sweep is the backstop. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
 | A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six lanes, narrowly (`reviewer` gets nothing that mutates). **Not yet exercised by a run** — the tools are tested, the lanes using them are not. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |

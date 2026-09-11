@@ -152,16 +152,10 @@ One fact per bullet. The orchestrator routes bullets individually, so a
 bullets are *routed*: a finding becomes a change request, a `BLOCKING` item
 becomes a dispatch. One that cannot be handed to a single lane is a structural
 problem there, and only there — elsewhere a long bullet is read by a human in
-context. The closed runs argue it from both sides. Gate lanes have never once
-exceeded 400 characters (their longest is 310), so enforcing it costs them
-nothing; every other lane produced **97 blocking violations that were overridden
-every single time**, and not one turned out to be a real content problem.
+context.
 
 **`recon` and `quant` RESEARCH get more room** because a bullet there carries a
 claim plus the `file:line` that proves it, and the citation is the point.
-`recon`'s median bullet is 314 characters — a 200-character target that half of
-all output misses is not a target, it is noise that teaches the reader to skip
-the advisory lines. It flagged 91% of `recon`'s bullets; it now flags 30%.
 
 A bullet that needs a paragraph is several bullets. If it genuinely needs a
 paragraph — a worked example, a table, a diff — put that below the block in a
@@ -183,17 +177,8 @@ your pack. So:
   `status: PARTIAL`, and name the conflict in `risks`: which pack rule, what the
   order asked, and what you did. The human decides which was right.
 
-Silently following the order is the failure to avoid. It happened on the first
-real run: a pack said a brand-new methodology section is flag-for-human, an
-order said write it, and the lane wrote it — correctly flagging the conflict,
-but reporting `DONE`, so nothing downstream treated the doc as provisional.
-
-That particular conflict no longer arises — the docs pack has since split the
-rule by whether the order specifies the content, because a convention phrased as
-*flag instead of doing* runs straight into the rule above and can only ever
-produce a report after the fact. The rule above is unchanged and still governs
-every other pack convention; a convention that only a `PARTIAL` can express is a
-convention worth rewriting rather than reporting.
+Silently following the order is the failure to avoid: a conflict nobody
+downstream can see is a conflict that gets built on.
 
 ### You cannot delete or rename files
 
@@ -257,19 +242,21 @@ Fill in only what the output leaves in angle brackets — `headline`, and
 from the artifact and must arrive unretyped.
 
 A head is a count of list items and a string sliced to an exact length. Those
-are the two things a model cannot do reliably by inspection, and the evidence is
-not ambiguous: across eight closed runs, **26 of 59 heads disagreed with their
-own artifact** — 18 on `detail`, 14 on a count — in every lane but one,
-whether or not that lane had a shell. It is not a discipline problem and no wording
-fixes it. The script counts; the lane judges.
+are the two things a model cannot do reliably by inspection, and no wording
+fixes that. The script counts; the lane judges.
 
-Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this.
-The orchestrator derives their head for them as a standing post-dispatch step —
-`protocol/orchestrator.md` § "Validate every artifact, derive every head" — so
-those lanes write the artifact and leave the counting alone. That same section
-binds the orchestrator to validate **every** artifact before routing from it,
-including those from lanes that do have `Bash`: a lane's own check is something
-it was told to run, not something you can see it ran.
+Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this,
+and are not asked to. The orchestrator validates every artifact and derives
+every head before routing from it — `protocol/orchestrator.md` § "Validate
+every artifact, derive every head" — including for lanes that do have `Bash`,
+because a lane's own check is something it was told to run, not something you
+can see it ran. Where a bound repo also wires `scripts/hooks/` into its
+`.claude/settings.json`, both checks happen earlier and mechanically: the
+artifact on every write, the head when you try to finish — which you cannot do
+on a head that disagrees with its artifact, you are held and handed the derived
+one. Write the head as described above regardless. A hook is local
+configuration and the protocol is not; a lane that assumes an enforcement it
+cannot see is the failure this section exists to prevent.
 
 **Why the head and not the body.** The orchestrator's context is the scarcest
 resource in a run, and it is the one thing every dispatch spends. A body
@@ -337,16 +324,11 @@ Run this on your own artifact before returning — **if your `tools:` includes
 `Bash`.** Exit 0 means it is routable; non-zero prints exactly what is wrong.
 
 **If you have no `Bash`, you cannot run it, and that is expected.** `scout`,
-`story-author` and `docs-engineer` are deliberately shell-less. The orchestrator
-runs the validator on every artifact before routing from it, and derives your
-head with `--emit-head` in the same step (both mandatory, not best-effort), so
-your artifact is checked and your counts are corrected either way.
-
-Do not try to do it by hand in the meantime. Put your effort into the artifact —
-every section present, every bullet under the right one — because that is what
-the derived head is counted from. And say nothing about any of it in `risks`: a
-bullet spent apologising for a tool you were never granted is a bullet the next
-lane has to read for nothing.
+`story-author` and `docs-engineer` are deliberately shell-less; § 4 says what
+happens to your artifact and your head instead. Put your effort into the
+artifact rather than auditing it by hand, and say nothing about any of it in
+`risks`: a bullet spent apologising for a tool you were never granted is a
+bullet the next lane has to read for nothing.
 
 It checks that the enums are real values, that every section is present, that an
 empty section says `- none`, that `DONE` is not paired with `NOT_RUN` on an

@@ -32,15 +32,6 @@ holds it, then read — in this order:
 
 Missing `.agentic.json` → report `BLOCKED`.
 
-The protocol is the **only** definition of the work order, the report artifact,
-the report head and the change request; nothing in this file restates them.
-
-Your order names a `run_dir` and a `report_to` path. Write the full report to
-that path yourself, then return the `REPORT HEAD` block (core § 4) as your final
-message — not the report. The orchestrator does not transcribe reports, and does
-not open your artifact unless your head's counts tell it to. A head whose counts
-disagree with the artifact silently drops work.
-
 Then read `docs/finance/financial-methodology.md`. It is the source of truth for
 every implemented formula, and you are its custodian. Everything you assert is
 measured against it, or is a proposed change to it.
@@ -240,9 +231,9 @@ violation that is not there.
 Return what the second command prints, replacing only the lines it leaves in
 angle brackets: `headline`, and `blocked_on` when your status is `BLOCKED` or
 `REFUSED`. Retype nothing else. `detail` especially is a verbatim slice of your
-own `verification.detail`, and copying it by hand is the single most common way
-a head has come back disagreeing with its artifact — 18 times across the closed
-runs. You cannot count list items or slice a string to an exact length by eye,
-and the head is made entirely of both. The script can.
+own `verification.detail`, and copying it by hand is the most common way a head
+comes back disagreeing with its artifact. You cannot count list items or slice
+a string to an exact length by eye, and the head is made entirely of both. The
+script can.
 
 This applies whether you were dispatched by the orchestrator or invoked directly.

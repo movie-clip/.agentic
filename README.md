@@ -13,10 +13,8 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 │  ├─ packs.md             applying pack_corrections at close-out
 │  └─ authoring.md         rules for writing agents, packs and protocol
 ├─ runs/<date>-<slug>/                    ← run ledgers — a slice's state on disk
-├─ scripts/check_report.py                ← validates an artifact, and its head
+├─ scripts/check_report.py                ← validates an artifact, its head, and a ledger's gates
 ├─ scripts/test_check_report.py           ← pins the validator's own behaviour
-├─ scripts/run_cost.py                    ← derives a run's cost from its ledger
-├─ scripts/test_run_cost.py
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
@@ -199,8 +197,8 @@ Honest list of what is still enforced by asking an agent nicely:
 | No agent commits | **hook** — `pre_commit_gate.py`. Real. |
 | Bullets stay routable | **script** — `check_report.py`, but only on the four gate lanes, where a bullet becomes a dispatch. Real there, advisory everywhere else, and deliberately so: 97 blocking violations off the gate lanes were overridden every time without one being a real defect. |
 | Reports use the protocol shape | **script** — `scripts/check_report.py`, run by the orchestrator on every artifact and by agents on their own. Real. |
-| A run's cost tally matches its rows | **script** — `scripts/run_cost.py`. Real. Catches a Cost block that disagrees with the Artifacts table, and a dispatch with no model. |
-| Every gate either ran or was skipped on purpose | **script** — `run_cost.py` checks the ledger's `gates:` line against the Artifacts rows. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. It cannot tell you a skip was *wise*. |
+| Every gate either ran or was skipped on purpose | **script** — `check_report.py <run_dir>/ --require-heads` checks the ledger's `gates:` line against the Artifacts rows at close-out. Real. Catches a gate omitted from the line, one claimed but never run, and one whose stated verdict disagrees with its row. It cannot tell you a skip was *wise*. |
+| A run's cost matches what the route promised | nothing, by choice. `run_cost.py` re-derived a `Cost` block from the rows until v0.5.7; the tally was never read, so the block and the script went. The `model` column stays — it is one fact per dispatch, written when the row is. |
 | Every lane runs on a chosen model | **agent frontmatter** — all eleven pinned explicitly, no `inherit`. Real. |
 | Every lane runs at a chosen effort | **agent frontmatter** — all eleven pinned (`high` for the 5 deciding lanes, `medium` for the rest); the implicit default was `xhigh`. Real. |
 | A report head's counts match its artifact | **script** — `check_report.py --head`, and `--emit-head` derives the head so it cannot disagree. Real. |

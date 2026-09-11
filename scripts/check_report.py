@@ -26,7 +26,9 @@ mandate the close-out cannot see is a mandate that quietly lapses: across runs
 2026-08-31 through 2026-09-03, not one head was saved and `--head` was never
 run, so `rounds: 0` meant "nothing was sent back" and "nothing was checked"
 indistinguishably. This flag makes the omission a failure the sweep reports,
-for every numbered dispatch slot, in one command.
+for every numbered dispatch slot, in one command. It also checks the run
+ledger's `gates:` line against its Artifacts rows, so a gate that quietly did
+not run cannot pass close-out unnoticed.
 
 Dependency-free by design: it runs anywhere the network runs.
 """
@@ -53,6 +55,19 @@ LANES = {"product", "quant", "recon", "story", "design", "backend", "frontend",
 GATE_LANES = {"integration", "review", "quant-audit", "protocol-lint"}
 # Only the tech lead's integration pass may request changes.
 CR_LANES = {"integration"}
+
+# The three gates a delivery run can be asked for, checked against the ledger's
+# `gates:` line by the close-out sweep. `quant-audit` is conditional on the
+# substance being mathematical and `review` on there being a story to accept, so
+# none of these is required by route alone - which is exactly why the ledger has
+# to say what happened to each one rather than the sweep guessing.
+#
+# Deliberately three where GATE_LANES is four. The fourth, `protocol-lint`,
+# gates authoring orders against the network's own files; it has nothing to say
+# about a run that changes the bound repo, and requiring every delivery ledger
+# to write `protocol-lint skipped (not an authoring order)` would be a line that
+# is always the same and therefore never read.
+LEDGER_GATES = ("quant-audit", "integration", "review")
 
 # PROTOCOL.md § 3 "Bullet discipline". One fact per bullet, short enough that
 # the orchestrator can route it without re-reading the artifact.
@@ -509,6 +524,79 @@ def _check_head(head: str, text: str) -> list[str]:
     return bad
 
 
+def _ledger_field(text: str, name: str) -> str | None:
+    """A `name:  value` line from the ledger header, or None."""
+    m = re.search(rf"^{re.escape(name)}:[ 	]*(.*)$", text, re.M)
+    return m.group(1).strip() if m else None
+
+
+def _ledger_table(text: str, heading: str) -> list[list[str]]:
+    """Rows of the markdown table under `## <heading>`, header/rule dropped."""
+    m = re.search(rf"^## {re.escape(heading)}[ 	]*$", text, re.M)
+    if not m:
+        return []
+    rows: list[list[str]] = []
+    for ln in text[m.end():].splitlines():
+        s = ln.strip()
+        if s.startswith("## "):
+            break
+        if not s.startswith("|"):
+            continue
+        cells = [c.strip() for c in s.strip("|").split("|")]
+        if all(set(c) <= {"-", ":"} and c for c in cells):
+            continue          # the |---|---| rule
+        rows.append(cells)
+    return rows[1:] if rows else []   # drop the header row
+
+
+def _gate_rows(arts: list[list[str]]) -> dict[str, str]:
+    """Gate lane -> the verdict its last Artifacts row recorded."""
+    seen: dict[str, str] = {}
+    for row in arts:
+        if len(row) < 8:
+            continue
+        lane, verdict = row[1].strip().lower(), row[7].strip()
+        # A gate can be written as its lane (`quant-audit`) or as a lane plus a
+        # mode (`quant` + `AUDIT`), and both spellings are in the closed runs.
+        mode = row[2].strip().lower()
+        if lane == "quant" and mode.startswith("audit"):
+            lane = "quant-audit"
+        if lane in LEDGER_GATES and verdict and verdict not in {"—", "-"}:
+            seen[lane] = verdict
+    return seen
+
+
+def check_gates(ledger: Path) -> list[str]:
+    """Every gate either ran and is recorded, or is accounted for as skipped.
+
+    Two runs closed without an acceptance gate and without saying so anywhere
+    that outlives the session. The skill already required the orchestrator to
+    report "which gates did not run and why" - to the human, once, in prose
+    that is gone by the next run. This puts the same disclosure in the ledger,
+    where it survives and can be checked.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    stated = _ledger_field(text, "gates")
+    ran = _gate_rows(_ledger_table(text, "Artifacts"))
+    if stated is None:
+        return ["no `gates:` line - the ledger cannot say which gates ran and "
+                "which were skipped on purpose"]
+    low = stated.lower()
+    problems = []
+    for g in LEDGER_GATES:
+        if g not in low:
+            problems.append(f"`gates:` does not account for {g} - name it with "
+                            f"its verdict, or `skipped` and why")
+        elif g in ran and ran[g].lower() not in low:
+            problems.append(f"`gates:` disagrees with the rows on {g}: rows "
+                            f"recorded {ran[g]}")
+        elif g not in ran and "skip" not in low.split(g, 1)[1][:40]:
+            problems.append(f"{g} has no verdict row, and `gates:` does not "
+                            f"mark it skipped - a gate that quietly did not "
+                            f"run is the one failure close-out cannot see")
+    return problems
+
+
 def _flag_value(argv: list[str], flag: str) -> str | None:
     """Value after `flag`, or None. A following flag is not a value."""
     if flag not in argv:
@@ -602,6 +690,26 @@ def main(argv: list[str]) -> int:
                 else Path(head_path).read_text(encoding="utf-8"))
 
     failed = False
+
+    # Close-out also validates the ledger itself: the `gates:` line has to
+    # account for all three delivery gates. It is checked here rather than in
+    # its own script because close-out is the only moment the answer is knowable
+    # and the only moment anyone runs a sweep - a check with its own command is
+    # a check that gets skipped.
+    if require_heads and target.is_dir():
+        ledger = target / "run.md"
+        if not ledger.is_file():
+            print(f"  ~ no run.md in {target} - `gates:` not checked")
+        else:
+            gate_problems = check_gates(ledger)
+            if gate_problems:
+                failed = True
+                print(f"FAIL {ledger}")
+                for g in gate_problems:
+                    print(f"  - {g}")
+            else:
+                print(f"ok   {ledger} (gates)")
+
     for f in files:
         notes: list[str] = []
         f_head = head

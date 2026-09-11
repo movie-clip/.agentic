@@ -52,9 +52,9 @@ gates:        <each of quant-audit, integration, review — verdict, or skipped 
 `model` is the model the dispatch **actually ran on** — the agent file's default,
 or the override if you escalated. Record an effort override the same way
 (`sonnet/max↑`); an unoverridden dispatch needs only the model, since the agent
-file pins its effort. Mark an escalation with `↑` and say why in
-**Cost** below. Writing the default from memory rather than from the agent file
-is how this column becomes fiction; read it if you are unsure.
+file pins its effort. Mark an escalation with `↑`. Writing the default from
+memory rather than from the agent file is how this column becomes fiction; read
+it if you are unsure.
 
 ## Open
 | kind | from | ref | one-line | state |
@@ -73,40 +73,7 @@ is how this column becomes fiction; read it if you are unsure.
 |---|---|---|---|
 | CR-1 | backend | 1 | 2 |
 
-## Cost
-| metric | value |
-|---|---|
-| dispatches | 16 |
-| rounds | 1 |
-| by model | sonnet 15 · opus 1 |
-| escalations | 03-backend sonnet→opus (second CR round on the same finding) |
 ```
-
-You fill **Cost** at close-out, from the Artifacts and Rounds tables above —
-it is a tally, not a new record. `scripts/run_cost.py <run_dir>` derives the
-same numbers and will tell you if the two disagree.
-
-### Why the ledger records what a run cost
-
-Step 1 of `orchestrate-feature` asks you to decide what a run costs *before*
-spending it. Until v0.4.1 nothing recorded what it then actually cost, so the
-route table's cost model was asserted and never once measured — and every lane
-ran on whatever the main session happened to be, invisibly.
-
-Two numbers make the difference. **Dispatches** says whether the route you chose
-matched the work. **Rounds** says whether a lane's model was equal to its job: a
-cheaper model that produces two change-request rounds costs more than the
-expensive one it replaced, because a round is a re-dispatch plus a re-run of the
-integration gate. Recording both is what makes the model policy in
-`protocol/authoring.md` falsifiable rather than a preference.
-
-Fill Cost even on a one-dispatch express run. A cost record that only exists for
-big runs cannot show you that the small ones were the expensive habit.
-
-**Mid-flight, the unfilled metrics are `—`, not `0`.** `0` is a claim that no
-dispatch happened, and `run_cost.py` will correctly call it a mismatch against
-the rows; `—` says the tally is not written yet, which is the truth until
-close-out.
 
 ### The row is written when the head returns, not when you are done with it
 
@@ -121,13 +88,13 @@ do next, so you go do it; or you tell the human what came back and the turn
 ends. Either way the dispatch happened, the artifact is on disk, and the ledger
 does not know. It happened in `2026-08-21-epic38-followups-and-etf`: the
 producer returned, the orchestrator validated its head, read its brief and
-reported it — and the Artifacts table still showed one row, `next:` still said
-`awaiting 02-delivery-brief.md from producer`, and `run_cost.py` exited 1.
+reported it — and the Artifacts table still showed one row, while `next:` still
+said `awaiting 02-delivery-brief.md from producer`.
 
 That failure is quiet in a way the others are not. The artifact is fine; the
 work is fine; only the record is wrong, so nothing downstream complains until a
-resume re-dispatches a lane that already ran, or the close-out tally is
-assembled from a table that is missing rows. **Updating the ledger before a
+resume re-dispatches a lane that already ran, or close-out reads a table that is
+missing rows. **Updating the ledger before a
 dispatch does not discharge this** — a pre-dispatch edit records intent, and
 intent is exactly what a stale ledger already has too much of.
 
@@ -157,8 +124,8 @@ saying so. `2026-08-25-leftover-findings-fold-in` skipped the same gate and only
 caught it because the docs lane happened to notice at close-out and put it in a
 `handoff` bullet. The skill already required you to report which gates did not
 run and why; it required you to say it to the human, once, in prose that is gone
-by the next run. Say it in the ledger, where it survives and `run_cost.py`
-checks it.
+by the next run. Say it in the ledger, where it survives and
+`check_report.py <run_dir>/ --require-heads` checks it at close-out.
 
 ### `next:` is what makes a run resumable
 

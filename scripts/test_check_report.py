@@ -363,6 +363,85 @@ check("head_path_for maps slot to head file",
 check("head_path_for returns None off-slot",
       cr.head_path_for(Path("/r/pack-corrections.md")) is None)
 
+print("the close-out sweep also checks the ledger's `gates:` line")
+
+LEDGER = """# RUN test
+status:       CLOSED
+route:        full
+gates:        quant-audit PASS · integration skipped (none) · review skipped (none)
+
+## Artifacts
+| # | lane | mode | agent | model | artifact | status | verdict |
+|---|------|------|-------|-------|----------|--------|---------|
+| 01 | recon | — | scout | sonnet | 01-lane.md | DONE | — |
+| 02 | quant | AUDIT | quant-analyst | opus | 02-quant.md | DONE | PASS |
+"""
+
+
+def _gates(line):
+    """Problems the sweep reports for a ledger whose `gates:` line is `line`."""
+    d = Path(tempfile.mkdtemp())
+    body = LEDGER if line is None else LEDGER.replace(
+        "quant-audit PASS · integration skipped (none) · "
+        "review skipped (none)", line)
+    if line is None:
+        body = "\n".join(l for l in LEDGER.splitlines()
+                         if not l.startswith("gates:")) + "\n"
+    (d / "run.md").write_text(body, encoding="utf-8")
+    return cr.check_gates(d / "run.md")
+
+
+check("all three named, verdicts matching the rows, is clean",
+      _gates("quant-audit PASS · integration skipped (none) · "
+             "review skipped (none)") == [], str(_gates(None)))
+check("a ledger with no `gates:` line says so",
+      any("no `gates:` line" in x for x in _gates(None)), str(_gates(None)))
+
+# The failure this exists for: a run that closed with no acceptance gate and
+# nothing anywhere saying so. Both spellings of that are caught.
+_left_out = _gates("quant-audit PASS · integration skipped (none)")
+check("a gate left out of the line is caught",
+      any("does not account for review" in x for x in _left_out), str(_left_out))
+_claimed = _gates("quant-audit PASS · integration skipped (none) · review PASS")
+check("a gate claimed but never run is caught",
+      any("no verdict row" in x and "review" in x for x in _claimed), str(_claimed))
+_disagrees = _gates("quant-audit FAIL · integration skipped (none) · "
+                    "review skipped (none)")
+check("a verdict disagreeing with the rows is caught",
+      any("disagrees with the rows on quant-audit" in x for x in _disagrees),
+      str(_disagrees))
+_ok = _gates("quant-audit PASS · integration skipped (express route) · "
+             "review skipped (no story to accept)")
+check("skipping a gate on purpose is clean", _ok == [], str(_ok))
+
+# Wired into the sweep, not just importable: the close-out command is the only
+# one anybody runs, so a check reachable only from Python is a check nobody runs.
+_run = Path(tempfile.mkdtemp())
+(_run / "01-lane.md").write_text(BLOCK, encoding="utf-8")
+(_run / "01-head.txt").write_text(_HEAD_OK, encoding="utf-8")
+(_run / "run.md").write_text(LEDGER, encoding="utf-8")
+_proc = subprocess.run(
+    [sys.executable, str(Path(cr.__file__)), str(_run), "--require-heads"],
+    capture_output=True, text=True)
+check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
+check("and the sweep says it checked the gates",
+      "(gates)" in _proc.stdout, _proc.stdout)
+
+(_run / "run.md").write_text(
+    LEDGER.replace(" · review skipped (none)", ""), encoding="utf-8")
+_proc = subprocess.run(
+    [sys.executable, str(Path(cr.__file__)), str(_run), "--require-heads"],
+    capture_output=True, text=True)
+check("an unaccounted gate fails the close-out sweep", _proc.returncode == 1,
+      _proc.stdout)
+
+# Mid-flight sweeps have no verdicts yet, so the check belongs to close-out only.
+_proc = subprocess.run(
+    [sys.executable, str(Path(cr.__file__)), str(_run)],
+    capture_output=True, text=True)
+check("without --require-heads the ledger is not checked", _proc.returncode == 0,
+      _proc.stdout)
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

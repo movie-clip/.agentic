@@ -129,8 +129,8 @@ produced evidence the lane is out of its depth:
 - a lane returned `BLOCKED` on something that is not a missing input, or
 - a finding reaches its **second** change-request round.
 
-Record any override in the `model` column as `opus↑` and explain it in **Cost**
-at close-out. A pre-emptive escalation is just an expensive default with extra
+Record any override in the `model` column as `opus↑` and say why when you report
+close-out. A pre-emptive escalation is just an expensive default with extra
 steps — escalate on what the run showed you, not on how hard the work looks.
 
 The full flow is ten-plus dispatches and four blocking human stops. That is
@@ -514,8 +514,9 @@ a closed run has been missing:
       at all, so `rounds: 0` could not distinguish "nothing came back" from
       "nothing was looked at". A non-zero exit is not a close-out blocker you
       may note and move past — re-derive the missing head with `--emit-head`,
-      or re-dispatch the lane, then run it again.
-- [ ] **`Cost` is filled and `run_cost.py` exits 0** (below).
+      or re-dispatch the lane, then run it again. The same sweep checks the
+      ledger's `gates:` line against the Artifacts rows, so a gate that quietly
+      did not run fails close-out rather than disappearing with the session.
 - [ ] **`next:` says `none — CLOSED`**, so a resumed session does not re-dispatch
       a lane that already ran.
 
@@ -544,28 +545,6 @@ pack, without a scope fence, and without a report anything downstream can read.
 
 The same applies to reaching for a repo skill the profile marks as superseded.
 If the routing table names an agent for a job, that agent does the job.
-
----
-
-### Close the cost record
-
-Fill the ledger's **Cost** block from the Artifacts and Rounds tables, then
-check it:
-
-```bash
-python <agentic_root>/scripts/run_cost.py <run_dir>
-```
-
-Exit 0 means your tally matches the rows. Non-zero means it does not, or a
-dispatch never recorded its model — either way the run is not closed, because
-an unrecorded model makes the run unmeasurable and a wrong tally is worse than
-no tally at all.
-
-Report the line to the human alongside `dispatched: <n>`. Two runs of the same
-route with very different costs is the most useful signal this network
-produces about itself: it is how the route table's cost model stops being an
-assertion, and how you find out whether a cheaper model on a lane bought
-anything or just paid for extra change-request rounds.
 
 ## Degrading gracefully
 

@@ -41,7 +41,7 @@ disagree with the artifact silently drops work.
 ## Why this gate exists
 
 Most of this network's correctness lives in prose, not code. `check_report.py`
-validates an artifact's shape and `run_cost.py` re-derives a ledger's tally, but
+validates an artifact's shape and, at close-out, a ledger's `gates:` line, but
 **nothing mechanically checks the files that define the lanes themselves.** An
 agent file with a wrong `model:` line bills wrong on every dispatch for the rest
 of its life; a pack section filed as conditional when its condition is not

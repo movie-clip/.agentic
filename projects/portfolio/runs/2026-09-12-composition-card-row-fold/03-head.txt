@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-composition-card-row-fold/03
+artifact: C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-composition-card-row-fold\03-integration.md
+status: DONE
+verdict: PASS
+verification: PASS
+detail: exit_code 0, failure_count 0; backend pytest, desktop vitest, tsc --noEmit, dead-code gate (ruff+vulture+knip) all ran; tail: "All tests passed."
+changed: 0
+contract_notes: 0
+pack_corrections: 0
+handoff: 2
+risks: 0
+headline: Frontend and test lanes' shared-fold refactor is engineering-coherent; full canonical suite green, no blocking findings.

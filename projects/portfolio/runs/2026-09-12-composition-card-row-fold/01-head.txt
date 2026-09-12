@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-composition-card-row-fold/01
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-composition-card-row-fold\01-frontend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          tsc --noEmit completed with no output (no errors)
+changed:         6
+contract_notes:  1
+pack_corrections: 0
+handoff:         3
+risks:           0
+headline:        Sector Composition and Benchmark Positioning now render side by side under one shared fold control, replacing the stacked layout and per-card toggle.

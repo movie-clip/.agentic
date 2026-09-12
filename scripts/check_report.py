@@ -249,6 +249,41 @@ NAME_ALIASES = {
 }
 
 
+def _is_ledger(path: Path) -> bool:
+    """The run ledger, by the two marks the protocol fixes: its name and its
+    first line. Everything else in a run dir opens with `REPORT`."""
+    if path.name.lower() == "run.md":
+        return True
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                return line.strip().upper().startswith("# RUN ")
+    except OSError:
+        return False
+    return False
+
+
+def check_ledger(ledger: Path, closed_only: bool = False) -> list[str]:
+    """Everything the ledger itself must satisfy, in one call.
+
+    `check_gates` is the one member that cannot answer mid-run - a gate with no
+    verdict row is a failure at close-out and simply the current state at
+    dispatch three - so it joins only once the run says it is CLOSED.
+    """
+    problems = (check_header(ledger) + check_phases(ledger)
+                + check_budget(ledger) + check_decisions(ledger)
+                + check_open_table(ledger) + check_models(ledger)
+                + check_authoring_gate(ledger.parent))
+    status = (_ledger_field(ledger.read_text(encoding="utf-8"), "status")
+              or "").strip().upper()
+    if status == "CLOSED" or not closed_only:
+        problems += check_gates(ledger)
+    return problems
+
+
+LEDGER_CHECKS = "header, phases, budget, decisions, gates, open, models, authoring"
+
+
 def lane_from_name(path: Path) -> str | None:
     """Infer the lane from an artifact filename, or None if unclear.
 
@@ -901,6 +936,155 @@ def check_decisions(ledger: Path) -> list[str]:
             f"and a resumed session has no record at all"]
 
 
+AGENT_MODELS = {"opus", "sonnet", "haiku"}
+AGENT_EFFORTS = {"low", "medium", "high", "xhigh", "max"}
+AGENT_KEYS = ("name", "description", "tools", "model", "effort")
+
+
+def _agents_dir() -> Path:
+    """`<agenticRoot>/plugins/agentic-core/agents`, from this script's location.
+
+    Not from the ledger's `agentic_root:`. A run whose ledger points at the
+    wrong root is exactly the run whose agent files you most want checked, and
+    this script already lives inside the tree it is checking.
+    """
+    return (Path(__file__).resolve().parent.parent
+            / "plugins" / "agentic-core" / "agents")
+
+
+def _frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
+    """Parse a `---` frontmatter block the way a YAML loader would, and say so.
+
+    Deliberately not PyYAML - this script is dependency-free by design. It only
+    needs to reproduce one failure, because that failure is the one that
+    happened: a plain (unquoted) scalar containing a colon followed by a space
+    is not a scalar to a YAML parser, it is a nested mapping, and the block
+    raises. Claude Code then loads the agent with *no* frontmatter at all - no
+    `tools:`, no `model:`, no `description:`.
+
+    Silent in every direction. The lane still runs, so nothing fails; it simply
+    runs unscoped, on the default model, with every MCP tool schema in the
+    session loaded into its context.
+    """
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}, ["no `---` frontmatter block"]
+    try:
+        end = next(i for i in range(1, len(lines)) if lines[i].strip() == "---")
+    except StopIteration:
+        return {}, ["frontmatter block is never closed by a second `---`"]
+
+    data: dict[str, str] = {}
+    problems: list[str] = []
+    key = None
+    for raw in lines[1:end]:
+        if not raw.strip():
+            continue
+        if raw[:1] in " \t" and key:       # folded continuation of the value
+            data[key] += " " + raw.strip()
+            continue
+        m = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", raw)
+        if not m:
+            problems.append(f"frontmatter line is not `key: value`: {raw[:60]!r}")
+            continue
+        key, value = m.group(1), m.group(2).strip()
+        data[key] = value
+
+    for k, v in data.items():
+        if v[:1] in ("'", '"'):
+            continue                       # quoted: a colon inside is fine
+        hit = re.search(r".{0,30}\S: \S.{0,30}", v)
+        if hit:
+            problems.append(
+                f"`{k}:` is an unquoted scalar containing a colon-space, so the "
+                f"whole frontmatter block fails to parse and every field in it "
+                f"is dropped - the lane then runs unscoped, on the default "
+                f"model, with every tool schema in the session loaded. "
+                f"Rewrite the colon or quote the value: ...{hit.group(0)}...")
+    return data, problems
+
+
+def check_agents(agents_dir: Path | None = None) -> list[str]:
+    """Every agent definition parses, and declares what authoring.md requires.
+
+    `protocol/authoring.md` already says all of this in prose - never
+    `inherit`, never `fable`, `effort` is a separate dial, grant tools
+    narrowly. A YAML typo defeats all four at once without failing anything,
+    which is what `2026-09-12-composition-card-row-fold` ran on: `tech-lead`,
+    `producer` and `quant-analyst` had unparseable frontmatter, so the
+    integration gate arrived with a 49,341-token baseline against the frontend
+    lane's 15,395 - roughly 34,000 tokens of tool schemas for tools its own
+    file does not grant it - and had to call `ToolSearch` to find the two
+    `mcp__project__` tools it was already supposed to be holding.
+    """
+    agents_dir = agents_dir or _agents_dir()
+    if not agents_dir.is_dir():
+        return []
+    problems = []
+    for path in sorted(agents_dir.glob("*.md")):
+        data, bad = _frontmatter(path.read_text(encoding="utf-8"))
+        for b in bad:
+            problems.append(f"{path.name}: {b}")
+        if bad:
+            continue                       # every field below is unreliable
+        for k in AGENT_KEYS:
+            if not data.get(k):
+                problems.append(f"{path.name}: missing `{k}:`")
+        name, model = data.get("name", ""), data.get("model", "").lower()
+        effort = data.get("effort", "").lower()
+        if name and name != path.stem:
+            problems.append(f"{path.name}: `name: {name}` does not match the "
+                            f"filename - dispatch addresses the file")
+        if model and model not in AGENT_MODELS:
+            problems.append(f"{path.name}: `model: {model}` - authoring.md "
+                            f"allows {sorted(AGENT_MODELS)}, and neither "
+                            f"`inherit` nor `fable`")
+        if effort and effort not in AGENT_EFFORTS:
+            problems.append(f"{path.name}: `effort: {effort}` is not one of "
+                            f"{sorted(AGENT_EFFORTS)}")
+    return problems
+
+
+def check_models(ledger: Path, agents_dir: Path | None = None) -> list[str]:
+    """The ledger's `model` column says what actually ran, or it says nothing.
+
+    It is written by hand, from the orchestrator's memory of the agent file, at
+    the moment the head comes back - and nothing has ever compared the two.
+    `2026-09-12-composition-card-row-fold` recorded `opus` against the
+    integration gate. `tech-lead.md` declares `sonnet`; the transcript says
+    `claude-sonnet-5`. The column was the only wrong thing in an otherwise
+    clean ledger, and it is the column a cost review would trust.
+    """
+    agents_dir = agents_dir or _agents_dir()
+    if not agents_dir.is_dir():
+        return []
+    problems = []
+    for row in _ledger_table(ledger.read_text(encoding="utf-8"), "Artifacts"):
+        if len(row) < 5:
+            continue
+        agent, claimed = row[3].strip(), row[4].strip().lower()
+        if not agent or agent in ("-", "--", "\u2014") or not claimed:
+            continue
+        if claimed in ("-", "--", "\u2014"):
+            continue
+        path = agents_dir / f"{agent}.md"
+        if not path.is_file():
+            problems.append(f"Artifacts row {row[0].strip()} names agent "
+                            f"{agent!r}, which has no definition in "
+                            f"{agents_dir.name}/")
+            continue
+        data, bad = _frontmatter(path.read_text(encoding="utf-8"))
+        if bad:
+            continue                       # check_agents owns that failure
+        declared = data.get("model", "").lower()
+        if declared and claimed != declared:
+            problems.append(
+                f"Artifacts row {row[0].strip()} records `model: {claimed}` for "
+                f"{agent}, whose definition declares `{declared}` - one of the "
+                f"two is wrong, and the ledger is the copy nobody re-derives")
+    return problems
+
+
 def check_budget(ledger: Path) -> list[str]:
     """`spent` is the dispatches on disk, and `budget` is falsifiable.
 
@@ -1020,6 +1204,19 @@ def main(argv: list[str]) -> int:
         print(head_for(target))
         return 0
 
+    if target.is_file() and _is_ledger(target):
+        # Pointing the validator at the ledger used to produce nine failures
+        # that were all the same failure: it was being asked the questions a
+        # lane report answers. It is not a lane report.
+        problems = check_ledger(target, closed_only=True)
+        if problems:
+            print(f"FAIL {target}")
+            for g in problems:
+                print(f"  - {g}")
+            return 1
+        print(f"ok   {target} ({LEDGER_CHECKS})")
+        return 0
+
     if target.is_dir():
         # A report is a file whose first line says so — PROTOCOL.md § 3's own
         # definition. The rule used to be the filename regex `^\d{2}-`, which
@@ -1056,23 +1253,25 @@ def main(argv: list[str]) -> int:
     # than in its own script because close-out is the only moment the answer is
     # knowable and the only moment anyone runs a sweep - a check with its own
     # command is a check that gets skipped.
-    if require_heads and target.is_dir():
+    if target.is_dir():
         ledger = target / "run.md"
         if not ledger.is_file():
-            print(f"  ~ no run.md in {target} - `gates:` not checked")
-        else:
-            ledger_problems = (check_header(ledger) + check_phases(ledger)
-                               + check_budget(ledger) + check_decisions(ledger)
-                               + check_gates(ledger) + check_open_table(ledger)
-                               + check_authoring_gate(target))
+            print(f"  ~ no run.md in {target} - the ledger was not checked")
+        elif require_heads:
+            ledger_problems = check_ledger(ledger)
             if ledger_problems:
                 failed = True
                 print(f"FAIL {ledger}")
                 for g in ledger_problems:
                     print(f"  - {g}")
             else:
-                print(f"ok   {ledger} (header, phases, budget, decisions, "
-                      f"gates, open, authoring)")
+                print(f"ok   {ledger} ({LEDGER_CHECKS})")
+        else:
+            # Silence here is the bug. A sweep that exits 0 without opening the
+            # ledger looks identical to one that read it and found it clean.
+            print(f"  ~ {ledger.name} not checked - this sweep validates "
+                  f"artifacts only; add --require-heads for the ledger, or "
+                  f"point the validator straight at run.md")
 
     for f in files:
         notes: list[str] = []

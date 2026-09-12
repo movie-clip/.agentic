@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-composition-card-row-fold/04
+artifact: C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-composition-card-row-fold\04-docs.md
+status: DONE
+verdict: NONE
+verification: NOT_RUN
+detail: order's verification field is NONE; doc-only change, no code touched
+changed: 2
+contract_notes: 0
+pack_corrections: 0
+handoff: 0
+risks: 0
+headline: Updated dashboard-fields.md to describe the shared-card fold and side-by-side composition layout, replacing the stale independent-fold claim.

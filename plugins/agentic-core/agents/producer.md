@@ -1,6 +1,6 @@
 ---
 name: producer
-description: Use this agent FIRST for any request that could become work - a feature idea, a complaint that something is wrong, "what should we do next", or a half-formed "wouldn't it be good if". It owns the roadmap: it decides whether the request fits an in-flight epic, needs a new story, needs a new epic, is already covered by existing work, or should be declined. It also owns sequencing and dependencies. It does not write stories or code; it returns a delivery brief that says what should be built, where it belongs, and in what order.
+description: Use this agent FIRST for any request that could become work - a feature idea, a complaint that something is wrong, "what should we do next", or a half-formed "wouldn't it be good if". It owns the roadmap - it decides whether the request fits an in-flight epic, needs a new story, needs a new epic, is already covered by existing work, or should be declined. It also owns sequencing and dependencies. It does not write stories or code; it returns a delivery brief that says what should be built, where it belongs, and in what order.
 tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 effort: high

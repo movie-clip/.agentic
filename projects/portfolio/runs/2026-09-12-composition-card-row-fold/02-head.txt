@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-composition-card-row-fold/02
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-composition-card-row-fold\02-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          43 test files passed, 388 tests passed, 0 failed, 0 skipped
+changed:         2
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+risks:           0
+headline:        Moved BenchmarkPositioningCard's fold/expand tests to DashboardPanel's shared composition-card toggle; full vitest suite passes.

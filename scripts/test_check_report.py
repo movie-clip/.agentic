@@ -480,7 +480,7 @@ _proc = subprocess.run(
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
 check("and the sweep says which ledger checks it ran",
-      "(header, phases, budget, decisions, gates, open, authoring)"
+      "(header, phases, budget, decisions, gates, open, models, authoring)"
       in _proc.stdout, _proc.stdout)
 
 # The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
@@ -774,6 +774,113 @@ check("and the gates a project does not declare are not demanded of it",
       not any("review" in x for x in _pgates), str(_pgates))
 check("while the ones it does declare are",
       any("lint-gate" in x for x in _pgates), str(_pgates))
+
+print("F13 - an agent definition whose frontmatter does not parse")
+_FM_OK = """---
+name: tech-lead
+description: Turn an approved story into a technical plan - layer sequencing.
+tools: Read, Write, Glob, Grep, Bash
+model: sonnet
+effort: high
+---
+
+body
+"""
+_FM_BAD = _FM_OK.replace("technical plan - layer", "technical plan: layer")
+_d, _probs = cr._frontmatter(_FM_OK)
+check("a clean block parses to its five fields",
+      sorted(_d) == ["description", "effort", "model", "name", "tools"]
+      and _probs == [], str(_probs))
+_d, _probs = cr._frontmatter(_FM_BAD)
+check("a colon-space in an unquoted scalar is caught",
+      any("colon-space" in x for x in _probs), str(_probs))
+check("and the message says the fields are dropped, not just malformed",
+      any("unscoped" in x for x in _probs), str(_probs))
+_d, _probs = cr._frontmatter(_FM_BAD.replace(
+    "description: Turn", "description: \"Turn").replace(
+    "layer sequencing.", "layer sequencing.\""))
+check("quoting the value settles it", _probs == [], str(_probs))
+check("a file with no frontmatter at all is caught",
+      cr._frontmatter("just a body\n")[1] != [])
+check("and one whose block never closes",
+      any("never closed" in x
+          for x in cr._frontmatter("---\nname: x\nbody\n")[1]))
+
+_adir = Path(tempfile.mkdtemp()) / "agents"
+_adir.mkdir()
+(_adir / "tech-lead.md").write_text(_FM_OK, encoding="utf-8")
+check("a directory of clean agent files passes",
+      cr.check_agents(_adir) == [], str(cr.check_agents(_adir)))
+(_adir / "tech-lead.md").write_text(_FM_BAD, encoding="utf-8")
+check("and one broken file fails it",
+      any("colon-space" in x for x in cr.check_agents(_adir)))
+(_adir / "tech-lead.md").write_text(
+    _FM_OK.replace("model: sonnet", "model: inherit"), encoding="utf-8")
+check("`model: inherit` is refused - authoring.md forbids it by name",
+      any("inherit" in x for x in cr.check_agents(_adir)),
+      str(cr.check_agents(_adir)))
+(_adir / "tech-lead.md").write_text(
+    _FM_OK.replace("effort: high\n", ""), encoding="utf-8")
+check("a missing `effort:` is a half-configured lane, and fails",
+      any("effort" in x for x in cr.check_agents(_adir)),
+      str(cr.check_agents(_adir)))
+(_adir / "tech-lead.md").write_text(
+    _FM_OK.replace("name: tech-lead", "name: techlead"), encoding="utf-8")
+check("a name that does not match its filename fails",
+      any("does not match" in x for x in cr.check_agents(_adir)))
+check("and a directory that does not exist is not an error",
+      cr.check_agents(_adir / "nope") == [])
+
+print("F14 - the ledger's model column against what the agent declares")
+(_adir / "tech-lead.md").write_text(_FM_OK, encoding="utf-8")
+_mroot = Path(tempfile.mkdtemp())
+_mled = _mroot / "run.md"
+_ARTS = """# RUN demo
+status:       CLOSED
+
+## Artifacts
+| # | lane | mode | agent | model | artifact | status | verdict |
+|---|------|------|-------|-------|----------|--------|---------|
+| 03 | integration | INTEGRATION | tech-lead | opus | 03.md | DONE | PASS |
+"""
+_mled.write_text(_ARTS, encoding="utf-8")
+check("a row claiming opus for a sonnet agent is caught",
+      any("declares `sonnet`" in x for x in cr.check_models(_mled, _adir)),
+      str(cr.check_models(_mled, _adir)))
+_mled.write_text(_ARTS.replace("| opus |", "| sonnet |"), encoding="utf-8")
+check("and the true model settles it",
+      cr.check_models(_mled, _adir) == [],
+      str(cr.check_models(_mled, _adir)))
+_mled.write_text(_ARTS.replace("tech-lead", "ghost-lane"), encoding="utf-8")
+check("a row naming an agent with no definition is caught",
+      any("no definition" in x for x in cr.check_models(_mled, _adir)))
+_mled.write_text(_ARTS.replace("| opus |", "| \u2014 |"), encoding="utf-8")
+check("an em-dash in the model cell claims nothing, so it is not judged",
+      cr.check_models(_mled, _adir) == [],
+      str(cr.check_models(_mled, _adir)))
+
+print("F15 - the ledger is not a lane report, and a sweep says what it skipped")
+_lroot = Path(tempfile.mkdtemp())
+(_lroot / "run.md").write_text(LEDGER, encoding="utf-8")
+check("run.md is recognised by name", cr._is_ledger(_lroot / "run.md"))
+(_lroot / "ledger-copy.md").write_text(LEDGER, encoding="utf-8")
+check("and by its `# RUN` first line, whatever it is called",
+      cr._is_ledger(_lroot / "ledger-copy.md"))
+(_lroot / "01-x.md").write_text(BLOCK, encoding="utf-8")
+check("a lane report is not mistaken for one",
+      not cr._is_ledger(_lroot / "01-x.md"))
+_r = subprocess.run(
+    [sys.executable, str(Path(cr.__file__)), str(_lroot / "run.md")],
+    capture_output=True, text=True)
+check("pointing the validator at the ledger no longer asks it for `changed:`",
+      "missing section" not in _r.stdout, _r.stdout[:200])
+check("it runs the ledger battery instead",
+      "header, phases, budget" in _r.stdout, _r.stdout[:200])
+_r = subprocess.run(
+    [sys.executable, str(Path(cr.__file__)), str(_lroot)],
+    capture_output=True, text=True)
+check("and a bare directory sweep admits it did not check the ledger",
+      "run.md not checked" in _r.stdout, _r.stdout[:300])
 
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

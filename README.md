@@ -1,11 +1,13 @@
 # `.agentic`
 
 An orchestrated agent network for the repos under `C:\projects\investments\`.
-Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); version history in
+[`CHANGELOG.md`](./CHANGELOG.md).
 
 ```
 .agentic/
-├─ ARCHITECTURE.md                        ← design rationale + provenance (human-facing)
+├─ ARCHITECTURE.md                        ← the current design and why (human-facing)
+├─ CHANGELOG.md                           ← provenance: what changed per version, and the evidence
 ├─ PROTOCOL.md                            ← THE contract, core. Everyone reads this.
 ├─ protocol/                              ← role-scoped extensions. Read exactly one.
 │  ├─ orchestrator.md      ledger · phases · control loop · relay rule
@@ -166,31 +168,38 @@ The network never touches that boundary.
 green suite cannot see — a missing acceptance criterion, a lagging contract doc.
 It is not a substitute for `python scripts/run_all_tests.py`.
 
-## Current state (v0.4.1)
+## Current state (v0.7.2)
 
-All ten roles live, each with a capability pack for `portfolio`.
+Eleven agents fill thirteen lanes, with eight capability packs for `portfolio`.
 
-**One shape of run is validated.** A `review` run (health-review fold-in) went through
-end to end on 2026-08-20: skill loaded, banner printed, ledger written, two
-lanes dispatched, zero repo edits by the orchestrator, both artifacts conforming
-to Shape 2 on first contact, stopped correctly at the human gate. That run has
-since been pruned; what it established is in `ARCHITECTURE.md`, and its
-artifacts are in git history. **The live ground truth is whatever is in
-`projects/<name>/runs/` now** — read that before changing the protocol.
+**The full delivery path is validated.** `US-37.1` closed end to end: 17
+dispatches, one change-request round, all three delivery gates `PASS`, story
+`Done`, every artifact validating. The earlier
+`2026-08-21-dynamic-sector-classification` put 12 dispatches through
+`backend → frontend → test → docs` and is where the Opus quant gate first
+earned its keep — it returned `FAIL` on a `registry.py` catch-all that 840
+green backend tests, 331 green frontend tests and a clean `tsc` had all passed
+over. The work order, change request and gate handshake stopped being guesses
+there.
 
-That run also produced the argument for the whole thing. The same request run
-*without* the network (v0.2.3, which silently no-op'd) took **25 minutes**,
-edited four repo files directly, left no record, and propagated a false finding
-— it logged a debt item asserting a field was undocumented that is documented at
-`dashboard-fields.md:289`. The orchestrated run took **10 minutes**, dispatched
-two lanes, touched nothing, and caught both that false finding and a second-order
-one the first run had introduced. Faster *and* more accurate; the ceremony was
-not the cost.
+**The phase model is the newer part, and is what the next runs test.** Routes
+were replaced by phases in v0.7.0. The first run under them closed clean against
+every check that existed at the time and still got away with four `pending`
+phase rows, a false `gates:` reason, and a work order asserting a file that had
+never been in git history — which is what the close-out sweep now checks for.
+**The live ground truth is whatever is in `projects/<name>/runs/` now** — read
+that before changing the protocol.
 
-**Still not validated: the implementation lanes.** No story has been through
-`backend → frontend → test → docs` with the three gates. Everything about the
-work order, the change request and the gate handshake remains a guess. The next
-move is one *small* slice.
+The argument for the whole thing came from the first clean run, a `review` route
+on 2026-08-20. The same request run *without* the network (v0.2.3, which
+silently no-op'd) took **25 minutes**, edited four repo files directly, left no
+record, and propagated a false finding — it logged a debt item asserting a field
+was undocumented that is documented at `dashboard-fields.md:289`. The
+orchestrated run took **10 minutes**, dispatched two lanes, touched nothing, and
+caught both that false finding and a second-order one the first run had
+introduced. Faster *and* more accurate; the ceremony was not the cost. That run
+has since been pruned; what it established is in `CHANGELOG.md`, and its
+artifacts are in git history.
 
 ### Not yet mechanical
 
@@ -218,7 +227,7 @@ Honest list of what is still enforced by asking an agent nicely:
 | The validator itself is correct | **tests** — `scripts/test_check_report.py`, 149 cases. Real, and it exists because a review pass found six bugs in the validator. |
 | The hooks do what they claim | **tests** — `scripts/hooks/test_hooks.py`, 20 cases, each driving the hook the way Claude Code does: a JSON payload on stdin, a decision in the exit code. Real. What it cannot pin is that the hooks are *installed* — that lives in the bound repo's `.claude/settings.json`, and an uninstalled hook is silent. The close-out sweep is the backstop. |
 | Read-only lanes don't edit the repo | **tool grant** — no `Edit` tool. Mostly real; `Bash` can still write. |
-| A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six lanes, narrowly (`reviewer` gets nothing that mutates). **Not yet exercised by a run** — the tools are tested, the lanes using them are not. |
+| A lane can check what the code actually does | **tool grant** — the bound repo's `project` MCP server: `probe_engine` runs one route in-process, `run_tests` returns parsed failures instead of the full dump. Granted to six agents, narrowly (`reviewer` gets nothing that mutates). Real, and exercised: `run_tests` and `check_gates` both appear in the `verification` blocks of the two runs on disk. `probe_engine`, `build_snapshot` and `reset_goldens` are still only tested, not used. |
 | A run survives a session restart | **the ledger on disk.** Real, and exercised. |
 | `scope` fences a work order | prose only, and it has held. Across 8 runs and ~110 dispatches there is no recorded breach — every mention of scope in a ledger is a lane stopping at its fence and reporting what it saw there. The `v0.5` marker that used to sit here proposed enforcing it; the runs say there is nothing yet to enforce. Revisit on the first real breach. |
 | A phase skipped on a false clause stays skipped when the clause turns true | prose, plus half a script. The clause itself is now required — a bare `not triggered` fails close-out — so the thing a re-plan would have to contradict is on disk. Whether anyone re-read it is still prose. |

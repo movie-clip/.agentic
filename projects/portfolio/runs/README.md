@@ -19,7 +19,7 @@ it is a transcript of a decision already encoded in `PROTOCOL.md`,
 `protocol/`, the profile or a capability pack — and a reader who needs it can
 get it from git history.
 
-So: **cite a pruned run by its id, never by a path.** `ARCHITECTURE.md` names
+So: **cite a pruned run by its id, never by a path.** `CHANGELOG.md` names
 run ids as provenance for every version entry and opens none of them; that is
 the durable form. A capability pack or a protocol file that tells a lane to
 *read* a run artifact has a dangling reference the moment that run is pruned,

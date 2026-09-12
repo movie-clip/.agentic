@@ -84,12 +84,22 @@ approve it. The human approves; the network never self-approves a story.
 | quant-audit | `quant-analyst` (AUDIT) | `quant.md` | **financial gate**: independently recomputes, checks trust honesty |
 | integration | `tech-lead` (INTEGRATION) | `architecture.md` | engineering gate: PASS / CHANGES_REQUESTED |
 | review | `reviewer` | — | acceptance gate: PASS / FAIL |
+| protocol-lint | `protocol-linter` | — | **authoring gate**: network files under `<agenticRoot>` against `protocol/authoring.md`. Not a delivery phase — see below |
 
-All **ten** roles are live (`plugins/agentic-core/agents/` is the authority on
-that count). This table says what each lane **owns**; `phases.md` says when it
-fires. Three gates, each checking something the others cannot see:
-`quant-analyst` gates the mathematics, `tech-lead` gates engineering coherence,
-`reviewer` gates acceptance against the story.
+Eleven agents fill these thirteen lanes — `quant-analyst` and `tech-lead`
+each fill two, and `plugins/agentic-core/agents/` is the authority on the
+roster. This table says what each lane **owns**; `phases.md` says when it
+fires.
+
+**Four gates, each checking something the others cannot see.** Three judge
+the delivery, and `phases.md` § Phases carries their triggers:
+`quant-analyst` gates the mathematics, `tech-lead` gates engineering
+coherence, `reviewer` gates acceptance against the story. The fourth,
+`protocol-lint`, judges the network's own files rather than this repo, so it
+is not one of the three the `verify` rows name — it fires on an authoring
+order, and at close-out the ledger's `gates:` line must account for it
+whenever a lane wrote `pack-corrections.md`, by verdict or by `skipped` and
+the reason.
 
 ## Repo skills agents may invoke
 

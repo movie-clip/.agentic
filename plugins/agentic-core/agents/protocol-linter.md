@@ -47,14 +47,14 @@ route map, not the rule text.
 
 | # | Rule | The failure you are looking for |
 |---|---|---|
-| 1 | Three-layer split | a bound repo's path, framework or command in an agent file; a message shape in a capability pack |
-| 2 | One rule, one home | a restated work-order, report, head or change-request block; a rule that now appears in two protocol files |
+| 1 | Four-layer split | a bound repo's path, framework or command in an agent file; a message shape in a capability pack; a lane name or trigger the project declares, hard-coded in a `SKILL.md` instead of read from the profile |
+| 2 | One rule, one home | a restated work-order, report, head or change-request block; a rule that now appears in two protocol files; a `SKILL.md` step that re-states a protocol rule instead of citing it |
 | 3 | Model declared | `inherit` or `fable` anywhere; a missing `model:` line; `opus` on a lane whose wrong answer something downstream catches |
 | 4 | Effort declared | a missing `effort:` line — the implicit default is `xhigh`, so an omission is a silent escalation, not a neutral one |
 | 5 | Index block | a pack or profile with no `## Index`; a section unfindable by the name a lane would search for; the same fact in two sections |
 | 6 | Always-read vs conditional | a section marked conditional whose condition the lane **cannot evaluate before reading it** — gotchas, reuse inventories, unit and sign conventions, guardrails |
 | 7 | Tool premises | a command in a pack the owning lane cannot run — open the agent's `tools:` line and check, do not assume |
-| 8 | Written for a model | provenance and change history that belongs in `ARCHITECTURE.md`; a paragraph where a table is the shape; a bullet carrying more than one fact |
+| 8 | Written for a model | provenance and change history that belongs in `CHANGELOG.md`; a paragraph where a table is the shape; a bullet carrying more than one fact |
 
 Rule 6 is the one that is easy to get wrong in the cheap direction, and rule 7
 is the one no other mechanism catches — `pack_corrections` is aimed at facts
@@ -83,8 +83,12 @@ itself is exactly the failure `gates.md` § 2 names: a document that is itself
 wrong agrees with you every time.
 
 So when the subject is `authoring.md` or this file, the anchor stops being the
-rule text and becomes **the network's existing files** — the ten agent
-definitions, the packs, the other protocol sections. The question inverts:
+rule text and becomes **the network's existing files** — the agent definitions
+in `plugins/agentic-core/agents/` other than the one under judgment, the
+packs, the other protocol sections. List that directory rather than working
+from a remembered roster: it is the authority on who is live, and a count
+written into prose here reads as fact long after it stops being one. The
+question inverts:
 not *does this file follow the rules*, but *do these rules still describe what
 the files actually do?* A rule the current files all violate is a rule that
 changed without its subjects, and that is a `FAIL` against the edit, not

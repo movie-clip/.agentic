@@ -3,7 +3,7 @@
 
 # Protocol extension — authoring rules
 
-## The three-layer split
+## The four-layer split
 
 | Layer | Lives in | Contains | Must not contain |
 |---|---|---|---|
@@ -93,7 +93,7 @@ other is only half-configured.
 
 **Claude Code's implicit default is `xhigh`** — the second-highest of five. So
 an agent with no `effort:` line is not running "normally", it is running near
-the top of the range. All ten lanes were doing exactly that until v0.4.4.
+the top of the range. Every lane was doing exactly that until v0.4.4.
 
 **`medium` is this network's baseline.** Two levels are in use:
 
@@ -192,7 +192,7 @@ changes what earns its place:
   the thing that lets an agent handle a case the rule did not anticipate.
 - **Cut the history of how the rule was discovered.** "v0.2 had eleven copies
   and two had drifted" is provenance. It is worth recording — in
-  `ARCHITECTURE.md`, whose reader is a human deciding whether to trust the
+  `CHANGELOG.md`, whose reader is a human deciding whether to trust the
   design. It changes no agent's behaviour, and every agent pays for it on every
   dispatch.
 - **Prefer a table to a paragraph** wherever the content is a mapping. Tables

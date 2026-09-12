@@ -11,7 +11,7 @@ Then read **your extension**, and only yours:
 | Your role | Also read |
 |---|---|
 | orchestrator (main session) | `protocol/orchestrator.md` |
-| `tech-lead`, `reviewer`, `quant-analyst` | `protocol/gates.md` |
+| `tech-lead`, `reviewer`, `quantitative-researcher` | `protocol/gates.md` |
 | `protocol-linter` | `protocol/gates.md` **and** `protocol/authoring.md` |
 | `docs-engineer`, on a close-out order | `protocol/packs.md` |
 | every other lane | nothing else |
@@ -64,7 +64,7 @@ richer on the code itself. Read the pack first, and when they disagree on a
 ```
 WORK ORDER <run-id>/<nn>
 lane:        product | quant | recon | story | design | backend | frontend | test | docs | quant-audit | integration | review | protocol-lint
-mode:        <tech-lead: DESIGN | INTEGRATION; quant-analyst: RESEARCH | AUDIT>
+mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT>
 run_dir:     <agenticRoot>/projects/<project>/runs/<run-id>
 report_to:   <agenticRoot>/projects/<project>/runs/<run-id>/<nn>-<lane>.md
 story:       <path to story file, or NONE>
@@ -133,9 +133,9 @@ risks:
 
 Every agent is granted `Write` for **exactly one purpose**: this artifact, under
 the `run_dir` your order names. Read-only lanes (`scout`, `producer`,
-`quant-analyst`, `tech-lead`, `reviewer`, `protocol-linter`) writing anywhere
-else — including any file in the bound repo — is a protocol violation, not a
-judgment call.
+`quantitative-researcher`, `tech-lead`, `reviewer`, `protocol-linter`) writing
+anywhere else — including any file in the bound repo — is a protocol
+violation, not a judgment call.
 
 ### Bullet discipline
 
@@ -297,8 +297,9 @@ INTEGRATION). It is **not** `status: PARTIAL` — the order succeeded; the thing
 it judged did not.
 
 Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
-`reviewer`, `tech-lead`, `quant-analyst` in `AUDIT` mode and `protocol-linter`
-may emit `PASS` or `FAIL`. Every other lane writes `verdict: NONE`.
+`reviewer`, `tech-lead`, `quantitative-researcher` in `AUDIT` mode and
+`protocol-linter` may emit `PASS` or `FAIL`. Every other lane writes
+`verdict: NONE`.
 
 ## 6. Field discipline
 

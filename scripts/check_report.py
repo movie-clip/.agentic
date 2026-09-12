@@ -1034,8 +1034,9 @@ def check_agents(agents_dir: Path | None = None) -> list[str]:
     `inherit`, never `fable`, `effort` is a separate dial, grant tools
     narrowly. A YAML typo defeats all four at once without failing anything,
     which is what `2026-09-12-composition-card-row-fold` ran on: `tech-lead`,
-    `producer` and `quant-analyst` had unparseable frontmatter, so the
-    integration gate arrived with a 49,341-token baseline against the frontend
+    `producer` and `quantitative-researcher` had unparseable frontmatter, so
+    the integration gate arrived with a 49,341-token baseline against the
+    frontend
     lane's 15,395 - roughly 34,000 tokens of tool schemas for tools its own
     file does not grant it - and had to call `ToolSearch` to find the two
     `mcp__project__` tools it was already supposed to be holding.

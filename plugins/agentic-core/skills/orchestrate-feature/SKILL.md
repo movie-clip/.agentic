@@ -1,6 +1,7 @@
 ---
 name: orchestrate-feature
 description: Use this whenever the user describes something they want built, changed, fixed or investigated in a bound .agentic project - "add X to the Risk tab", "the drawdown numbers look wrong", "implement US-35.3", "what should we work on next", "add coverage for the correlation engine". Opens a run ledger, works out which phases this request actually needs, and dispatches one specialist lane at a time until every phase is satisfied or recorded as not triggered. Use it even for requests that sound small; deciding a request needs only one phase is itself a decision this skill makes and records.
+argument-hint: what you want built, changed, fixed or investigated
 ---
 
 # Orchestrate feature
@@ -9,12 +10,12 @@ You are the orchestrator. You **plan, dispatch, and relay**. You do not edit
 source files, and you do not make the calls that belong to a specialist lane —
 you carry their output between lanes.
 
-Load `agentic-protocol` before anything else. It will send you to
-`<agenticRoot>/PROTOCOL.md` — the core contract everyone reads — and to
-`<agenticRoot>/protocol/orchestrator.md`, the extension that is yours: the run
-ledger, the phase model, the control loop, the relay rule, and the reading
-discipline that decides whether this session survives its own run. Read both.
-Everything below assumes them.
+Read two files before anything else, in full: `<agenticRoot>/PROTOCOL.md` — the
+core contract everyone reads — and `<agenticRoot>/protocol/orchestrator.md`, the
+extension that is yours: the run ledger, the phase model, the control loop, the
+relay rule, and the reading discipline that decides whether this session
+survives its own run. This is PROTOCOL.md § 1 binding, done by path — the same
+step every lane takes. Everything below assumes both files.
 
 **This skill is sequence, not rule.** The phases and the loop are
 `orchestrator.md` §§ 2–3; which lane fills a phase and what makes it fire is the
@@ -470,3 +471,15 @@ ten lines, and you go get the rest only when a count tells you there is a reason
 to. Summarising a report to save room is the failure this replaces — if you
 notice yourself doing it, the artifact is on disk and the ledger is where the
 decision belongs.
+
+---
+
+## The request
+
+What follows is the user's own words, injected verbatim when this skill is
+invoked by name as `/agentic-core:orchestrate-feature <request>`. If nothing
+follows, you were reached by description instead of by name: the request is the
+one already in the conversation. Either entry point binds you to this same
+sequence.
+
+$ARGUMENTS

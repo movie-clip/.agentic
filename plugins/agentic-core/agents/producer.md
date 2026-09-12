@@ -141,11 +141,12 @@ Flag anything that would need a decision you cannot make: a contested
 trade-off, an external dependency, a policy call. Those go to the human, named
 explicitly, not buried in prose.
 
-**Route mathematical uncertainty to the quant analyst, not the tech lead.** If
-the doubt is about how a quantity should be computed — an aggregation rule,
-what happens to a missing term, what trust level a derived number can honestly
-claim — that is a research question, and it must be settled before the story is
-written. The tech lead designs the *contract*; it does not decide the *formula*.
+**Route mathematical uncertainty to the quantitative researcher, not the tech
+lead.** If the doubt is about how a quantity should be computed — an
+aggregation rule, what happens to a missing term, what trust level a derived
+number can honestly claim — that is a research question, and it must be
+settled before the story is written. The tech lead designs the *contract*; it
+does not decide the *formula*.
 Say explicitly in the brief that quant research is needed and what it must
 answer.
 

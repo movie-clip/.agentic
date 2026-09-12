@@ -73,7 +73,7 @@ approve it. The human approves; the network never self-approves a story.
 | Lane | Agent | Pack | Owns |
 |---|---|---|---|
 | product | `producer` | `product.md` | roadmap placement, epic/story shaping, sequencing |
-| quant | `quant-analyst` (RESEARCH) | `quant.md` | research brief: formulas, grounding, trust-class analysis |
+| quant | `quantitative-researcher` (RESEARCH) | `quant.md` | research brief: formulas, grounding, trust-class analysis |
 | story | `story-author` | `story.md` | drafts the ticketed story |
 | recon | `scout` | — | read-only exploration |
 | design | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, lane split |
@@ -81,19 +81,19 @@ approve it. The human approves; the network never self-approves a story.
 | frontend | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test) |
 | test | `test-engineer` | `testing.md` | `app/tests/**`, `src/**/*.test.{ts,tsx}`, `src/test/**` |
 | docs | `docs-engineer` | `docs.md` | `docs/**`, and — at close-out only — `<agenticRoot>/projects/portfolio/capabilities/**` when applying `pack-corrections.md` |
-| quant-audit | `quant-analyst` (AUDIT) | `quant.md` | **financial gate**: independently recomputes, checks trust honesty |
+| quant-audit | `quantitative-researcher` (AUDIT) | `quant.md` | **financial gate**: independently recomputes, checks trust honesty |
 | integration | `tech-lead` (INTEGRATION) | `architecture.md` | engineering gate: PASS / CHANGES_REQUESTED |
 | review | `reviewer` | — | acceptance gate: PASS / FAIL |
 | protocol-lint | `protocol-linter` | — | **authoring gate**: network files under `<agenticRoot>` against `protocol/authoring.md`. Not a delivery phase — see below |
 
-Eleven agents fill these thirteen lanes — `quant-analyst` and `tech-lead`
-each fill two, and `plugins/agentic-core/agents/` is the authority on the
-roster. This table says what each lane **owns**; `phases.md` says when it
-fires.
+Eleven agents fill these thirteen lanes — `quantitative-researcher` and
+`tech-lead` each fill two, and `plugins/agentic-core/agents/` is the
+authority on the roster. This table says what each lane **owns**;
+`phases.md` says when it fires.
 
 **Four gates, each checking something the others cannot see.** Three judge
 the delivery, and `phases.md` § Phases carries their triggers:
-`quant-analyst` gates the mathematics, `tech-lead` gates engineering
+`quantitative-researcher` gates the mathematics, `tech-lead` gates engineering
 coherence, `reviewer` gates acceptance against the story. The fourth,
 `protocol-lint`, judges the network's own files rather than this repo, so it
 is not one of the three the `verify` rows name — it fires on an authoring
@@ -111,7 +111,7 @@ reference; they are not replaced by this network.
 | `write-tests` | `test-engineer` (its content is mirrored into `capabilities/testing.md`) |
 | `ui-polish` | `frontend-engineer` — mandatory for any card work; a design-system audit test enforces it |
 | `fmp-data` | any lane touching market data, symbol resolution or the cache |
-| `quant-research` | `quant-analyst` in RESEARCH mode (its brief template is mirrored into `capabilities/quant.md`) |
+| `quant-research` | `quantitative-researcher` in RESEARCH mode (its brief template is mirrored into `capabilities/quant.md`) |
 | `write-story` | `story-author` — for its drafting conventions only; its workflow (roadmap edits, epic placement, `build-story` handoff) is superseded by this network |
 | `verify-story` | `reviewer` (its checklist becomes the gate) |
 | `update-docs` | `docs-engineer` |

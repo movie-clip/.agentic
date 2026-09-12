@@ -59,7 +59,7 @@ gates:        <every gate the project declares under `verify` — each a verdict
 | # | lane | mode | agent | model | artifact | status | verdict |
 |---|------|------|-------|-------|----------|--------|---------|
 | 01 | product | — | producer | sonnet | 01-delivery-brief.md | DONE | — |
-| 02 | quant | AUDIT | quant-analyst | opus | 02-quant-audit.md | DONE | PASS |
+| 02 | quant | AUDIT | quantitative-researcher | opus | 02-quant-audit.md | DONE | PASS |
 | 03 | backend | — | backend-engineer | opus↑ | 03-backend.md | DONE | — |
 
 `model` is the model the dispatch **actually ran on** — the agent file's default,

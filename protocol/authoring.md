@@ -69,7 +69,7 @@ frequency is the profile that earns Opus.
 
 | Model | Lanes | Why |
 |---|---|---|
-| `opus` | `quant-analyst`, `protocol-linter` | **Neither has a downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
+| `opus` | `quantitative-researcher`, `protocol-linter` | **Neither has a downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
 | `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
@@ -100,11 +100,12 @@ the top of the range. Every lane was doing exactly that until v0.4.4.
 | Effort | Lanes | Why |
 |---|---|---|
 | `high` | `producer`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the contract is, whether it is acceptable, and the two that write the code the contract describes. |
-| `medium` | `quant-analyst`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
+| `medium` | `quantitative-researcher`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
 
-`quant-analyst` and `protocol-linter` sit at `medium` **on the model tier, not
-on the effort dial**: they are the two lanes on Opus, and the tier is what buys
-their judgment. This is a deliberate trade — see the caveat below.
+`quantitative-researcher` and `protocol-linter` sit at `medium` **on the model
+tier, not on the effort dial**: they are the two lanes on Opus, and the tier
+is what buys their judgment. This is a deliberate trade — see the caveat
+below.
 
 `low` and `max` are not defaults anywhere. `max` is the escalation for a lane
 the run has shown to be struggling, on the same evidence rule as a model
@@ -119,10 +120,11 @@ changes what those lanes do, not only what they cost.
 **Two things to watch on the next full run**, because both are untested at these
 settings:
 
-- **`quant-analyst` at `medium`.** It found the run's one MATERIAL defect at
-  `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing the work —
-  but the gate that has no downstream check is the worst place for a silent
-  regression. If an audit passes something a later gate catches, raise it.
+- **`quantitative-researcher` at `medium`.** It found the run's one MATERIAL
+  defect at `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing
+  the work — but the gate that has no downstream check is the worst place for
+  a silent regression. If an audit passes something a later gate catches,
+  raise it.
 - **`scout` at `sonnet`/`medium`.** It moved up a model tier on structural
   grounds, not accuracy ones, so watch the thing that moved it: does the
   `## Orchestrator brief` name every section below it, and does the head come
@@ -298,10 +300,10 @@ pack must name the underlying command too.
 **Grant per lane, and grant narrowly.** A subagent's `tools:` line is also what
 loads into its context on every dispatch, so an unused tool schema is a standing
 cost for no return. The current grants: engines and tests get everything;
-`quant-analyst` gets the probing tools because AUDIT recomputes independently and
-must be able to call the engine it is judging rather than read the code and
-infer; `reviewer` gets no mutating tool, because a gate that verifies must not
-also change the tree it is verifying.
+`quantitative-researcher` gets the probing tools because AUDIT recomputes
+independently and must be able to call the engine it is judging rather than
+read the code and infer; `reviewer` gets no mutating tool, because a gate that
+verifies must not also change the tree it is verifying.
 
 ## Adding a project
 

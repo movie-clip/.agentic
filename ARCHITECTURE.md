@@ -1,6 +1,6 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.2**. Lives at `C:\projects\investments\.agentic`, one level above
+Version **0.7.4**. Lives at `C:\projects\investments\.agentic`, one level above
 the repos it drives. One project is bound: `portfolio` (quant-research-lab).
 `plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
 version — this heading has been wrong before.
@@ -189,14 +189,14 @@ even when the same role does them.
 |---|---|---|---|
 | `recon` | `scout` | — | read-only exploration: where does this live, what already exists, what will this touch |
 | `product` | `producer` | `product.md` | **the front door.** Roadmap placement, epic/story shaping, sequencing — and where "no" lives |
-| `quant` | `quant-analyst` (RESEARCH) | `quant.md` | formulas, academic grounding, trust-class analysis, metrics inventory, before a story exists |
+| `quant` | `quantitative-researcher` (RESEARCH) | `quant.md` | formulas, academic grounding, trust-class analysis, metrics inventory, before a story exists |
 | `story` | `story-author` | `story.md` | drafts the ticketed story. Decides nothing — not placement, not the contract |
 | `design` | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, and the lane split, settled before anyone codes |
 | `backend` | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test). Owns the contract source of truth |
 | `frontend` | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test). Mirrors server schemas exactly |
 | `test` | `test-engineer` | `testing.md` | everything under a test file — fixtures, goldens, the network guard |
 | `docs` | `docs-engineer` | `docs.md` | `docs/**`, and at close-out only, applying `pack-corrections.md` back into the packs |
-| `quant-audit` | `quant-analyst` (AUDIT) | `quant.md` | **mathematics gate.** Independently recomputes published numbers, checks trust labels |
+| `quant-audit` | `quantitative-researcher` (AUDIT) | `quant.md` | **mathematics gate.** Independently recomputes published numbers, checks trust labels |
 | `integration` | `tech-lead` (INTEGRATION) | `architecture.md` | **engineering gate.** PASS / CHANGES_REQUESTED, per lane |
 | `review` | `reviewer` | — | **acceptance gate.** ACs one by one, test-plan fidelity. PASS / FAIL |
 | `protocol-lint` | `protocol-linter` | — | **authoring gate.** The network's own files against `authoring.md` |
@@ -221,11 +221,12 @@ own grants.
 The policy is in `authoring.md`; the rationale is one test: *would a wrong
 answer from this lane be caught by anything downstream — a test, a gate, a
 validator, the human approval step?* If yes, Sonnet. If no, Opus. Only
-`quant-analyst` and `protocol-linter` fail it. A wrong formula is engineered
-perfectly, tested thoroughly, satisfies every acceptance criterion and passes
-every other gate; a wrong `model:` line in an agent file bills wrong on every
-dispatch forever and shows up as nothing at all. `effort` is the second dial and
-is not the model — `high` for the five lanes that decide something, `medium` for
+`quantitative-researcher` and `protocol-linter` fail it. A wrong formula is
+engineered perfectly, tested thoroughly, satisfies every acceptance criterion
+and passes every other gate; a wrong `model:` line in an agent file bills wrong
+on every dispatch forever and shows up as nothing at all. `effort` is the second
+dial and is not the model — `high` for the five lanes that decide something,
+`medium` for
 the rest, because the implicit default is `xhigh` and an omission is a silent
 escalation rather than a neutral one.
 
@@ -233,7 +234,7 @@ escalation rather than a neutral one.
 
 | Gate | Judges | Fails on |
 |---|---|---|
-| `quant-analyst` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
+| `quantitative-researcher` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
 | `protocol-linter` | the **network's own files** | an agent, pack or protocol section that breaks `authoring.md` |

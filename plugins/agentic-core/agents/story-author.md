@@ -33,7 +33,8 @@ Missing `.agentic.json` → report `BLOCKED`.
 ## Your inputs are authoritative — and they are not yours to revise
 
 You will be given the producer's delivery brief, and where the work is
-mathematical, the quant analyst's research brief. Read both completely.
+mathematical, the quantitative researcher's research brief. Read both
+completely.
 
 **Open decisions stay open.** If the producer escalated something to the human
 — epic placement, a scope trade-off, a policy question — you do not resolve it.

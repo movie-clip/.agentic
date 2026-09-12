@@ -1,6 +1,7 @@
 # Capability pack: quant — project `portfolio`
 
-For the `quant-analyst` lane, both modes. This is the pack behind guardrail one.
+For the `quantitative-researcher` lane, both modes. This is the pack behind
+guardrail one.
 
 Companion source: `portfolio/.claude/skills/quant-research/SKILL.md` — read it in
 research mode for the full brief template.

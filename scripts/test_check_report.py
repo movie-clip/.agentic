@@ -381,7 +381,7 @@ gates:        quant-audit PASS · integration skipped (none) · review skipped (
 | # | lane | mode | agent | model | artifact | status | verdict |
 |---|------|------|-------|-------|----------|--------|---------|
 | 01 | recon | — | scout | sonnet | 01-lane.md | DONE | — |
-| 02 | quant | AUDIT | quant-analyst | opus | 02-quant.md | DONE | PASS |
+| 02 | quant | AUDIT | quantitative-researcher | opus | 02-quant.md | DONE | PASS |
 """
 
 

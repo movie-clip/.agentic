@@ -22,28 +22,27 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); version history in
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
-│  ├─ commands/feature.md                 ← /agentic-core:feature "..."
 │  ├─ skills/
-│  │  ├─ orchestrate-feature/SKILL.md     ← the loop; runs in the main session
+│  │  ├─ orchestrate-feature/SKILL.md     ← the entry point; runs in the main session
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
-│     ├─ producer.md        sonnet/high  roadmap · epics · stories · sequencing
-│     ├─ quant-analyst.md   opus/medium    formulas · trust classes · financial gate
-│     ├─ story-author.md    sonnet/medium  drafts the ticketed story (human approves)
-│     ├─ scout.md           sonnet/medium  read-only recon
-│     ├─ tech-lead.md       sonnet/high  design pass + integration gate
-│     ├─ backend-engineer.md   sonnet/high
-│     ├─ frontend-engineer.md  sonnet/high
-│     ├─ test-engineer.md      sonnet/medium
-│     ├─ docs-engineer.md      sonnet/medium
-│     ├─ reviewer.md        sonnet/high  acceptance gate
-│     └─ protocol-linter.md opus/medium   authoring gate — network files vs authoring.md
+│     ├─ producer.md                sonnet/high    roadmap · epics · stories · sequencing
+│     ├─ quantitative-researcher.md opus/medium    formulas · trust classes · financial gate
+│     ├─ story-author.md            sonnet/medium  drafts the ticketed story (human approves)
+│     ├─ scout.md                   sonnet/medium  read-only recon
+│     ├─ tech-lead.md               sonnet/high    design pass + integration gate
+│     ├─ backend-engineer.md        sonnet/high
+│     ├─ frontend-engineer.md       sonnet/high
+│     ├─ test-engineer.md           sonnet/medium
+│     ├─ docs-engineer.md           sonnet/medium
+│     ├─ reviewer.md                sonnet/high    acceptance gate
+│     └─ protocol-linter.md         opus/medium    authoring gate — network files vs authoring.md
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
 │  ├─ project.md                          ← the binding profile
 │  ├─ runs/<date>-<slug>/                 ← run ledgers — a slice's state on disk
 │  └─ capabilities/
 │     ├─ product.md               for the producer
-│     ├─ quant.md                 for the quant analyst
+│     ├─ quant.md                 for the quantitative researcher
 │     ├─ story.md                 for the story author
 │     ├─ architecture.md          for the tech lead
 │     ├─ backend.md · frontend.md · testing.md · docs.md
@@ -110,7 +109,7 @@ then either the skill did not load or you are on a pre-0.3 copy. Either way,
 stop and check before trusting anything that follows.
 
 **While iterating on the network**, use the local path source. Edits to a
-`SKILL.md` take effect immediately; changes under `agents/`, `commands/` or
+`SKILL.md` take effect immediately; changes under `agents/` or
 `.mcp.json` need `/reload-plugins` or a restart.
 
 ### Fallback wiring
@@ -128,7 +127,7 @@ else. Fine for evaluating whether the design earns its keep.
 ## Use
 
 ```
-/agentic-core:feature add a per-sector drawdown breakdown to the Risk tab
+/agentic-core:orchestrate-feature add a per-sector drawdown breakdown to the Risk tab
 ```
 
 Or just describe what you want — `orchestrate-feature`'s description is written

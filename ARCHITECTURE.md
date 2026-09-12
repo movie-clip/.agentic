@@ -1,6 +1,6 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.4**. Lives at `C:\projects\investments\.agentic`, one level above
+Version **0.7.5**. Lives at `C:\projects\investments\.agentic`, one level above
 the repos it drives. One project is bound: `portfolio` (quant-research-lab).
 `plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
 version — this heading has been wrong before.
@@ -237,7 +237,7 @@ escalation rather than a neutral one.
 | `quantitative-researcher` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
-| `protocol-linter` | the **network's own files** | an agent, pack or protocol section that breaks `authoring.md` |
+| `protocol-linter` | the **network's own files** | an agent, skill, pack or protocol section that breaks `authoring.md` |
 
 None subsumes another. A wrong formula can be engineered flawlessly, tested
 thoroughly, and satisfy every acceptance criterion — the second and third gates

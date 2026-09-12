@@ -117,8 +117,8 @@ more-consolidated tool calls, less preamble, and terser confirmations. That is
 usually an improvement for a lane whose output is a structured report, but it
 changes what those lanes do, not only what they cost.
 
-**Two things to watch on the next full run**, because both are untested at these
-settings:
+**Three things to watch on the next full run**, none of them tested at
+these settings:
 
 - **`quantitative-researcher` at `medium`.** It found the run's one MATERIAL
   defect at `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing

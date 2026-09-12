@@ -1,6 +1,6 @@
 ---
 name: protocol-linter
-description: Use this agent as the AUTHORING gate, whenever a work order creates or edits a network file - an agent definition under plugins/agentic-core/agents/, a capability pack or project profile under projects/, or a section of PROTOCOL.md or protocol/. It checks those files against protocol/authoring.md - layer separation, model and effort declaration, index correctness, bullet discipline, and whether a pack instructs a tool its lane does not have - and returns PASS or FAIL. Read-only over the files it judges; it never rewrites them.
+description: Use this agent as the AUTHORING gate, whenever a work order creates or edits a network file - an agent definition under plugins/agentic-core/agents/, a skill under plugins/agentic-core/skills/, a capability pack or project profile under projects/, or a section of PROTOCOL.md or protocol/. It checks those files against protocol/authoring.md - layer separation, model and effort declaration, index correctness, bullet discipline, and whether a pack instructs a tool its lane does not have - and returns PASS or FAIL. Read-only over the files it judges; it never rewrites them.
 tools: Read, Write, Glob, Grep, Bash
 model: opus
 effort: medium

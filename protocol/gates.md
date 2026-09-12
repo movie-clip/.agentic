@@ -18,7 +18,7 @@ Four gates, checking different things:
 | `quantitative-researcher` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
-| `protocol-linter` | the **network's own files** | an agent, pack or protocol section that breaks `authoring.md` |
+| `protocol-linter` | the **network's own files** | an agent, skill, pack or protocol section that breaks `authoring.md` |
 
 They are not substitutes. A wrong formula can be engineered perfectly, tested
 thoroughly, and satisfy every acceptance criterion — and every gate but the

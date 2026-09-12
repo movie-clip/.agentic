@@ -9,7 +9,7 @@
 |---|---|---|---|
 | Protocol | `PROTOCOL.md` + `protocol/*.md` | message shapes, binding, gates | anything about a specific repo, anything about a specific role's craft |
 | Role | `plugins/agentic-core/agents/<name>.md` | what this lane judges, tool discipline | any path, framework or convention from a specific repo |
-| Capability | `projects/<project>/capabilities/<lane>.md`, and `project.md` § Phases | paths, frameworks, fixtures, commands, gotchas, external anchors; **which lane fills each phase and the clause that fires it** | message shapes, role definitions |
+| Capability | `projects/<project>/capabilities/<lane>.md`, `project.md`, and `phases.md` | paths, frameworks, fixtures, commands, gotchas, external anchors; **which lane fills each phase and the clause that fires it** | message shapes, role definitions |
 | Skill | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — how a run is opened, what happens between a head returning and the next dispatch, how one is closed | any rule the protocol states, and any lane or trigger the project declares; it cites both |
 
 If you are tempted to write `pytest` in an agent file, that line belongs in a
@@ -209,6 +209,13 @@ them. Write those for that person.
 Packs and profiles are read by index (core § 1, steps 4–5). Every one of them
 opens with:
 
+**Unless it is read in full, in which case it opens with `## Contents`.**
+`phases.md` is the case: it has exactly one reader, that reader needs all of
+it, and an index inviting it to skip a section would be wrong. Give a
+full-read file over ~100 lines a `## Contents` list instead — same job of
+letting a partial read see the whole scope, without the instruction to skip.
+An index is a claim that skipping is safe; make it only where it is.
+
 ```markdown
 ## Index
 Always read: <the sections no lane may skip — guardrails, trust rules>
@@ -298,11 +305,18 @@ also change the tree it is verifying.
 
 ## Adding a project
 
-Create `projects/<name>/project.md` plus capability packs, and drop
-`.agentic.json` in that repo. The `plugins/` layer is untouched — that is the
-entire reason for the split, and the test of whether it holds.
+Create `projects/<name>/project.md` and `projects/<name>/phases.md` plus
+capability packs, and drop `.agentic.json` in that repo. The `plugins/` layer is
+untouched — that is the entire reason for the split, and the test of whether it
+holds.
 
-**The profile's `## Phases` table is what makes that true for sequencing.**
+**The profile is two files, split by reader.** `project.md` is what every lane
+reads: guardrails, lane map, mechanical gates. `phases.md` is the orchestrator's
+alone. The split is not tidiness — a section a lane cannot use is a section it
+pays for on every dispatch, and an index telling it to skip one is advice a
+whole-file read cannot take.
+
+**`phases.md`'s `## Phases` table is what makes that true for sequencing.**
 `protocol/orchestrator.md` § 2 fixes the phases and their dependency order;
 the profile binds each one to a lane, in its own order, with the clause that
 decides whether it fires here. A project with no mathematics gate declares no
@@ -311,9 +325,11 @@ approved scope is an issue rather than a story says so in the `specification`
 row. Neither needs a word changed under `plugins/`.
 
 **And the `verify` rows are machine-read.** `check_report.py` resolves a run's
-profile — from the ledger's `project:` field, or from the run dir's own path
-under `projects/<project>/runs/` — and takes the gate set from that table's
-`verify` rows. So declaring a gate in the profile is what makes close-out demand
+profile directory — from the ledger's `project:` field, or from the run dir's
+own path under `projects/<project>/runs/` — reads `project.md` and `phases.md`
+together, and takes the gate set from that table's `verify` rows. A project that
+has not split the two yet still works: the table is found in whichever file
+holds it. So declaring a gate in the profile is what makes close-out demand
 an account of it; there is no second list to keep in step, and no project is
 measured against another's gates.
 

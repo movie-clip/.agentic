@@ -775,6 +775,63 @@ check("and the gates a project does not declare are not demanded of it",
 check("while the ones it does declare are",
       any("lint-gate" in x for x in _pgates), str(_pgates))
 
+print("the profile may be split across project.md and phases.md")
+
+# `## Phases` moved out of project.md so build lanes stop reading it. The gate
+# set must still resolve, or close-out silently falls back to the default set -
+# which is this project's, and would measure another project against it.
+_LANE_FACING = """# Project profile: `demo`
+
+## Lane routing
+
+| Lane | Agent |
+|---|---|
+| review | reviewer |
+"""
+_PHASES_ONLY = """# Project phases: `demo`
+
+## Phases
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| build | 1..n | backend, frontend | anything that edits the repo | — |
+| verify | 1 | lint-gate | always | — |
+| verify | 2 | integration | any build lane was dispatched | — |
+| framing | 1 | product | the request changes the product | **yes** |
+| close | 1 | docs | always | — |
+"""
+
+_sroot = Path(tempfile.mkdtemp())
+_sdir = _sroot / "projects" / "demo"
+(_sdir / "runs" / "2026-01-01-x").mkdir(parents=True)
+(_sdir / "project.md").write_text(_LANE_FACING, encoding="utf-8")
+(_sdir / "phases.md").write_text(_PHASES_ONLY, encoding="utf-8")
+_sledger = _sdir / "runs" / "2026-01-01-x" / "run.md"
+_sledger.write_text(LEDGER, encoding="utf-8")
+check("the gate set resolves from phases.md when project.md has no table",
+      cr.profile_gates(_sledger) == ("lint-gate", "integration"),
+      str(cr.profile_gates(_sledger)))
+check("a lane-facing table beside it is not swept into the gate set",
+      "review" not in cr.profile_gates(_sledger),
+      str(cr.profile_gates(_sledger)))
+_sjoined = cr._profile_text(_sledger)
+check("both files reach the profile reader",
+      "Lane routing" in _sjoined and "## Phases" in _sjoined)
+check("and a human stop declared in phases.md is still found",
+      cr._stop_lanes(_sjoined) == {"product"}, str(cr._stop_lanes(_sjoined)))
+
+# The split is optional: a project that keeps everything in project.md is
+# unchanged, which is what lets one project split without forcing the others.
+_uroot = Path(tempfile.mkdtemp())
+_udir = _uroot / "projects" / "demo"
+(_udir / "runs" / "2026-01-01-x").mkdir(parents=True)
+(_udir / "project.md").write_text(_PROFILE, encoding="utf-8")
+_uledger = _udir / "runs" / "2026-01-01-x" / "run.md"
+_uledger.write_text(LEDGER, encoding="utf-8")
+check("an unsplit profile resolves exactly as before",
+      cr.profile_gates(_uledger) == ("lint-gate", "integration"),
+      str(cr.profile_gates(_uledger)))
+
 print("F13 - an agent definition whose frontmatter does not parse")
 _FM_OK = """---
 name: tech-lead

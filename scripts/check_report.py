@@ -69,7 +69,8 @@ CR_LANES = {"integration"}
 # about a run that changes the bound repo, and requiring every delivery ledger
 # to write `protocol-lint skipped (not an authoring order)` would be a line that
 # is always the same and therefore never read.
-# The profile's `## Phases` table is the authority (`protocol/authoring.md`):
+# The profile's `## Phases` table is the authority (`protocol/authoring.md`),
+# and it lives in `phases.md` beside `project.md` - see `_profile_text`:
 # its `verify` rows name the lanes that gate *this* project. This tuple is the
 # fallback for a ledger whose profile cannot be resolved - a run dir copied
 # elsewhere, a project.md not yet written - and it is this project's set, which
@@ -739,7 +740,11 @@ _PENDING = re.compile(r"^(pending|planned|queued)\b", re.I)
 
 
 def _verify_lanes(profile: str) -> tuple[str, ...]:
-    """Gate lanes a project profile declares, from its `## Phases` verify rows."""
+    """Gate lanes a project profile declares, from its `## Phases` verify rows.
+
+    `profile` is the joined profile text from `_profile_text`, so the table is
+    found whether the project keeps it in `phases.md` or still in `project.md`.
+    """
     lanes: list[str] = []
     for row in _ledger_table(profile, "Phases"):
         if len(row) < 3 or row[0].strip().lower() != "verify":
@@ -761,21 +766,39 @@ def _stop_lanes(profile: str) -> set[str]:
     return stops
 
 
+# The profile is two files, split by reader (`protocol/authoring.md`
+# § "Adding a project"): `project.md` is what every lane reads, `phases.md` is
+# the orchestrator's alone. Both are read and joined, so a table lands the same
+# whichever file holds it - which is what lets a project split them at its own
+# pace without its close-out silently falling back to the default gate set.
+PROFILE_FILES = ("project.md", "phases.md")
+
+
 def _profile_text(ledger: Path) -> str | None:
-    """This run's project profile, or None if it cannot be resolved."""
+    """This run's project profile, or None if it cannot be resolved.
+
+    The profile's files are joined in `PROFILE_FILES` order. A project that has
+    not split `phases.md` out yet resolves to `project.md` alone and behaves
+    exactly as before.
+    """
     text = ledger.read_text(encoding="utf-8")
     root = _ledger_field(text, "agentic_root")
     project = _ledger_field(text, "project")
-    candidates = []
+    dirs = []
     if root and project:
-        candidates.append(Path(root) / "projects" / project / "project.md")
-    candidates.append(ledger.parent.parent.parent / "project.md")
-    for cand in candidates:
-        try:
-            if cand.is_file():
-                return cand.read_text(encoding="utf-8")
-        except OSError:
-            continue
+        dirs.append(Path(root) / "projects" / project)
+    dirs.append(ledger.parent.parent.parent)
+    for pdir in dirs:
+        parts = []
+        for name in PROFILE_FILES:
+            try:
+                cand = pdir / name
+                if cand.is_file():
+                    parts.append(cand.read_text(encoding="utf-8"))
+            except OSError:
+                continue
+        if parts:
+            return "\n\n".join(parts)
     return None
 
 

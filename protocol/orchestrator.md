@@ -149,7 +149,7 @@ gate that did not run carries `skipped` and the reason. Each has its own trigger
 and none is implied by the shape of the run, so a missing row is not by itself
 wrong — **a missing row nobody *decided* on is.**
 
-`check_report.py` reads **which** gates are owed from the profile's `## Phases`
+`check_report.py` reads **which** gates are owed from `phases.md`'s `## Phases`
 verify rows, so the set below is this project's, not the script's. A project
 declaring different gates is measured against its own. The triggers are the
 profile's too; what follows is portfolio's, as an illustration of the shape.
@@ -277,8 +277,10 @@ project names, and fires only when its trigger is true of *this* request.
 **The phases are protocol; the lanes that fill them are not.** This file does not
 know what your project calls its lanes, whether it has a mathematics gate, or
 whether its unit of approved scope is a story, a ticket or an issue. Read
-`projects/<project>/project.md` § Phases at intake: it binds each phase to a
-lane, in order, with the clause that decides whether that lane fires.
+`projects/<project>/phases.md` at intake: it binds each phase to a lane, in
+order, with the clause that decides whether that lane fires. It is yours alone —
+no specialist lane reads it, which is why it is a file beside `project.md`
+rather than a section inside it.
 
 ### A phase that does not fire is recorded, not skipped
 

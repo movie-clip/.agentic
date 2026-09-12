@@ -18,9 +18,9 @@ Everything below assumes them.
 
 **This skill is sequence, not rule.** The phases and the loop are
 `orchestrator.md` §§ 2–3; which lane fills a phase and what makes it fire is the
-project profile's `## Phases` table. What is here is the part that is neither:
-how to open a run, what to do in the minutes after a head comes back, and how to
-close one out.
+project's `phases.md`. What is here is the part that is neither: how to open a
+run, what to do in the minutes after a head comes back, and how to close one
+out.
 
 ---
 
@@ -105,8 +105,10 @@ beside the tool, and a lane that shells out is following the pack, not failing.
    `<agenticRoot>/protocol/orchestrator.md` (your extension). No other extension
    is yours; `gates.md` and `packs.md` belong to the lanes.
 3. Read `<agenticRoot>/projects/<project>/project.md` — the `## Index` block
-   first, then the always-read sections, **and `## Phases`**. That table is what
-   the next step fills in.
+   first, then the always-read sections — **and
+   `<agenticRoot>/projects/<project>/phases.md` in full**. That second file is
+   the phase→lane binding, it is yours alone, and its table is what the next
+   step fills in.
 4. **Check for an unfinished run before starting a new one.** List
    `<agenticRoot>/projects/<project>/runs/`. If a `run.md` has `status:` other
    than `CLOSED` and its request matches what the user is asking about, read it
@@ -122,7 +124,7 @@ beside the tool, and a lane that shells out is following the pack, not failing.
 
 ### Fill in `## Phases`, then derive the budget
 
-Copy the profile's `## Phases` rows into the ledger and evaluate each trigger
+Copy `phases.md`'s `## Phases` rows into the ledger and evaluate each trigger
 against *this* request. Every row gets a verdict now: `pending`, or
 `not triggered (<the clause that was false>)`.
 
@@ -351,8 +353,8 @@ sentence, correcting six agents' output costs the session.
 
 ### `verify` — the gates run in the profile's order
 
-Each gate judges something the others cannot see, and the profile's ordering
-argument is in its `## Phases` section. Take it as given.
+Each gate judges something the others cannot see, and the ordering argument is
+in `phases.md` § Four orderings that are not negotiable. Take it as given.
 
 On a gate's findings: blocking items go back to the owning lane as change
 requests, one order each, `inputs` naming the CR file path and scope fenced to

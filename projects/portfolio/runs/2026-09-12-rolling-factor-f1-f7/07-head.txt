@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-f1-f7/07
+artifact:    C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-f1-f7\07-test.md
+status:      DONE
+verdict:     NONE
+verification: PASS
+detail:      43 test files passed, 394 tests passed (0 failed). Also ran `npx tsc --noEmit` clean and the file in isolation (7/7 passed) before the full run.
+changed:     5
+contract_notes: 0
+pack_corrections: 0
+handoff:     3
+risks:       3
+headline:    Relabeled the unreachable window-partial test and added model-level `partial` tooltip coverage; full vitest suite passes.

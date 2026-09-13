@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-audit/03
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-audit\03-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order verification field was NONE (docs-only, no code touched)
+changed:         2
+contract_notes:  5
+pack_corrections: 0
+handoff:         4
+risks:           2
+headline:        Logged 10 tech-debt entries for F1-F10 (F2 flagged owner-ruling-only) and fixed the one genuine doc-only prose error (F4's 20-obs edge case).

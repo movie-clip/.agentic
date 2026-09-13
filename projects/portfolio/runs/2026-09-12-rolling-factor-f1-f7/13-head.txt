@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-f1-f7/13
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-f1-f7\13-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          Order names verification: NONE. docs-engineer has no Bash; verified by reading all three edited files back and cross-checking against 05-quant-audit.md, 09-frontend.md, 11-quant-audit.md, 12-integrati
+changed:         3
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+risks:           0
+headline:        Wrote the F1/F7 contract-doc row, applied the TrustBadge pack correction, and removed the shipped F1/F7 tech-debt rows.

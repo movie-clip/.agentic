@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-f1-f7/12
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-f1-f7\12-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          exit_code 0, failure_count 0 (via mcp__project__run_tests scope=full). Backend pytest -n auto, desktop vitest, tsc --noEmit, and the dead-code gate (ruff+vulture+knip) all green; "All tests passed." c
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+risks:           2
+headline:        Engineering gate PASS: F1/F7 land cleanly, full suite green, one non-blocking docstring SHOULD_FIX noted.

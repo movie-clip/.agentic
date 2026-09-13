@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-audit/01
+artifact: C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-audit\01-recon.md
+status: DONE
+verdict: NONE
+verification: NOT_RUN
+detail: order verification field was NONE (read-only recon)
+changed: 0
+contract_notes: 0
+pack_corrections: 0
+handoff: 3
+risks: 4
+headline: Mapped Rolling Factor Analysis chart end-to-end: frontend card, diagnostics route/engine, per-window Gram-Schmidt ridge-OLS formula, schemas, and trust handling.

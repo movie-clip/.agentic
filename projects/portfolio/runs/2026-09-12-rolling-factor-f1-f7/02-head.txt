@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-f1-f7/02
+artifact: C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-f1-f7\02-backend.md
+status: DONE
+verdict: NONE
+verification: PASS
+detail: 8 passed, 212 deselected in 7.01s
+changed: 2
+contract_notes: 5
+pack_corrections: 0
+handoff: 3
+risks: 0
+headline: Removed the permanently-null `alpha` field from `RollingFactorLoadingPoint` and its test-expectation mirror; no other backend site referenced it.

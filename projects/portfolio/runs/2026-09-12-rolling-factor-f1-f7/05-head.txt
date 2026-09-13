@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-12-rolling-factor-f1-f7/05
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-12-rolling-factor-f1-f7\05-quant-audit.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          8 passed, 212 deselected in 6.66s. anchor: constructed degenerate cases - 5 independent factor-model builds run against the shipped engine (290d full; 290d with 2 proxies dropped; 40d; 12d; empty), pl
+changed:         0
+contract_notes:  3
+pack_corrections: 0
+handoff:         5
+risks:           3
+headline:        F7 alpha removal verified clean; F1 fails - model-level `partial` from a missing factor proxy still renders badge-free, so an incomplete factor fit looks fully verified.

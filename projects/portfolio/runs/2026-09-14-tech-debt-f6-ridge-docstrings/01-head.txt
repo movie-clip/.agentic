@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-14-tech-debt-f6-ridge-docstrings/01
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-14-tech-debt-f6-ridge-docstrings\01-recon.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only recon order; no verification command named
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         15
+risks:           2
+headline:        All F6 claims confirmed against shipped code; docstrings are at 7847-7848 and 7905-7906, one line off the order's citation; risk.py:1636 repeats the same mischaracterization.

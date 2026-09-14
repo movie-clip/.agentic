@@ -145,6 +145,14 @@ budget:       6 — 4 triggered phases (build is 2 lanes) + 2 gates, minus
 
 Derive it; do not pad it (`orchestrator.md` § 3). Going one over costs a
 `## Replans` row, and that row is the measurement a padded budget throws away.
+Write the new budget into that row's `change` cell as `budget 6 -> 8`: the
+first row's *old* value is the only surviving record of what you derived here.
+
+**This number is also the run's ceiling, and it does not move.** At twice the
+budget you derive *now* - not twice whatever it has been re-planned to - you
+stop and hand back to the user, however close the work feels. `check_report.py`
+will not close a run past that line without the user's ruling in
+`decisions.md`.
 
 ### The model each dispatch runs on
 
@@ -359,13 +367,29 @@ in `phases.md` § Four orderings that are not negotiable. Take it as given.
 
 On a gate's findings: blocking items go back to the owning lane as change
 requests, one order each, `inputs` naming the CR file path and scope fenced to
-exactly that finding. Then re-run that gate.
+exactly that finding. Then re-run that gate — that one, not the whole phase.
+
+**Only `tech-lead` writes its own change requests.** Every other gate returns a
+verdict and cannot dispatch, so when `quant-audit`, `reviewer` or
+`protocol-lint` fails, the CR file is yours to write: `PROTOCOL.md` § 5 for
+the shape, and the body **points at the gate's finding rather than restating it**.
+You did not find it, and a relayed finding in your words is your judgment
+wearing the gate's authority. `check_report.py` reads every `cr/CR-<n>.md`
+against the `Rounds` and `Open` tables, so a request that claims a round the
+table denies, or a `SHOULD_FIX` with no `Open` row, fails the run.
 
 **Increment the round counter in `run.md` before dispatching, not after.** Two
 rounds on the same finding is the limit; a third means the request is unclear or
 the design was wrong — that is a re-plan and an escalation to the user, not
 another loop. The limit is only real if it is written down, because the session
 that loops is the session that already lost track.
+
+**A finding the last round's fix caused is that finding, renumbered.** Name its
+ancestor in the `Rounds` row's `caused by` column and continue the count from
+there; a row that genuinely opens a new subject says `independent`. Counting it
+as a fresh finding at round 1 is how a run laps the same code twice with every
+row still reading `1 | 2`. `check_report.py` reads both tables and will not let
+them disagree.
 
 Non-blocking items carry to **Open**; they do not hold the run.
 
@@ -387,9 +411,8 @@ Before you set `status: CLOSED`, walk the ledger once:
 - [ ] **Every `## Phases` row reads `satisfied — <nn>` or `not triggered
       (<clause>)`.** A row still reading `pending` is the run's own record that
       it stopped early; either dispatch it or write down why it no longer fires.
-      The sweep below fails on this now — `2026-09-12` closed with four rows
-      still `pending` against four completed dispatches, and the only thing that
-      noticed was a later reader.
+      The sweep below fails on this — without it, a run closes with `pending`
+      rows against completed dispatches and only a later reader notices.
 - [ ] **`spent` equals the number of Artifacts rows.** A dispatch that returned
       nothing still owes a row (`orchestrator.md` § 1) — `LOST`, then re-dispatch
       as the next slot number.

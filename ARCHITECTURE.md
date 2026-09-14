@@ -1,6 +1,6 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.5**. Lives at `C:\projects\investments\.agentic`, one level above
+Version **0.7.10**. Lives at `C:\projects\investments\.agentic`, one level above
 the repos it drives. One project is bound: `portfolio` (quant-research-lab).
 `plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
 version — this heading has been wrong before.
@@ -112,7 +112,9 @@ carried between turns that is not in the ledger will not survive the run.
 `## Phases` is filled in at intake, the budget falls out of it — triggered
 phases plus gates — and is not padded. At `spent == budget` the orchestrator
 writes a `## Replans` row saying what the estimate missed before dispatching
-again; at twice the original budget it stops and hands back to the human. A
+again; at twice the **original** budget it stops and hands back to the human,
+and the ruling that lets it go on is written to `decisions.md` — a ceiling read
+off the re-planned budget rises with every re-plan and can never be reached. A
 route name was chosen before the run knew anything. A budget is derived from
 which triggers actually fired, so `spent` against `budget` at close-out measures
 whether the model is calibrated for this project.
@@ -305,10 +307,16 @@ specialist reads the original. Verbatim became a property of the filesystem.
 from any engineer" works, mechanically, as: tech lead writes the request to
 `<run_dir>/cr/CR-<n>.md` → orchestrator opens a new work order on the owning
 lane, scope fenced to that finding, the file named in `inputs` → engineer fixes
-exactly that → the integration gate re-runs. **Two rounds maximum on the same
+exactly that → the integration gate re-runs. **Every other gate routes the
+same way**, with the orchestrator writing the request on the failing gate's
+behalf, since none of them can dispatch either; the body then points at the
+gate's own report rather than restating it, because a relayed finding restated
+is the orchestrator's judgment wearing the gate's authority. **Two rounds maximum on the same
 finding**, counted in the ledger's `Rounds` table rather than in anyone's
 memory; a third means the request is unclear or the design is wrong, and that
-goes to the human.
+goes to the human. A finding caused by a previous round's fix is that finding
+renumbered, so the row names its ancestor in `caused by` and the count
+continues across it — otherwise the cap is defeated by renaming.
 
 **Serial by default.** One order at a time, and its head is read before the next
 is written. Parallel dispatch carries conflicting implicit decisions that only

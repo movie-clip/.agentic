@@ -76,7 +76,7 @@ At `app/primitives/`, imported individually (no barrel export):
 | Primitive | Use |
 |---|---|
 | `CardShell` `{title, badge?, actions?, className?}` | outer wrapper for **every** card; gives `role="region"` + `aria-labelledby` |
-| `TrustBadge` `{type: 'synthetic'\|'unavailable', tooltip?}` | the only legal way to render a trust badge |
+| `TrustBadge` `{type: 'synthetic'\|'unavailable'\|'degraded', tooltip?}` | the only legal way to render a trust badge |
 | `WindowSelector<T>` `{options, value, onChange, labelFn?, ariaLabelFn?}` | window/option groups; `aria-pressed` + focus-visible |
 | `EmptyState` `{title, detail?}` | no-data path |
 | `LoadingState` `{message?}` | async fetch |
@@ -157,8 +157,10 @@ The raw commands are still correct. Nothing here is only doable through a tool.
 
 - **No fabrication.** `null` / `unavailable` renders as `"—"`. Never `0`, never
   `""`, never `"N/A"`, never a placeholder.
-- **Trust rendered visibly.** `withheld` and `degraded` always show their badge.
-  Never silently suppressed.
+- **Trust rendered visibly.** `degraded` shows its `TrustBadge`; `withheld`
+  publishes no value, so a badge is the wrong primitive — it renders its own
+  `EmptyState`, worded distinctly from `unavailable`. Never silently
+  suppressed, never collapsed into each other.
 - **No finance math in components.** Ask the engine. A percentage computed in a
   component is untraceable to a methodology formula, which breaks guardrail 2.
 - **Types mirror schemas exactly**, changed in the same pass as the schema.
@@ -181,7 +183,7 @@ describes, which is worse than either.
 
 - [ ] Outer wrapper is `CardShell`; states use `EmptyState` / `LoadingState` / `ErrorState`
 - [ ] Charts wrapped in `ChartShell` with a meaningful `ariaLabel`, `chartDefaults` spread
-- [ ] `TrustBadge` for any synthetic/unavailable state; `WindowSelector` for any option group
+- [ ] `TrustBadge` for any state in its type union (§ The eight primitives); `WindowSelector` for any option group
 - [ ] Zero literal hex; zero literal pixels on spacing/size style props
 - [ ] TS types mirror the backend schema exactly, per the tech lead's contract
 - [ ] Semantic colour also encoded by symbol or label

@@ -43,12 +43,10 @@ copies it into the run ledger at intake and records a verdict beside every row.
 
 **`ground-truth` before `framing`.** When both fire, recon's artifact is an
 `inputs` on the producer's order. Run the other way round, the producer
-establishes the facts itself and recon re-derives them — which is what happened
-on `2026-09-09`: the brief's own `risks` block conceded *"'Already covered'
-rests on claims I opened myself"*, the scout ran two dispatches later over the
-same territory, and it **contradicted the brief** (the Dashboard volatility path
-has no 20-observation floor; the brief said it did). Two dispatches, one of them
-wrong, and the correction surfaced only because a third lane read both.
+establishes the facts itself and recon re-derives them — two dispatches over the
+same territory, and nothing reconciles them. A producer's "already covered"
+then rests on claims it opened itself, and a later scout can contradict it with
+no mechanism that notices.
 
 **`quant` RESEARCH before `story`.** The research brief is what makes acceptance
 criteria groundable. Written the other way round, the story states an outcome
@@ -76,7 +74,7 @@ stop. Record the row as `not triggered (single-lane slice; the delivery brief in
 <nn> is the specification)`, and `review` does not fire either — its own clause
 asks for a story to accept, and there is none.
 
-The evidence is `2026-09-11`: a story of 28 lines and two tickets, carrying no
+The failure it prevents: a story of 28 lines and two tickets, carrying no
 contract notes, restating a brief the human had already approved. It was not
 wrong. It was a dispatch and a human stop spent re-stating a decision already
 made, and the `review` gate that followed judged acceptance criteria written
@@ -100,7 +98,7 @@ weaker standard than the repo itself applies. And it is the only command that
 writes `.claude/.last-test-pass`, which the commit hook checks against every
 changed file — so a run whose gate ran `vitest` + `tsc` + `detect_deadcode.py`
 ends with three green results, a `PASS` verdict, and work the human cannot
-commit until they run the suite themselves. `2026-09-12` ended exactly there.
+commit until they run the suite themselves.
 
 A build lane's own `verification` is properly narrower: it is checking its own
 change, not the run. The gate is where the project's standard applies.

@@ -1,7 +1,24 @@
-<!-- Extension: AUTHORING a new agent, pack or protocol section.
-     Not read at runtime by anyone. -->
+<!-- Extension: the rules the AUTHORING gate enforces, and the spec anyone
+     writing an agent, skill, pack or protocol section writes to.
+     `protocol-linter` reads this file in full on every dispatch. -->
 
 # Protocol extension — authoring rules
+
+Read in full. Every section is a rule `protocol-linter` can fail a file on, and
+a `FAIL` must cite one by name.
+
+## Contents
+
+- **The four-layer split** — which of the four files a given line belongs in
+- **One rule, one home** — no rule in two files, and where to place a new one
+- **Choosing a model for an agent** — `model:`, `effort:`, and escalation
+- **Writing for the reader you actually have** — what earns a line its place
+- **Indexing a pack or profile** — `## Index` vs `## Contents`, and the
+  always-read test
+- **A pack may not instruct a tool the lane does not have** — check `tools:`
+  before writing a command
+- **The project tool server** — per-lane grants and what they may assume
+- **Adding a project** — the files a new project needs
 
 ## The four-layer split
 
@@ -73,17 +90,12 @@ frequency is the profile that earns Opus.
 | `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
-**`scout` moved from `haiku` to `sonnet` (v0.5.4).** The old row's reasoning was
-about *claim accuracy*, and on that scout was never wrong — every ledger that
-checked its findings recorded them as coherent and independently reconfirmed.
-What it missed is that a recon report is not only claims. Of five dispatches,
-**two returned a head disagreeing with its artifact and one produced a brief
-that failed to name six of its own sections** — and that last one is the
-expensive kind, because the orchestrator routes off the brief. A brief that does
-not index its sections costs a full artifact read, which is the exact cost the
-whole head-and-brief design exists to avoid. Deriving the head (v0.5.0) fixes
-the counting half; indexing your own document is comprehension, and no script
-can do it for you.
+**A report is not only its claims**, which is the half that is easy to miss when
+tiering a read-only lane. The other half is the artifact's own structure: a head
+that matches it, and a brief that names every section below it (core § 4). A
+script derives the head; indexing your own document is comprehension, and an
+orchestrator routing off an unindexed brief pays a full artifact read — the
+exact cost the head-and-brief design exists to avoid.
 
 ### Effort is the second dial, and it is not the model
 
@@ -93,7 +105,7 @@ other is only half-configured.
 
 **Claude Code's implicit default is `xhigh`** — the second-highest of five. So
 an agent with no `effort:` line is not running "normally", it is running near
-the top of the range. Every lane was doing exactly that until v0.4.4.
+the top of the range.
 
 **`medium` is this network's baseline.** Two levels are in use:
 
@@ -117,26 +129,6 @@ more-consolidated tool calls, less preamble, and terser confirmations. That is
 usually an improvement for a lane whose output is a structured report, but it
 changes what those lanes do, not only what they cost.
 
-**Three things to watch on the next full run**, none of them tested at
-these settings:
-
-- **`quantitative-researcher` at `medium`.** It found the run's one MATERIAL
-  defect at `xhigh`. Opus at `medium` is a reasonable bet — the tier is doing
-  the work — but the gate that has no downstream check is the worst place for
-  a silent regression. If an audit passes something a later gate catches,
-  raise it.
-- **`scout` at `sonnet`/`medium`.** It moved up a model tier on structural
-  grounds, not accuracy ones, so watch the thing that moved it: does the
-  `## Orchestrator brief` name every section below it, and does the head come
-  back matching the artifact? Its citations were already complete at `haiku` and
-  are not the question. If the briefs come back clean, the move paid for itself;
-  if they do not, the problem is the order's framing, not the tier.
-- **`protocol-linter` at all.** It has never run. It is the second Opus lane and
-  the second gate with no downstream check, so a wrong `PASS` from it is as
-  invisible as a wrong audit. Judge its first dispatches on whether every `FAIL`
-  cites a rule, a file and a line — a finding missing any of the three is the
-  lane drifting into style review.
-
 ### Two things `effort` does not control
 
 **Extended thinking is inherited, not per-agent.** A subagent takes the main
@@ -151,23 +143,17 @@ an expensive one, and `status: PARTIAL` will not always catch it.
 
 ### Why `integration` and `review` are on Sonnet
 
-The other two gates are not: `quant-audit` and `protocol-lint` run on Opus,
-for the reason the model table gives — nothing downstream checks them. These two
-are different because something does. `integration` is followed by `review`, and
-`review` by the human's acceptance of the work itself.
+`quant-audit` and `protocol-lint` are on Opus for the reason the model table
+gives — nothing downstream checks them. These two are different because
+something does: `integration` is followed by `review`, and `review` by the
+human's acceptance of the work itself.
 
-And because v0.4 moved their load-bearing checks off the model and onto
-mechanisms. `check_report.py` enforces the report shape, the head's counts and
-the brief's completeness; acceptance criteria must name the observation that
-would prove them false; the external-anchor rule in `gates.md` says what a
-gate must check against. A gate leaning on structure is far less
-tier-sensitive than one leaning on the model noticing something — and these
-are the two gates with the most structure to lean on.
-
-If gate quality visibly drops, `tech-lead` in `INTEGRATION` mode is the first
-lane to move back to Opus — it is the gate with the widest surface and the one
-whose misses are hardest to see. Move it because the ledger shows a problem,
-not on a hunch.
+The second reason is the one to reuse when tiering a new gate. **A gate whose
+load-bearing checks sit on mechanisms is far less tier-sensitive than one
+leaning on the model noticing something.** `check_report.py` enforces the report
+shape, the head's counts and the brief's completeness; an acceptance criterion
+must name the observation that would prove it false; `gates.md` § 2 says what a
+gate must check against. These two have the most structure to lean on.
 
 ### Escalating a single dispatch
 
@@ -175,19 +161,26 @@ The frontmatter is a **default, not a ceiling**. The orchestrator may override
 the model for one dispatch, and should when the run has produced evidence that
 the lane is out of its depth:
 
-- a lane returned `BLOCKED` on something that is not a missing input, or
-- a finding reaches its **second** change-request round.
+- a lane returned `BLOCKED` on something that is not a missing input,
+- a finding reaches its **second** change-request round, or
+- a gate passed something a later gate then caught — raise the gate that missed
+  it, and `quant-audit` before any other, since nothing downstream checks it.
 
-Both are recorded in the ledger, so an escalation is visible after the fact and
-the pattern is reviewable. Escalate on evidence the run produced — never
+All three are recorded in the ledger, so an escalation is visible after the fact
+and the pattern is reviewable. Escalate on evidence the run produced — never
 pre-emptively, because a pre-emptive escalation is just a more expensive default
 with extra steps.
 
+When quality drops across a run rather than in one dispatch, the standing
+default to revisit is `tech-lead` in `INTEGRATION` mode: the widest gate surface
+and the least visible misses. Change a default because the ledgers show a
+problem, not on a hunch.
+
 ## Writing for the reader you actually have
 
-Everything under `PROTOCOL.md`, `protocol/`, `projects/` and `agents/` is read
-**only by models**, once per dispatch, and by many dispatches per run. That
-changes what earns its place:
+Everything under `PROTOCOL.md`, `protocol/`, `projects/`, `agents/` and
+`skills/` is read **only by models**, once per dispatch, and by many dispatches
+per run. That changes what earns its place:
 
 - **Keep the *why* that changes behaviour.** A rule with a stated consequence is
   followed more reliably than a bare imperative, and the consequence is often

@@ -480,8 +480,7 @@ _proc = subprocess.run(
     capture_output=True, text=True)
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
 check("and the sweep says which ledger checks it ran",
-      "(header, phases, budget, decisions, gates, open, models, authoring)"
-      in _proc.stdout, _proc.stdout)
+      f"({cr.LEDGER_CHECKS})" in _proc.stdout, _proc.stdout)
 
 # The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
 # close-out pack-corrections dispatch is an authoring order - the only order in
@@ -649,19 +648,73 @@ check("a dispatch nobody recorded is caught",
 _over = _budget(header="budget:       1 — x\nspent:        2\n")
 check("over budget with no Replans row is caught",
       any("no `## Replans` row" in x for x in _over), str(_over))
-_REPLAN = "\n## Replans\n| plan | because | change |\n|---|---|---|\n| v2 | the gate found a contract gap | +1 backend |\n"
-check("and a Replans row settles it",
-      _budget(header="budget:       1 — x\nspent:        2\n",
-              replans=_REPLAN) == [],
-      str(_budget(header="budget:       1 — x\nspent:        2\n",
-                  replans=_REPLAN)))
-_hard = _budget(header="budget:       0 — x\nspent:        2\n",
-                replans=_REPLAN)
-check("twice the budget is a hard stop even with a Replans row",
-      True if _hard == [] else any("hard stop" in x for x in _hard), str(_hard))
-_hard2 = _budget(header="budget:       1 — x\nspent:        2\n",
-                 replans=_REPLAN)
-check("exactly twice the budget is not past it", _hard2 == [], str(_hard2))
+NL = chr(10)
+
+
+def _ledger(budget, spent, replans, decisions=None, rounds=""):
+    """A ledger with `spent` dispatches actually on disk, and its re-plan chain."""
+    body = LEDGER.replace(
+        "route:        full",
+        "route:        full" + NL + "project:      portfolio" + NL
+        + "budget:       {} — x".format(budget) + NL
+        + "spent:        {}".format(spent))
+    body += "".join(
+        "| {0:02d} | build | — | scout | sonnet | {0:02d}-x.md | DONE | — |".format(i) + NL
+        for i in range(3, spent + 1))
+    body += _PHASES + rounds + replans
+    d = Path(tempfile.mkdtemp())
+    (d / "run.md").write_text(body, encoding="utf-8")
+    if decisions is not None:
+        (d / "decisions.md").write_text(decisions, encoding="utf-8")
+    return d
+
+
+_REPLAN = """
+## Replans
+| plan | because | change |
+|---|---|---|
+| v2 | the gate found a contract gap | budget 4 -> 5 |
+"""
+_settled = cr.check_budget(_ledger(5, 6, _REPLAN) / "run.md")
+check("and a Replans row settles it", _settled == [], str(_settled))
+_vague = cr.check_budget(_ledger(5, 6, _REPLAN.replace(
+    "budget 4 -> 5", "+1 backend")) / "run.md")
+check("a re-plan that does not say what the new budget is is caught",
+      any("does not say what the new budget is" in x for x in _vague), str(_vague))
+
+# The ceiling is twice what intake derived, and no re-plan moves it. This is
+# `2026-09-12-rolling-factor-f1-f7` to the number: it derived 7, re-planned to
+# 14, spent 14 - and passed, because the check read the ceiling off 14.
+_CHAIN = """
+## Replans
+| plan | because | change |
+|---|---|---|
+| v2 | the quant gate failed | budget 7 -> 10: +CR-1, +CR-2 |
+| v3 | it failed again | budget 10 -> 13: +CR-3, +CR-4 |
+| v4 | pack-corrections went non-empty | budget 13 -> 14: +protocol-lint |
+"""
+_recede = cr.check_budget(_ledger(14, 14, _CHAIN) / "run.md")
+check("a re-planned run cannot outrun its own ceiling",
+      any("twice the original `budget: 7`" in x for x in _recede), str(_recede))
+_under = cr.check_budget(_ledger(14, 13, _CHAIN) / "run.md")
+check("and one dispatch short of it is left alone", _under == [], str(_under))
+_unrelated = cr.check_budget(_ledger(
+    14, 14, _CHAIN, decisions="D-1: the framing verdict is mine." + NL) / "run.md")
+check("an unrelated ruling on disk is not consent to a run twice its size",
+      any("hard stop" in x for x in _unrelated), str(_unrelated))
+_ruled = cr.check_budget(_ledger(
+    14, 14, _CHAIN,
+    decisions="D-2: carry on past the budget hard stop - finish the open CRs." + NL)
+    / "run.md")
+check("and the human's ruling on the budget releases it", _ruled == [], str(_ruled))
+_broken = cr.check_budget(_ledger(14, 5, _CHAIN.replace(
+    "budget 10 -> 13", "budget 11 -> 13")) / "run.md")
+check("a budget chain that does not join up is caught",
+      any("the chain from the derived budget is broken" in x for x in _broken),
+      str(_broken))
+_drift = cr.check_budget(_ledger(20, 5, _CHAIN) / "run.md")
+check("and a header budget the chain never lands on is caught",
+      any("one of the two is fiction" in x for x in _drift), str(_drift))
 _nob = _budget(header="spent:        2\n")
 check("a phase-model ledger with no budget is caught",
       any("no readable `budget:`" in x for x in _nob), str(_nob))
@@ -669,6 +722,138 @@ check("a ledger with no phase table has no budget to check",
       cr.check_budget(_d2 / "run.md") == [])
 check("the derivation after the number does not confuse it",
       cr._leading_int("7 — 5 triggered phases + 2 gates") == 7)
+
+
+print("the round cap is counted, and a fix's consequence does not reset it")
+
+_ROUNDS = """
+## Rounds
+| finding | lane | round | of | caused by |
+|---|---|---|---|---|
+{rows}"""
+_LINEAGE = """
+## Replans
+| plan | because | change |
+|---|---|---|
+| v3 | new FINDING 4 — CR-1's fix conflates two causes | budget 7 -> 10: +CR-3 (frontend) |
+"""
+
+
+def _rounds(rows, replans=""):
+    return cr.check_rounds(
+        _ledger(7, 2, replans, rounds=_ROUNDS.format(rows=rows)) / "run.md")
+
+
+_honest = _rounds("| CR-1 | frontend | 1 | 2 | — |" + NL
+                  + "| CR-3 | frontend | 2 | 2 | CR-1 |" + NL, _LINEAGE)
+check("a consequence that continues its ancestor's count passes",
+      _honest == [], str(_honest))
+_reset = _rounds("| CR-1 | frontend | 1 | 2 | — |" + NL
+                 + "| CR-3 | frontend | 1 | 2 | CR-1 |" + NL)
+check("the same finding re-entering at round 1 under a new number is caught",
+      any("does not reset it" in x for x in _reset), str(_reset))
+_third = _rounds("| CR-1 | frontend | 1 | 2 | — |" + NL
+                 + "| CR-3 | frontend | 2 | 2 | CR-1 |" + NL
+                 + "| CR-5 | frontend | 3 | 2 | CR-3 |" + NL)
+check("a third lap on one lineage is caught",
+      any("past the cap" in x for x in _third), str(_third))
+_cap = _rounds("| CR-1 | frontend | 1 | 3 | — |" + NL)
+check("the cap is not a per-run setting",
+      any("the cap is 2" in x for x in _cap), str(_cap))
+_orphan = _rounds("| CR-3 | frontend | 2 | 2 | CR-9 |" + NL)
+check("lineage naming a finding with no row of its own is caught",
+      any("no row of its own" in x for x in _orphan), str(_orphan))
+_indep = _rounds("| CR-1 | frontend | 1 | 2 | — |" + NL
+                 + "| CR-3 | test | 1 | 2 | independent |" + NL)
+check("a genuinely new subject may claim independence", _indep == [], str(_indep))
+
+# `2026-09-12-rolling-factor-f1-f7` as it was actually written: the `v3` re-plan
+# said in prose that CR-1's fix caused the new finding, while the `Rounds` rows
+# it added the same turn recorded no cause at all. Nothing read both.
+_silent = _rounds("| CR-1 | frontend | 1 | 2 | — |" + NL
+                  + "| CR-3 | frontend | 1 | 2 | — |" + NL, _LINEAGE)
+check("a re-plan that blames a change request and a row that claims no cause",
+      any("claims no cause" in x for x in _silent), str(_silent))
+_four = _rounds("| CR-1 | frontend | 1 | 2 |" + NL)
+check("the four-column table every closed run shipped is caught",
+      any("column(s)" in x for x in _four), str(_four))
+_none = cr.check_rounds(_ledger(7, 2, "") / "run.md")
+check("a run that needed no rework has no table to check", _none == [], str(_none))
+
+
+print("a change request is a dispatch, so it is checked like one")
+
+_CR = """CHANGE REQUEST CR-1 — 2026-01-01-x
+lane:        frontend
+severity:    BLOCKING
+round:       1 of 2
+raised by:   05-quant-audit.md § Findings, FINDING 1 (CRITICAL)
+scope fence: apps/desktop/src/features/portfolio/Card.tsx only
+
+Read the FINDING 1 block in full. That block is the specification.
+"""
+
+
+def _cr(body=_CR, rows="| CR-1 | frontend | 1 | 2 | — |", open_rows="",
+        source="05-quant-audit.md"):
+    """Problems for a run holding one change request and its Rounds row."""
+    d = Path(tempfile.mkdtemp())
+    (d / "cr").mkdir()
+    (d / "cr" / "CR-1.md").write_text(body, encoding="utf-8")
+    if source:
+        (d / source).write_text("FINDING 1", encoding="utf-8")
+    (d / "run.md").write_text(
+        LEDGER
+        + NL + "## Rounds" + NL
+        + "| finding | lane | round | of | caused by |" + NL
+        + "|---|---|---|---|---|" + NL + rows + NL
+        + NL + "## Open" + NL
+        + "| kind | from | ref | one-line | state |" + NL
+        + "|---|---|---|---|---|" + NL + open_rows + NL,
+        encoding="utf-8")
+    return cr.check_cr(d)
+
+
+check("a change request in the protocol's shape passes", _cr() == [], str(_cr()))
+_nolane = _cr(body=_CR.replace("lane:        frontend" + NL, ""))
+check("a request that never says which lane owns the fix is caught",
+      any("has no `lane:`" in x for x in _nolane), str(_nolane))
+_nosev = _cr(body=_CR.replace("severity:    BLOCKING" + NL, ""))
+check("and one that never says whether it holds the slice",
+      any("has no `severity:`" in x for x in _nosev), str(_nosev))
+_badsev = _cr(body=_CR.replace("BLOCKING", "CRITICAL"))
+check("a gate's own severity word is not the protocol's",
+      any("it is BLOCKING or SHOULD_FIX" in x for x in _badsev), str(_badsev))
+_nofence = _cr(body=_CR.replace("scope fence: apps/desktop/src/features/portfolio/Card.tsx only" + NL, ""))
+check("a relayed request with no scope fence is caught",
+      any("has no `scope fence:`" in x for x in _nofence), str(_nofence))
+
+# The two tables the orchestrator writes in the same turn, reconciled.
+_rnd = _cr(rows="| CR-1 | frontend | 2 | 2 | — |")
+check("a round the request claims and the table denies is caught",
+      any("the table is the count" in x for x in _rnd), str(_rnd))
+_lane = _cr(rows="| CR-1 | test | 1 | 2 | — |")
+check("and a lane the two disagree on",
+      any("names lane 'frontend'" in x for x in _lane), str(_lane))
+_orphan = _cr(rows="| CR-9 | frontend | 1 | 2 | — |")
+check("a Rounds row counting a request nobody can read is caught",
+      any("has no CR-9.md in cr/" in x for x in _orphan), str(_orphan))
+check("and a request the cap cannot see",
+      any("has no `## Rounds` row" in x for x in _orphan), str(_orphan))
+
+# `PROTOCOL.md` § 5: SHOULD_FIX reaches the human through `Open` or not at all.
+_sf = _cr(body=_CR.replace("BLOCKING", "SHOULD_FIX"))
+check("a non-blocking request that left the run silently is caught",
+      any("no `## Open` row naming it" in x for x in _sf), str(_sf))
+_sfok = _cr(body=_CR.replace("BLOCKING", "SHOULD_FIX"),
+            open_rows="| should_fix | CR-1 | cr/CR-1.md | the badge nit | CARRIED |")
+check("and carried in that table, it passes", _sfok == [], str(_sfok))
+
+_dangling = _cr(source=None)
+check("a `raised by:` naming an artifact that is not there is caught",
+      any("no readable artifact" in x for x in _dangling), str(_dangling))
+_none = cr.check_cr(Path(tempfile.mkdtemp()))
+check("a run that needed no change request has none to check", _none == [], str(_none))
 
 print("a human stop the run passed leaves the ruling on disk")
 

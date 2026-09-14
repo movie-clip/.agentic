@@ -39,9 +39,9 @@ states this model, and it is short.
 | `docs/tech-debt-register.md` | deferred improvements, not stories |
 
 The earlier `epic-roadmap.md` / `prd/**` / `stories/README.md` corpus was
-deleted at commit `ce9c97d` ("cleanup", 2026-09-07) and is not coming back in
-that shape: the roadmap was hand-maintained, reached 2,090 lines, and about
-nine tenths of it was completed-epic prose. `ROADMAP.md` replaces it by being
+deleted and is not coming back in that shape: the roadmap was
+hand-maintained, reached 2,090 lines, and about nine tenths of it was
+completed-epic prose. `ROADMAP.md` replaces it by being
 *derived* from story frontmatter rather than written, so it cannot go stale and
 shipped work costs one row. Do not propose recreating the old corpus.
 

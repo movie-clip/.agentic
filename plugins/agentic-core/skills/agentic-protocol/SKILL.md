@@ -28,12 +28,12 @@ context without adding a rule you are bound by.
 
 ## Why these files hold no copy of anything
 
-Until v0.3 this skill carried a full copy of the protocol, with a note saying
+This skill once carried a full copy of the protocol, with a note saying
 `PROTOCOL.md` wins if they disagree. They had already disagreed. A contract with
 two copies and a tiebreak rule is a contract that drifts, and this network's
 whole purpose is catching drift.
 
-The v0.4 partition does not reintroduce that risk: it splits one contract by
+The partition does not reintroduce that risk: it splits one contract by
 audience, it does not duplicate one. If you are about to paste a message shape
 into an agent file, a capability pack, or here — don't. Point at the file that
 owns it.

@@ -283,7 +283,63 @@ downstream travel as `inputs` paths to the lanes that will actually use them.
 
 ---
 
-## 5. The three result fields are not the same thing
+## 5. Shape 3 — the change request (what a gate's finding becomes)
+
+A gate that fails owes the owning lane one change request per blocking finding,
+written to `<run_dir>/cr/CR-<n>.md`. It is the only artifact in a run that is
+neither an order nor a report — it is a finding, addressed — and it lives here
+rather than in the gate extension because all three roles meet it: gates write
+them, the orchestrator relays them, and every build lane receives them.
+
+```
+CHANGE REQUEST CR-<n> — <run id>
+lane:        <the lane that owns the fix>
+severity:    BLOCKING | SHOULD_FIX
+round:       <n> of 2
+raised by:   <path to the artifact that found it> § <section or finding id>
+scope fence: <the files this order may open and change>
+
+<the body — see the two cases below>
+```
+
+- **Who writes it.** `tech-lead` in INTEGRATION mode writes its own: it cannot
+  dispatch, so it names the paths in `handoff` and the orchestrator relays each
+  as a fresh work order. Every other gate — `quant-audit`, `reviewer`,
+  `protocol-lint` — returns a verdict and cannot write orders either, so the
+  orchestrator writes the request that carries their finding. One mechanism,
+  with the finding one file further away.
+- **If you found it, state it.** In the body: the finding (file:line, specific),
+  why it matters (the consequence, not the rule), and what would satisfy it. You
+  are the source, so this is original text. "Violates convention" gets argued
+  with; "the frontend types this as required and the backend returns null when
+  history is short, so the card throws on a new import" gets fixed.
+- **If you are relaying it, point at it.** `raised by:` names the block, and
+  that block *is* the specification. Do not restate it — a paraphrased change
+  request is the relayer's judgment wearing the gate's authority. The finding's
+  own report already carries the where, the claim, the actual, the impact and
+  the expected, in the words of the lane that owns the subject.
+- **`scope fence` is what makes the order safe to relay.** It names the files
+  this dispatch may open and change, and nothing else. An engineer handed a
+  finding it did not produce has no boundary but its own judgment without it.
+- **`raised by` names a path inside the run**, never a quotation of it. A change
+  request whose source cannot be opened is a claim rather than a relay, and
+  `check_report.py` fails it.
+- **Only `BLOCKING` holds the slice.** `SHOULD_FIX` is recorded in the ledger's
+  `Open` table and reaches the human at close-out — through that table or not at
+  all, and the check reads it.
+- **`severity` is derived from the verdict, not from the gate's own word.** Each
+  gate grades findings in its own vocabulary — `CRITICAL | MATERIAL | MINOR` for
+  the quantitative researcher, and others elsewhere — and those words say how
+  bad, not whether the run stops. The finding that a `FAIL` rests on is
+  `BLOCKING`; one the same report raised without failing on it is `SHOULD_FIX`.
+  A gate's grade copied straight across is a severity nobody decided.
+- **The lane receiving one fixes exactly what it names.** Adjacent improvements
+  are a new order, not a bonus. Disagreement goes in `risks`, and the work still
+  gets done; a second disagreement on the same finding goes to the human.
+
+---
+
+## 6. The three result fields are not the same thing
 
 | Field | Question | Who fills it |
 |---|---|---|
@@ -301,7 +357,7 @@ Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
 `protocol-linter` may emit `PASS` or `FAIL`. Every other lane writes
 `verdict: NONE`.
 
-## 6. Field discipline
+## 7. Field discipline
 
 - `status: PARTIAL` is honourable. Claiming `DONE` on unverified work is the
   single most expensive failure in this network.
@@ -315,7 +371,7 @@ Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
   `- none — because X` is counted as one real entry, so your head advertises
   work that does not exist. If the reason matters, it is a `risks` bullet.
 
-## 7. The report is checked, not trusted
+## 8. The report is checked, not trusted
 
 ```bash
 python <agenticRoot>/scripts/check_report.py <report_to path> --lane <lane>

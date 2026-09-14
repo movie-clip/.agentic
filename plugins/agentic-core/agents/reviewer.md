@@ -59,8 +59,9 @@ Your axis is different: **does this satisfy the story?**
 concerns" is a FAIL with extra steps, and it is how gates stop meaning anything.
 
 Every `FAIL` names: the specific criterion or guardrail, the file, and what
-would satisfy it. The orchestrator routes your text back to the owning lane
-verbatim, so vague findings cost a whole extra round trip.
+would satisfy it. The orchestrator does not retell it — it points the owning
+lane at the block you wrote (core § 5), read with no memory of your reasoning,
+so a vague finding arrives vague and costs a whole round trip.
 
 You do not run the project's full mechanical suite unless the work order says
 to — that is the human's step, and your job is to catch what a green suite would

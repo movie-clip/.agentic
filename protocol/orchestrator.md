@@ -82,9 +82,10 @@ it if you are unsure.
 | contract_note | 03-design | 06-backend | client type updated to match nullable sector |
 
 ## Rounds
-| finding | lane | round | of |
-|---|---|---|---|
-| CR-1 | backend | 1 | 2 |
+| finding | lane | round | of | caused by |
+|---|---|---|---|---|
+| CR-1 | backend | 1 | 2 | — |
+| CR-3 | backend | 2 | 2 | CR-1 |
 
 ## Replans
 | plan | because | change |
@@ -175,10 +176,9 @@ not open one to record that there was nothing to correct: a lane's own
 `pack_corrections: - none` is already that record, in the artifact whose head
 the count came from. A file written to say "nothing here" makes the gate
 accountable for nothing, and the reason written beside `skipped` is then a claim
-about the file's contents that no one re-reads — `2026-09-12` closed with
-`protocol-lint skipped (pack-corrections.md is empty)` against a file of eleven
-lines. The gate was right to skip. The ledger's reason for skipping it was
-false, and that is the part a later reader would have believed.
+about the file's contents that no one re-reads. A gate can be right to skip
+while the ledger's stated reason for skipping it is false — and the false
+reason is the part a later reader believes.
 
 Record this in the ledger and not only in your close-out report. The report is
 prose said once to a human and gone by the next run; the ledger line is read
@@ -365,21 +365,51 @@ spent:        0
 
 **Derive it, do not pad it.** A budget with slack in it is one a run can only
 come in under, which makes the number unfalsifiable in exactly the direction
-that matters — `2026-09-12` budgeted `4 + 1 slack` and spent 4, and the ledger
-cannot say whether the model was calibrated or the padding absorbed the miss.
+that matters: a run that lands inside its padding leaves a ledger that cannot
+say whether the model was calibrated or the slack absorbed the miss.
 One dispatch over an honest estimate costs a `## Replans` row, and that row is
 the measurement. Buying it off in advance is paying to learn nothing.
 
 Increment `spent` on every dispatch. **At `spent == budget` you do not dispatch
 again until you have written a `## Replans` row** saying what the estimate missed
-and what the new budget is. At twice the original budget, stop and hand back to
-the human regardless of how close the work feels.
+and what the new budget is — in the `change` cell, as `budget 7 → 10`, because
+the first row's *old* value is the only surviving record of what intake derived.
+
+**At twice the original budget, stop and hand back to the human** regardless of
+how close the work feels. Original, not current: a ceiling read off the
+re-planned budget rises with every re-plan, so it recedes exactly as fast as a
+run approaches it and is never reached. If the human rules that it goes on, that ruling is written to `decisions.md` like every other
+human ruling — `check_report.py` will not close the run without it.
 
 A route name was chosen before the run knew anything, from a menu of guesses
 about shape. A budget is derived from which triggers actually fired, which is
 evidence, and it is falsifiable at close-out: `spent` against `budget` measures
 the estimate, and it is the only number in the ledger that says whether the
 phase model is calibrated for this project yet.
+
+### A gate that fails routes; it does not stop the run
+
+No gate can dispatch, so every `FAIL` becomes work only if you make it work.
+The route is one shape for all four of them:
+
+1. **One change request per blocking finding**, at `<run_dir>/cr/CR-<n>.md`,
+   in the shape core § 5 gives. `tech-lead` writes its own and hands you the
+   paths; for `quant-audit`, `reviewer` and `protocol-lint` the file is yours
+   to write, and its body **points at the gate's finding rather than restating
+   it** — you did not find it, and your words carrying its authority is the
+   relay rule's own failure case (§ 5).
+2. **Dispatch the lane that owns the file**, scope fenced to that finding, with
+   the CR path in `inputs`. Not the lane that raised it, and not a lane that
+   merely touches the area.
+3. **Write the `## Rounds` row before dispatching, not after** — the count is
+   the cap, and a count written afterwards is a count that reflects what
+   happened rather than what was allowed.
+4. **Re-run that gate.** That one. The others judged work nothing has touched,
+   and their verdicts stand.
+
+Non-blocking findings do not hold the slice: they become `Open` rows and reach
+the human at close-out. A `SHOULD_FIX` change request with no `Open` row is a
+finding that left the run quietly, and the close-out sweep fails it.
 
 ### Re-plan on evidence, and version it
 
@@ -550,11 +580,11 @@ most consequential one. A human stop produces a decision in the chat, and the
 chat is not a path, so it reaches the next lane the one way the relay rule
 forbids: as your restatement of it.
 
-`2026-09-11` is what that costs. The story lane's own `risks` block: *"this
-story assumes the work order's framing of the human's ruling is accurate — I did
-not see a separate signed ruling document, only the work order's own restatement
-of the producer's brief's two open items as resolved."* The lane was right to
-flag it, had no way to check it, and drafted against a paraphrase anyway.
+What that costs, in a story lane's own `risks` block: *"this story assumes the
+work order's framing of the human's ruling is accurate — I did not see a
+separate signed ruling document, only the work order's own restatement of the
+producer's brief's two open items as resolved."* The lane was right to flag it,
+had no way to check it, and drafted against the paraphrase anyway.
 
 So **write the ruling down before the next dispatch**, in
 `<run_dir>/decisions.md`:
@@ -601,13 +631,13 @@ one:
   know as a question for the lane, not as a premise for it.
 
 **If you need a claim and have neither, that is the `ground-truth` trigger.**
-The phase exists for this and nothing else. `2026-09-12` skipped it on the
-strength of an intake grep and then told the frontend lane that a spec file
-"still asserts the old DOM shape" — the file did not exist. The lane repeated
-the claim in its handoff, the test lane spent its `risks` block establishing
-that no such file had ever been in git history, and the run carried an `Open`
-row about its own work order to close-out. Nothing shipped wrong; three lanes
-paid for one sentence. An unverified claim reads exactly like a verified one,
+The phase exists for this and nothing else. Skipping it on the strength of an
+intake grep is how an order comes to assert that a file "still asserts the old
+DOM shape" when the file does not exist: the lane repeats the claim in its
+handoff, the next lane spends its `risks` block disproving it, and the run
+carries an `Open` row about its own work order to close-out. Nothing ships
+wrong; three lanes pay for one sentence. An unverified claim reads exactly like
+a verified one,
 which is why it has to be sourced where it is written rather than caught where
 it hurts.
 

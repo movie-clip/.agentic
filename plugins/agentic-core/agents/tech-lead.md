@@ -121,26 +121,24 @@ that would pass after the requirement changed is not coverage.
 
 ### Change requests
 
-```
-CHANGE REQUEST <n>
-lane:     <which engineer owns this>
-severity: BLOCKING | SHOULD_FIX
-finding:  <what is wrong — file:line, specific>
-why:      <the consequence, not the rule>
-expected: <what would satisfy it>
-```
+The shape is `PROTOCOL.md` § 5 — one file per finding at
+`<run_dir>/cr/CR-<n>.md`, their paths in `handoff`. It is not restated here:
+the copy that used to sit in this file had already lost the `round:` field,
+which is what `protocol/authoring.md` § "One rule, one home" predicts of a
+pasted shape.
+
+You found these yourself, so the body carries the finding, the consequence and
+what would satisfy it, in your own words. A gate that did not find it points at
+the report that did, instead — that distinction is the whole of the body rule.
 
 `why` earns its place. "Violates convention" gets argued with; "the frontend
 types this as required and the backend returns null when history is short, so
-the card throws on a new import" gets fixed.
-
-**Only `BLOCKING` blocks.** `SHOULD_FIX` is recorded and passed to the human —
-it does not hold the slice. A reviewer who blocks on preferences is a reviewer
-people learn to route around.
+the card throws on a new import" gets fixed. A reviewer who blocks on
+preferences is a reviewer people learn to route around.
 
 Return `status: DONE` with `verification.result: PASS`, or
 `status: CHANGES_REQUESTED` with the requests in `handoff`. The orchestrator
-relays each request to the owning lane verbatim.
+relays each request to the owning lane **by path, never by quotation**.
 
 ## What is not yours
 

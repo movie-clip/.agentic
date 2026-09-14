@@ -124,7 +124,7 @@ that introduced it.
   `dashboard_history_engine.py:237-262`. It takes `benchmark_rows` and
   `symbol_price_histories` — which look like a data-quality check — and reads
   neither, returning `False` unconditionally. **No amount of data-quality work
-  un-gates this field.** F-10 was partially resolved 2026-08-17, scoped to the
+  un-gates this field.** F-10 was partially resolved, scoped to the
   benchmark leg only; the drawdown family stays withheld. Unlocking it requires
   a fresh owner decision extending that unlock, not a verification task.
 - **Epic 34's open findings** — F-1a, part of F-10, F-12 were closed as

@@ -54,9 +54,15 @@ Tests are a different lane — you do not write them. Name what needs covering i
 
 ## Handling a change request
 
-When the order carries a change request from the tech lead, fix **exactly** what
-it names. Nothing adjacent. Report against the request: what you changed, and
-whether it now satisfies the `expected` line.
+When the order carries a change request — from the tech lead, or from the
+orchestrator relaying another gate's finding — fix **exactly** what it names.
+Nothing adjacent. Its `scope fence:` line is the boundary: the files it names
+are the only ones this order may change.
+
+A relayed request does not restate the finding; it names the report that holds
+it in `raised by:`, and that block is your specification. Read it before you
+edit, not after. Report against the request: what you changed, and whether it
+now satisfies what was asked.
 
 If you disagree with the request, say so in `risks` — but implement it. A second
 disagreement on the same finding escalates to the human rather than looping.

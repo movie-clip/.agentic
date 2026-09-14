@@ -273,6 +273,7 @@ def check_ledger(ledger: Path, closed_only: bool = False) -> list[str]:
     """
     problems = (check_header(ledger) + check_phases(ledger)
                 + check_budget(ledger) + check_decisions(ledger)
+                + check_rounds(ledger) + check_cr(ledger.parent)
                 + check_open_table(ledger) + check_models(ledger)
                 + check_authoring_gate(ledger.parent))
     status = (_ledger_field(ledger.read_text(encoding="utf-8"), "status")
@@ -282,7 +283,8 @@ def check_ledger(ledger: Path, closed_only: bool = False) -> list[str]:
     return problems
 
 
-LEDGER_CHECKS = "header, phases, budget, decisions, gates, open, models, authoring"
+LEDGER_CHECKS = ("header, phases, budget, rounds, cr, decisions, gates, open, "
+                 "models, authoring")
 
 
 def lane_from_name(path: Path) -> str | None:
@@ -1109,6 +1111,203 @@ def check_models(ledger: Path, agents_dir: Path | None = None) -> list[str]:
     return problems
 
 
+CR_FIELDS = ("lane", "severity", "round", "raised by", "scope fence")
+CR_SEVERITY = {"BLOCKING", "SHOULD_FIX"}
+
+
+def check_cr(run_dir: Path) -> list[str]:
+    """Change requests are dispatches, and nothing checked them at all.
+
+    A CR is the only artifact in a run that becomes a work order without being
+    a report, so none of the report checks reach it - and `PROTOCOL.md` section
+    5 is the shape it is measured against. The four in
+    `2026-09-12-rolling-factor-f1-f7` were well written and still carried none
+    of `lane`, `severity`, or an `Open` row for anything non-blocking, because
+    the only copy of the shape an author was likely to read sat in
+    `tech-lead.md` and had drifted from the protocol's.
+
+    Three things are reconciled here rather than merely parsed: the `round:` a
+    request claims against the `Rounds` table that counts it, the lane it names
+    against the lane that table records, and a `SHOULD_FIX` against the `Open`
+    row that is supposed to carry it to the human. Each is a place two copies
+    of one fact can disagree, which is the only kind of error worth a check.
+    """
+    cr_dir = run_dir / "cr"
+    files = sorted(cr_dir.glob("CR-*.md")) if cr_dir.is_dir() else []
+    ledger = run_dir / "run.md"
+    text = ledger.read_text(encoding="utf-8") if ledger.is_file() else ""
+    rounds = {_finding_id(r[0]): r for r in _ledger_table(text, "Rounds") if r}
+    open_text = " ".join(" ".join(r) for r in _ledger_table(text, "Open"))
+    problems, seen = [], set()
+    for path in files:
+        ident = _finding_id(path.stem)
+        seen.add(ident)
+        body = path.read_text(encoding="utf-8")
+        fields = {k: _cr_field(body, k) for k in CR_FIELDS}
+        for key in CR_FIELDS:
+            if not fields[key]:
+                problems.append(f"{path.name} has no `{key}:` - core "
+                                f"section 5 is the shape, and a missing field "
+                                f"is one the engineer has to guess at")
+        sev = (fields["severity"] or "").strip().upper()
+        if sev and sev not in CR_SEVERITY:
+            problems.append(f"{path.name} has `severity: {sev}` - it is "
+                            f"BLOCKING or SHOULD_FIX; only the first holds the "
+                            f"slice, and a gate's own severity word does not "
+                            f"answer that")
+        row = rounds.get(ident)
+        rnd = _leading_int(fields["round"])
+        if row is None:
+            problems.append(f"{path.name} has no `## Rounds` row - a dispatch "
+                            f"the cap cannot see is a dispatch outside the cap")
+        else:
+            if rnd is not None and rnd != _leading_int(row[2] if len(row) > 2
+                                                      else ""):
+                problems.append(f"{path.name} says `round: {fields['round']}` "
+                                f"and its `## Rounds` row says "
+                                f"{row[2].strip()} - the table is the count")
+            lane = (fields["lane"] or "").strip().lower()
+            table_lane = (row[1].strip().lower() if len(row) > 1 else "")
+            if lane and table_lane and lane != table_lane:
+                problems.append(f"{path.name} names lane {lane!r} and its "
+                                f"`## Rounds` row names {table_lane!r}")
+        if sev == "SHOULD_FIX" and ident not in open_text:
+            problems.append(f"{path.name} is SHOULD_FIX with no `## Open` row "
+                            f"naming it - a request that does not hold the "
+                            f"slice reaches the human through that table or "
+                            f"not at all")
+        src = _cr_source(fields["raised by"] or "", run_dir)
+        if fields["raised by"] and src is None:
+            problems.append(f"{path.name} `raised by:` names no readable "
+                            f"artifact in this run - relay is by path, and a "
+                            f"path that cannot be opened is a claim")
+    for ident in rounds:
+        if ident.upper().startswith("CR-") and ident not in seen:
+            problems.append(f"`## Rounds` row {ident} has no {ident}.md in "
+                            f"cr/ - the row counts a request nobody can read")
+    return problems
+
+
+def _cr_field(body: str, name: str) -> str | None:
+    """A `name:  value` line from a change request header, or None."""
+    m = re.search(rf"^{re.escape(name)}:[ \t]*(.*)$", body, re.M | re.I)
+    return m.group(1).strip() if m else None
+
+
+def _cr_source(value: str, run_dir: Path) -> Path | None:
+    """The artifact a `raised by:` line points at, if it is on disk."""
+    for tok in re.findall(r"[^\s,;]+\.md", value):
+        cand = Path(tok)
+        for p in ((cand,) if cand.is_absolute() else (run_dir / tok,)):
+            if p.is_file():
+                return p
+    return None
+
+ROUND_CAP = 2          # protocol/gates.md section 4
+_NO_CAUSE = {"-", "--", "—", "", "none", "independent"}
+
+
+def check_rounds(ledger: Path) -> list[str]:
+    """The round cap is counted here or it is not counted anywhere.
+
+    `gates.md` section 4 caps rework at two rounds on the same finding and says
+    the count lives in this table rather than in anyone's memory - but nothing
+    read the table until `2026-09-13`, so the cap was memory after all, written
+    down. Every row of `2026-09-12-rolling-factor-f1-f7` read `1 | 2` while the
+    frontend went round the same badge logic twice, because the second lap
+    arrived under a new finding id.
+
+    That is the failure worth catching, and it is only catchable because the
+    run said so itself: the `v3` re-plan recorded that the new finding was
+    *caused by* CR-1's fix. A consequence of a fix is the same finding wearing a
+    new number, so `caused by` carries the lineage and the count continues
+    across it. A row that genuinely opens a new subject says `independent` -
+    an explicit claim a human can weigh, which is what the network already
+    demands of a phase that does not fire.
+    """
+    text = ledger.read_text(encoding="utf-8")
+    rows = _ledger_table(text, "Rounds")
+    if not rows:
+        return []
+    problems: list[str] = []
+    seen: dict[str, int] = {}
+    lineage: list[tuple[str, str, int]] = []
+    for row in rows:
+        name = row[0].strip() if row else "?"
+        if len(row) < 5:
+            problems.append(f"`## Rounds` row {name!r} has {len(row)} column(s) "
+                            f"- the table is `finding | lane | round | of | "
+                            f"caused by`, and `caused by` is what stops a "
+                            f"finding's consequence from re-entering at round 1")
+            continue
+        ident = _finding_id(row[0])
+        rnd, of = _leading_int(row[2]), _leading_int(row[3])
+        if rnd is None or of is None:
+            problems.append(f"`## Rounds` row {name!r} has no readable "
+                            f"`round`/`of` - the cap cannot be counted off prose")
+            continue
+        if of != ROUND_CAP:
+            problems.append(f"`## Rounds` row {name!r} declares `of {of}` - the "
+                            f"cap is {ROUND_CAP} (gates.md section 4) and is "
+                            f"not a per-run setting")
+        if rnd < 1 or rnd > of:
+            problems.append(f"`## Rounds` row {name!r} is round {rnd} of {of} - "
+                            f"past the cap means the request is unclear or the "
+                            f"design is wrong; escalate to the human rather "
+                            f"than looping")
+        seen[ident] = rnd
+        cause = row[4].strip().lower()
+        if cause not in _NO_CAUSE:
+            lineage.append((ident, _finding_id(row[4]), rnd))
+    for ident, cause, rnd in lineage:
+        if cause not in seen:
+            problems.append(f"`## Rounds` row {ident} says it was caused by "
+                            f"{cause}, which has no row of its own - lineage "
+                            f"names a finding in this table")
+        elif rnd != seen[cause] + 1:
+            problems.append(f"`## Rounds` row {ident} was caused by {cause} "
+                            f"(round {seen[cause]}) but enters at round {rnd} - "
+                            f"a consequence of a fix continues that count, it "
+                            f"does not reset it")
+    problems += _replan_lineage(text, rows)
+    return problems
+
+
+def _finding_id(cell: str) -> str:
+    """`CR-1 (FINDING 1)` -> `CR-1`. The id is what lineage can be keyed on."""
+    m = re.search(r"CR-\d+", cell, re.I)
+    return m.group(0).upper() if m else cell.strip()
+
+
+def _replan_lineage(text: str, rows: list[list[str]]) -> list[str]:
+    """A re-plan that blames an existing change request owes the lineage.
+
+    The orchestrator writes both tables, so the two can disagree silently -
+    and did: `v3` said in prose that CR-1's fix caused the new finding, while
+    the `Rounds` rows it added the same turn recorded no cause at all. Nothing
+    reconciles free prose with a typed table except a check that reads both.
+    """
+    cause_col = {_finding_id(r[0]): (r[4].strip().lower() if len(r) >= 5 else "")
+                 for r in rows if r}
+    problems = []
+    for row in _ledger_table(text, "Replans"):
+        if len(row) < 3:
+            continue
+        plan, because, change = row[0].strip(), row[1], row[2]
+        blamed = {m.upper() for m in re.findall(r"CR-\d+", because, re.I)}
+        added = {m.upper() for m in re.findall(r"\+\s*(CR-\d+)", change, re.I)}
+        if not blamed or not added:
+            continue
+        for ident in sorted(added - blamed):
+            if cause_col.get(ident, "") in _NO_CAUSE:
+                problems.append(
+                    f"`## Replans` row {plan} names {sorted(blamed)[0]} in its "
+                    f"reason for adding {ident}, but {ident}'s `## Rounds` row "
+                    f"claims no cause - say which finding it descends from, or "
+                    f"write `independent` and own the claim")
+    return problems
+
+
 def check_budget(ledger: Path) -> list[str]:
     """`spent` is the dispatches on disk, and `budget` is falsifiable.
 
@@ -1121,7 +1320,12 @@ def check_budget(ledger: Path) -> list[str]:
       a crashed subagent, a lost head - still owes a row, so the count holds.
     - over budget without a `## Replans` row is drift. The budget is only
       falsifiable if exceeding it costs a sentence.
-    - twice the budget is the hard stop, wherever the run thinks it is.
+    - twice the **original** budget is the hard stop, and the original is the
+      one number a re-plan cannot move. Reading the ceiling off the current
+      budget - which is what this did until `2026-09-13` - raises it with every
+      re-plan, so the stop recedes exactly as fast as a run approaches it:
+      `2026-09-12-rolling-factor-f1-f7` derived 7, re-planned to 14, spent 14,
+      and passed against a ceiling of 28. Fourteen dispatches, no human.
     """
     text = ledger.read_text(encoding="utf-8")
     if not _ledger_table(text, "Phases"):
@@ -1145,14 +1349,88 @@ def check_budget(ledger: Path) -> list[str]:
                         f"every dispatch owes a row, including one that "
                         f"returned nothing; write it with `status: LOST` "
                         f"rather than leaving the count to disagree")
-    if spent > budget and not _ledger_table(text, "Replans"):
+    replans = _ledger_table(text, "Replans")
+    if spent > budget and not replans:
         problems.append(f"`spent: {spent}` is past `budget: {budget}` with no "
                         f"`## Replans` row - say what the estimate missed and "
                         f"what the new budget is")
-    if budget and spent > 2 * budget:
-        problems.append(f"`spent: {spent}` is past twice `budget: {budget}` - "
-                        f"that is the hard stop; hand back to the human")
+    original, chain = _budget_chain(replans)
+    problems += chain
+    landed = _last_new(replans)
+    if landed is not None and landed != budget:
+        problems.append(f"the last `## Replans` row lands on {landed} but the "
+                        f"header says `budget: {budget}` - one of the two is "
+                        f"fiction, and the hard stop is derived from this chain")
+    if original is None:
+        original = budget
+    if original and spent >= 2 * original:
+        if not _budget_ruling(ledger.parent):
+            problems.append(
+                f"`spent: {spent}` has reached twice the original "
+                f"`budget: {original}` - that is the hard stop. The run stops "
+                f"there and hands back regardless of how close the work feels, "
+                f"and the ruling that lets it go on lives in decisions.md. "
+                f"There is none that mentions the budget")
     return problems
+
+
+_BUDGET_STEP = re.compile(r"budget\s*(\d+)\s*(?:→|->|-->)\s*(\d+)", re.I)
+
+
+def _last_new(replans: list[list[str]]) -> int | None:
+    """The budget the last re-plan landed on, or None if it did not say."""
+    for row in reversed(replans):
+        m = _BUDGET_STEP.search(" ".join(row))
+        if m:
+            return int(m.group(2))
+    return None
+
+
+def _budget_chain(replans: list[list[str]]) -> tuple[int | None, list[str]]:
+    """The original budget, and what the `## Replans` chain fails to support.
+
+    A re-plan row owes the new budget in words (`budget 7 -> 10`) because that
+    is what orchestrator.md asks of it, and because the first row's *old* value
+    is the only surviving record of what the run derived at intake. Without it
+    the original is unrecoverable and the hard stop has nothing to stand on, so
+    a row that does not say is a failure rather than a silent fallback - a
+    fallback here is how the ceiling went missing in the first place.
+    """
+    if not replans:
+        return None, []
+    problems, steps = [], []
+    for row in replans:
+        plan = row[0].strip() if row else "?"
+        m = _BUDGET_STEP.search(" ".join(row))
+        if not m:
+            problems.append(f"`## Replans` row {plan} does not say what the new "
+                            f"budget is - write it in `change` as "
+                            f"`budget <old> -> <new>`; the first row's old value "
+                            f"is the only record of what intake derived, and "
+                            f"the hard stop is twice that number")
+            continue
+        steps.append((plan, int(m.group(1)), int(m.group(2))))
+    for (_, _, prev_new), (plan, old, _) in zip(steps, steps[1:]):
+        if old != prev_new:
+            problems.append(f"`## Replans` row {plan} re-plans from {old}, but "
+                            f"the row before it landed on {prev_new} - the "
+                            f"chain from the derived budget is broken")
+    return (steps[0][1] if steps else None), problems
+
+
+def _budget_ruling(run_dir: Path) -> bool:
+    """Did the human rule on this run passing its hard stop, on disk?
+
+    `decisions.md` is already where a human stop leaves its ruling, so the
+    hard stop needs no mechanism of its own - only the ruling to actually be
+    about the budget. A framing decision sitting in the file is not consent to
+    a run twice its size.
+    """
+    try:
+        text = (run_dir / "decisions.md").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return "budget" in text.lower()
 
 
 def _leading_int(value: str | None) -> int | None:

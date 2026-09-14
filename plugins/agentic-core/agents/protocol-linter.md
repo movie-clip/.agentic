@@ -105,9 +105,11 @@ against `authoring.md` is not a weaker verdict, it is not a verdict.
 FAIL with extra steps, and it is how gates stop meaning anything.
 
 Every `FAIL` names three things: **the rule** in `authoring.md`, **the file and
-line**, and **what would satisfy it**. The orchestrator routes your text back to
-the owning lane verbatim, so a finding phrased as an observation costs a whole
-extra round trip to turn into an instruction.
+line**, and **what would satisfy it**. The orchestrator does not retell your
+finding — it points the owning lane at the block you wrote (core § 5), which
+that lane reads with no memory of your reasoning. A finding phrased as an
+observation therefore arrives as an observation, and costs a whole round trip
+to turn into an instruction.
 
 You may not emit `CHANGES_REQUESTED` — that verdict belongs to `tech-lead` in
 `INTEGRATION` mode alone.

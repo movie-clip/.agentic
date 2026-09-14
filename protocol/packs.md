@@ -39,6 +39,15 @@ You are the docs lane holding `pack-corrections.md`. For each entry:
   and leave the pack alone.
 - **Apply the replacement wording as given**, into the section it belongs in.
   Do not rewrite the surrounding paragraph while you are there.
+- **A corrected fact stated twice is corrected twice.** Before you close an
+  entry, search the pack for the fact you just changed. A correction is exactly
+  when § Keeping a pack readable by index gets violated: the entry names one
+  section, and the fact lives in two. Replace the second copy with a pointer to
+  the corrected section, not a second corrected copy. Collapsing a duplicate is
+  not the rewriting forbidden above — it removes a fact, it does not add one.
+- **A line that disagrees without restating is not yours to settle.** Which
+  side is wrong is a question about the code the correction came from, and this
+  order scopes you to the packs. Record it in `risks`.
 - **Keep the pack's `## Index` accurate.** If a correction adds, removes or
   renames a section, the index must move with it, or every future reader
   navigating by index will miss it.

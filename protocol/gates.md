@@ -60,36 +60,33 @@ defect — say so in `risks`.
 - The mechanical gates in the repo (test runner, pre-commit hook, CI) are the
   final authority. No agent may bypass, weaken or work around a hook. If a
   commit is blocked, the answer is to fix the work, never to skip the gate.
-- A reviewer `FAIL` blocks close-out. The orchestrator re-dispatches to the
-  owning lane with the failure artifact's path as an input; it does not fix
-  things itself.
+- **Your `FAIL` blocks close-out and comes back to you.** It does not stop the
+  run and it is not yours to fix: the orchestrator turns each blocking finding
+  into a change request, dispatches the lane that owns the file, and re-runs
+  you. Write findings that survive that trip — the lane reading yours has no
+  memory of your reasoning and only the block you point it at. Non-blocking
+  findings do not hold the slice; they become `Open` rows and reach the human at
+  close-out.
 
 ---
 
-## 4. Shape 3 — the change request (`tech-lead` INTEGRATION only)
+## 4. What a FAIL costs — the rounds it may take
 
-You cannot dispatch. Write each change request to `<run_dir>/cr/CR-<n>.md`, and
-name those paths in `handoff` — the orchestrator relays each as a fresh work
-order whose `inputs` carries the path to that file.
+The change request itself is **core § 5**: the shape, who writes it, and the
+difference between stating a finding you found and pointing at one you are
+relaying. Not restated here. Two rules on top of it are yours, because they
+govern the loop rather than the artifact.
 
-```
-CHANGE REQUEST <n>
-lane:     <owning lane>
-severity: BLOCKING | SHOULD_FIX
-round:    <1 | 2>
-finding:  <what is wrong — file:line, specific>
-why:      <the consequence, not the rule>
-expected: <what would satisfy it>
-```
-
-- Only `BLOCKING` holds the slice. `SHOULD_FIX` is recorded in the ledger's
-  `Open` table and surfaced to the human at close-out.
-- `finding` names a file and a line. A change request that says "the error
-  handling is inconsistent" cannot be acted on or checked.
-- `why` states the consequence, not the rule. "The client will render `null` as
-  `0`" routes; "this violates the contract convention" does not.
-- An engineer receiving one fixes **only** what it names. Adjacent improvements
-  are a new order, not a bonus.
 - **Two rounds maximum on the same finding.** The count lives in the ledger's
-  `Rounds` table, not in anyone's memory. A third round means the request is
-  unclear or the design is wrong — escalate to the human rather than looping.
+  `Rounds` table, not in anyone's memory — `check_report.py` reads it, and reads
+  each request's `round:` against it. A third round means the request is unclear
+  or the design is wrong — escalate to the human rather than looping.
+- **A finding that a previous round's fix caused is that finding, renumbered.**
+  It continues the count; it does not open a new one. The `Rounds` row carries
+  the lineage in `caused by`, and a row that genuinely opens a new subject says
+  `independent` rather than leaving the cell blank. Without the lineage the cap
+  is defeated by naming: a lane laps the same code twice while every row still
+  reads `1 | 2`, because the second lap entered as a new finding.
+- **Re-run only the gate that failed.** A FAIL is not a reason to re-run the
+  verify phase; the other gates judged work that has not changed, and their
+  verdicts stand until something touches what they read.

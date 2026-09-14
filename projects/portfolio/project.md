@@ -129,8 +129,8 @@ explicitly routes "build US-X.Y" / "pick up ticket T-..." / "implement the
 next story" to `orchestrate-feature`, so the trigger collision is closed at
 the skill itself. The residual prose that once told agents to run `build-story`
 lived in `docs/product/stories/README.md` and `docs/product/prd/README.md`,
-both deleted at commit `ce9c97d`, so the collision is now closed both at the
-skill and across the repo docs.
+both deleted, so the collision is now closed both at the skill and across
+the repo docs.
 
 **If `build-story` loads for a request that belongs to this network, stop and
 route to `orchestrate-feature` instead.** A slice built through it has no run

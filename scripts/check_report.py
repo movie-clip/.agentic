@@ -89,7 +89,16 @@ AUTHORING_GATE = "protocol-lint"
 # Over MAX it is carrying several facts, and cannot be routed to several lanes;
 # that is structural. Measured against the first full run: 186 bullets, median
 # 336 chars, longest 1517. The median is the habit this cap is changing.
-TARGET_BULLET = 200
+#
+# TARGET moved 200 -> 300 on the four runs closed 2026-09-12, on the same
+# evidence rule that moved WIDE_TARGET below: a target the median bullet misses
+# is not a target. Across 179 non-wide bullets the median is 206 and 54% were
+# over 200 - including 10 of `backend` and `quant-audit`'s 49, whose bullets are
+# the shortest in the network. Sampled at 201-290 they carry exactly one fact
+# plus the `file:line` or the reason the protocol asks for; the compounding the
+# rule describes starts above that. At 300 it fires on 14%, and on the lanes it
+# should: 10 of `docs`'s 26, 6 of `frontend`'s 38, none of `backend`'s.
+TARGET_BULLET = 300
 MAX_BULLET = 400
 
 # `recon` and `quant` RESEARCH are evidence lanes: a bullet carries a claim plus

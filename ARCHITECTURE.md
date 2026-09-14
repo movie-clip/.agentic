@@ -1,6 +1,6 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.10**. Lives at `C:\projects\investments\.agentic`, one level above
+Version **0.7.12**. Lives at `C:\projects\investments\.agentic`, one level above
 the repos it drives. One project is bound: `portfolio` (quant-research-lab).
 `plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
 version — this heading has been wrong before.
@@ -345,6 +345,13 @@ orchestrator opens a section only when a count says there is something in it.
 The head is *derived* by `check_report.py --emit-head`, never typed, because a
 count written by hand is wrong in the one direction that matters: too low,
 silently dropping work.
+
+**The ledger is written by a script for the same reason.** `scripts/ledger.py`
+applies a head's Artifacts row, `next:`, phase state and `Open` rows in one
+call, derives `spent:` from the rows rather than taking it as an argument, and
+hands the result to `check_report.py`'s ledger battery — so an inconsistency is
+reported at the dispatch that caused it instead of at close-out. `Rounds` and
+`Replans` are prose rows written a few times a run and stay hand-edited.
 
 **Gates stay mechanical.** `run_all_tests.py`, the commit hook and CI remain the
 actual authority, and the integration gate runs the project's whole acceptance

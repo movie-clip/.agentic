@@ -192,7 +192,10 @@ per run. That changes what earns its place:
   dispatch.
 - **Prefer a table to a paragraph** wherever the content is a mapping. Tables
   are shorter, and they make an omission visible as an empty cell.
-- **One fact per bullet, under 200 characters.**
+- **One fact per bullet, under 200 characters.** This is the rule for an
+  instruction file, not the one core § 3 sets for a report bullet: those carry
+  a `file:line` and are measured separately, so the two numbers differ on
+  purpose and neither is a stale copy of the other.
 
 The human-facing artifacts are the exception, and there are only four: the
 delivery brief's recommendation, the story's acceptance criteria, the gate

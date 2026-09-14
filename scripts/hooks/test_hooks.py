@@ -193,6 +193,20 @@ check("an unusable artifact is reported ahead of its head",
       code == 2 and "section 3" in err and "Return this head" not in err,
       f"{code} {err}")
 
+# The advisory half of check_report.py reaches the Bash-less lanes here and
+# nowhere else - and it rides along with a hold rather than causing one.
+_long = "- " + "x" * 350
+_adv = d / "09-docs.md"
+_adv.write_text(BLOCK.replace("  - one item", "  " + _long), encoding="utf-8")
+code, err = run(HEAD_GATE, payload(head_for_text(_adv), lane="docs-engineer"))
+check("a long bullet alone does not hold the lane", code == 0, f"{code} {err}")
+_adv.write_text(BLOCK.replace("  - one item", "  " + _long)
+                .replace("risks:", "risk:"), encoding="utf-8")
+code, err = run(HEAD_GATE, payload(head_for_text(_adv), lane="docs-engineer"))
+check("but a real violation carries the advisories with it",
+      code == 2 and "do not block" in err and "target 300" in err,
+      f"{code} {err}")
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

@@ -144,9 +144,9 @@ One fact per bullet. The orchestrator routes bullets individually, so a
 
 | lane | target | ceiling |
 |---|---|---|
-| gate lanes — `integration`, `review`, `quant-audit`, `protocol-lint` | 200 | **400, enforced** |
+| gate lanes — `integration`, `review`, `quant-audit`, `protocol-lint` | 300 | **400, enforced** |
 | `recon`, `quant` RESEARCH | 400 | 600, advisory |
-| everything else | 200 | 400, advisory |
+| everything else | 300 | 400, advisory |
 
 **The ceiling blocks on a gate lane and advises everywhere else.** A gate's
 bullets are *routed*: a finding becomes a change request, a `BLOCKING` item

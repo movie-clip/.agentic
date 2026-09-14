@@ -26,6 +26,12 @@ Bounded. Two blocks per subagent, then it allows the stop and says so. A hook
 that can refuse forever is a hook that can hang a run, and the close-out sweep
 (`check_report.py <run_dir>/ --require-heads`) is still there to catch what got
 through -- a missing head file fails it.
+
+Advisories ride along, and never cause a hold. This is the only place the `~`
+half of check_report.py reaches the three lanes with no Bash: the CLI is one
+they cannot run and report_artifact_gate.py drops the notes on purpose. A lane
+already being held is already editing, so the notes cost it nothing there. A
+clean artifact is still a clean stop.
 """
 
 from __future__ import annotations
@@ -130,11 +136,21 @@ def main() -> None:
     # differs: a malformed artifact is the lane's own writing, a wrong head is
     # arithmetic it should not have been doing by hand in the first place.
     lane_of = cr.lane_from_name(artifact)
-    art_bad = cr.check(artifact, lane=lane_of)
+    # Advisories ride along with a hold, and never cause one. `scout`,
+    # `story-author` and `docs-engineer` have no Bash, so the only half of
+    # check_report.py that has ever reached them is the blocking half -- both
+    # hooks drop the `~` notes, and the CLI is one they cannot run. A lane
+    # already being held is already editing, which is the one moment the notes
+    # cost it nothing. On a clean artifact nothing is said: an advisory is by
+    # definition not worth stopping a lane for.
+    notes: list[str] = []
+    art_bad = cr.check(artifact, lane=lane_of, warn=notes)
     if art_bad:
         _hold(agent_id, [f"{artifact.name} does not satisfy PROTOCOL.md "
                          "section 3, so its head cannot be trusted either:"]
-              + [f"  - {b}" for b in art_bad])
+              + [f"  - {b}" for b in art_bad]
+              + ([""] + ["Advisory, while you are here (these do not block):"]
+                 + [f"  ~ {n}" for n in notes] if notes else []))
 
     head_bad = cr._check_head(head, artifact.read_text(encoding="utf-8"))
     if head_bad:

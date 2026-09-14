@@ -237,6 +237,8 @@ After each head:
    dispatch actually ran on), `spent`, the phase's state if this satisfied it,
    `next:`, and a typed row under **Open** for anything unabsorbed. A ledger
    updated at the end is a ledger that does not survive the thing it exists for.
+   `scripts/ledger.py` writes all of those in one call and validates the result
+   — `orchestrator.md` § 1 is where that lives.
 
 5. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
    naming the path and the section. Keep each one under **Open** until a

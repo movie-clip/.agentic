@@ -137,6 +137,38 @@ the first attempt happened.
 of Artifacts rows, so a dispatch left out of the table now fails close-out
 rather than quietly making the budget look better than it was.
 
+### One call for the fields that move on every head
+
+The row, `next:` and `spent:` change together every time a head comes back, and
+three hand edits are three chances for one of them to half-land. One command
+writes all of them:
+
+```bash
+python <agenticRoot>/scripts/ledger.py <run_dir> \
+  --row "<nn> | lane | mode | agent | model | artifact | status | verdict" \
+  --next "<the single next action>"
+```
+
+`--set` moves a header field; `--phase`, `--open` and `--close` write the rows
+those tables hold. `ledger.py --help` carries the exact spelling, which is not
+repeated here — a second copy of a command's own usage is the copy that goes
+stale.
+
+**`spent:` has no flag.** The script counts the Artifacts rows and writes it,
+which is the equality the sweep above already fails a ledger for breaking. The
+number cannot drift from the table it is a count of, and the arithmetic stops
+being yours. It is the rule the head's counts already follow: derive it, do not
+write it.
+
+Each write then goes through the ledger battery close-out runs, minus the gate
+check that cannot answer mid-run. A budget passed with no `## Replans` row, a
+`CLOSED` run whose `next:` still names a dispatch, a row left in `Open` after
+it was absorbed — each is reported at the dispatch that caused it, where it
+costs a sentence, rather than at close-out, where it costs a re-plan.
+
+Nothing above changes and hand-editing still works: `Rounds` and `Replans` have
+no flag and are written that way.
+
 ### `gates:` accounts for every gate, including the ones you skipped
 
 ```

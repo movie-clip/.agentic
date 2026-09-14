@@ -297,9 +297,15 @@ for gate in ("integration", "review", "quant-audit", "protocol-lint"):
     b, w = _split(_bul(500), gate)
     check(f"{gate}: over the ceiling blocks",
           any("chars (max 400)" in x for x in b), str(b))
-    b, w = _split(_bul(300), gate)
+    b, w = _split(_bul(350), gate)
     check(f"{gate}: under the ceiling is advisory only",
-          not b and any("target 200" in x for x in w), f"{b} {w}")
+          not b and any("target 300" in x for x in w), f"{b} {w}")
+    # The 200 target fired on 54% of all non-gate bullets and on the median
+    # one. A bullet this size carries a fact plus its citation and is now
+    # silent everywhere - that is the recalibration, not a softened rule.
+    b, w = _split(_bul(250), gate)
+    check(f"{gate}: a fact plus its citation is silent at 250",
+          not b and not w, f"{b} {w}")
 
 for lane in ("backend", "docs", "story", "test", "frontend"):
     b, w = _split(_bul(500), lane)

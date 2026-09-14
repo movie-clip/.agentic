@@ -11,6 +11,8 @@ a `FAIL` must cite one by name.
 
 - **The four-layer split** — which of the four files a given line belongs in
 - **One rule, one home** — no rule in two files, and where to place a new one
+- **The frontmatter has to parse, or none of it applies** — `model:`,
+  `effort:` and `tools:` are text until it does
 - **Choosing a model for an agent** — `model:`, `effort:`, and escalation
 - **Writing for the reader you actually have** — what earns a line its place
 - **Indexing a pack or profile** — `## Index` vs `## Contents`, and the
@@ -61,6 +63,36 @@ if it would, it is a rule and belongs in the protocol, and the step cites it.
 everything below assumes it — so a step that re-argues an extension's rule is
 arguing with a file the reader has already read, and the two copies drift
 against a reader who cannot tell which is current.
+
+## The frontmatter has to parse, or none of it applies
+
+`model:`, `effort:` and `tools:` are declarations only for as long as the YAML
+block around them parses. When it does not, Claude Code still loads the agent —
+with its name taken from the filename and **every other field silently
+dropped**. The lane then runs on the session's default model and effort, and
+with the parent's entire tool roster in place of its own allowlist, which also
+means losing the `mcp__*` tools it declared and nothing else grants.
+
+Nothing warns, at any verbosity. The file still reads correctly to anyone
+checking the `model:` and `effort:` rules below by eye, which is why this rule
+sits above them.
+
+The break is almost always a colon in the `description:`, the one field long
+enough to contain a sentence:
+
+```yaml
+description: ... turn an approved story into a technical plan: layer sequencing
+```
+
+An unquoted YAML scalar may not contain `: `, so the parser reads a mapping
+where the line intends prose. A dash, a semicolon, or quoting the whole value
+all satisfy it; which one is a matter of taste, and taste is not a finding.
+
+**The check is a command, not a reading.** It names the file and the reason:
+
+```bash
+claude plugin validate <agenticRoot>/plugins/agentic-core
+```
 
 ## Choosing a model for an agent
 

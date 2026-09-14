@@ -1,6 +1,6 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.12**. Lives at `C:\projects\investments\.agentic`, one level above
+Version **0.7.13**. Lives at `C:\projects\investments\.agentic`, one level above
 the repos it drives. One project is bound: `portfolio` (quant-research-lab).
 `plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
 version — this heading has been wrong before.
@@ -218,6 +218,16 @@ narrowly, with `reviewer` getting nothing that mutates. It exists because lanes
 were otherwise hand-writing throwaway probe scripts to answer "what does this
 route actually return?". Each agent file's `tools:` line is the authority on its
 own grants.
+
+**`tools:`, `model:` and `effort:` hold only while the block around them
+parses.**
+Frontmatter that fails to parse still loads the agent — name taken from the
+filename, every other field dropped — so the lane silently takes the session's
+default model and effort and the parent's entire tool roster in place of its
+allowlist, `mcp__*` grants included. `claude plugin validate
+plugins/agentic-core` reports it by file and reason; `protocol-linter` runs that
+before it reads anything, and `authoring.md` § "The frontmatter has to parse, or
+none of it applies" is the rule it cites.
 
 **Model and effort are pinned in frontmatter on all eleven, never `inherit`.**
 The policy is in `authoring.md`; the rationale is one test: *would a wrong

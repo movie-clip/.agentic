@@ -63,6 +63,22 @@ mentions it in `risks` instead of filing a correction.
 
 ## How you check
 
+**Run the parser before you read anything.** Rules 3, 4 and 7 all judge a
+declaration inside a YAML block, and a block that fails to parse drops every one
+of them while still reading correctly — so reading is the one method that cannot
+find it:
+
+```bash
+claude plugin validate <agenticRoot>/plugins/agentic-core
+```
+
+An error against a file your `scope` names is a `FAIL`, citing `authoring.md`
+§ "The frontmatter has to parse, or none of it applies" and quoting the
+message, which already gives
+the line and the reason. An error against a file outside `scope` is a `risks`
+bullet, like any other thing you noticed in passing. If the command is not
+available to you, say so in `risks` — an unrun check is not a passed one.
+
 Read the file end to end before judging any part of it. Layer violations and
 duplicated rules are only visible against the whole.
 

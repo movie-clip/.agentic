@@ -330,6 +330,28 @@ It also removes the need for a route menu. A run where only `build` and its own
 defended, and nothing has to void itself, because the clause that was false is
 written down and is re-read every turn.
 
+### A phase is ruled out by its trigger, not by your having done it
+
+`not triggered` says the project's clause was evaluated and came back false. It
+does not say the question got answered somewhere else. "The orchestrator read
+the files this turn" and "the intake grep already located them" are the second
+thing, and both are § 7 bending in the place it bends most easily: reading is
+cheap, and the answer is usually right.
+
+`ground-truth` is where that happens, so its admissible clauses are worth naming
+outright. There are two:
+
+- **a prior artifact already covers the area**, cited by path — that is
+  "unfamiliar" being false, and the citation is what makes it checkable by
+  someone who was not here;
+- **nothing this run touches is in that area.**
+
+Your own reading is neither. It is evidence about the trigger rather than a
+substitute for the phase: needing ten files open to write one order is what "the
+area is unfamiliar" looks like from the inside. Nothing here stops you reading —
+§ 6 still requires every claim in an order to be sourced. It stops the reading
+from being the reason a lane did not run.
+
 ### The order is a dependency, not a schedule
 
 A phase may not run before the phases it reads from are satisfied or ruled out —

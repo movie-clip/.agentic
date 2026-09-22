@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-16-audit-mm-cot-long-short-index/01
+artifact:    C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-16-audit-mm-cot-long-short-index\01-recon.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order's verification field was NONE; recon is read-only per non_goals (no pine_check.py run).
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     3
+risks:       2
+headline:    mm_cot_long_short_index.pine already self-flags its Gold COT symbols as unconfirmed; default targets Gold correctly; request.security() omits explicit lookahead.

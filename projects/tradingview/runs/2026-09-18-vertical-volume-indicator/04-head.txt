@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-18-vertical-volume-indicator/04
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-18-vertical-volume-indicator\04-quant-audit.md
+status:          DONE
+verdict:         PASS
+verification:    NOT_RUN
+detail:          AUDIT mode; order's verification field was NONE. Anchor used = 02-quant.md's hand-computed worked example (3 bars x 4 intrabars, B=4, R_lo=10.00, R_hi=12.50, h=0.625). The code's literal binning/POC/n
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         6
+risks:           4
+headline:        Mathematics gate PASSES: volume_profile.pine reproduces 02-quant's worked example exactly (550/720/970/230, POC bin 2); 5 non-blocking findings, severest MATERIAL.

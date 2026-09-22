@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-18-vertical-volume-indicator/08
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-18-vertical-volume-indicator\08-integration.md
+status:          DONE
+verdict:         PASS
+verification:    FAIL
+detail:          7 SHOULD_FIX findings across the repo, 0 BLOCKING — unchanged in count and substance from my first pass (05-integration.md). volume_profile.pine:193 P008 is the sole finding on this run's file (shifte
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+risks:           0
+headline:        Re-run confirms CR-1's fix; repo-wide check unchanged in substance — PASS stands.

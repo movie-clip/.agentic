@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-18-vertical-volume-indicator/11
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-18-vertical-volume-indicator\11-quant-audit.md
+status:          DONE
+verdict:         PASS
+verification:    NOT_RUN
+detail:          AUDIT mode, delta re-verification; order's verification field was NONE. Anchors: (1) 02-quant.md's hand-computed worked example (3 bars x 4 intrabars, B=4, R_lo=10.00, R_hi=12.50, h=0.625) re-derived 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+risks:           4
+headline:        CR-2's flat-array storage rewrite preserves every audited number exactly (0 mismatches over 4,000 differential trials); one new non-blocking MATERIAL finding on two unguarded clearing loops.

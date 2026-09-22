@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-17-fix-mm-cot-long-short-index/11
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-17-fix-mm-cot-long-short-index\11-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          PASS 0 findings, exit 0.
+changed:         2
+contract_notes:  2
+pack_corrections: 0
+handoff:         2
+risks:           3
+headline:        Applied the coordinator's confirmed fully-bare symbol defaults (no prefix, no _ALL suffix); static check still passes.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-17-fix-mm-cot-long-short-index/05
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-17-fix-mm-cot-long-short-index\05-quant-audit.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          exit 0, "mm_cot_long_short_index.pine: PASS 0 findings" — re-run by me, not reused from 02-backend.md. Anchors: Briese/Williams 0..100 net COT Index definition re-implemented independently in Python;
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         9
+risks:           5
+headline:        Seven of the eight prior findings are closed and the arithmetic reproduces exactly, but FINDING 1 is only half fixed: the window is still counted in chart bars above weekly.

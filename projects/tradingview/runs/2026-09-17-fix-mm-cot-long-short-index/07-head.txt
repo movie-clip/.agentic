@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-17-fix-mm-cot-long-short-index/07
+artifact:    C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-17-fix-mm-cot-long-short-index\07-docs.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order's verification field is NONE; this is a prose/documentation-only reconciliation, no static or compile check applies to comment-only and Markdown edits.
+changed:     7
+contract_notes: 2
+pack_corrections: 0
+handoff:     2
+risks:       3
+headline:    Reconciled mm_cot_long_short_index.pine's header and docs/mm-cot-long-short-index.md with CR-1 and all four MINOR quant-audit findings; accurate counts and drift-proof citations now in place.

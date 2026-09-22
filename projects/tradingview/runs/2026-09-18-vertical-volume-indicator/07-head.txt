@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-18-vertical-volume-indicator/07
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-18-vertical-volume-indicator\07-quant-audit.md
+status:          DONE
+verdict:         PASS
+verification:    NOT_RUN
+detail:          AUDIT mode, delta re-verification; order's verification field was NONE. Anchor = a constructed partial-na case built on 02-quant.md's hand-computed worked example (3 bars x 4 intrabars, B=4, R_lo=10.0
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         6
+risks:           5
+headline:        CR-1's na-handling fix is arithmetically sound and regresses nothing; two new non-blocking findings, F6 MATERIAL doc/code mismatch and F7 MINOR diagnostics wording.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-18-vertical-volume-indicator/02
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-18-vertical-volume-indicator\02-quant.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order's verification field was NONE; RESEARCH mode produces a specification, not a runnable check. Formula self-checked against a 3-bar/12-intrabar hand example computed independently in Python (see §
+changed:         0
+contract_notes:  3
+pack_corrections: 0
+handoff:         7
+risks:           4
+headline:        Volume-by-price profile fully specified as an ORIGINAL construction: bar-count window, 24-bin count binning, close-binned lower-timeframe volume, normalised to window max.

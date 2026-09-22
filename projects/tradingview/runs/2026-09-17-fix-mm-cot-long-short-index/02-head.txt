@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-17-fix-mm-cot-long-short-index/02
+artifact:        C:\projects\investments\.agentic\projects\tradingview\runs\2026-09-17-fix-mm-cot-long-short-index\02-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          exit 0, "mm_cot_long_short_index.pine: PASS 0 findings" — no BLOCKING or SHOULD_FIX findings; both request.security() calls now carry an explicit lookahead so the prior P008 hits are gone.
+changed:         7
+contract_notes:  4
+pack_corrections: 0
+handoff:         3
+risks:           5
+headline:        Rebuilt mm_cot_long_short_index.pine per 01-quant.md's net-index spec (timeframe-invariant weekly window, _ALL symbols, staleness); static check passes clean, TradingView compile still unverified.

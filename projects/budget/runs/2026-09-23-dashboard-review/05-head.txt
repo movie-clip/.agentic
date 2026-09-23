@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-dashboard-review/05
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-23-dashboard-review\05-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order's verification field is NONE; docs-only change, no build/test command applicable.
+changed:         2
+contract_notes:  0
+pack_corrections: 0
+handoff:         1
+risks:           0
+headline:        Reconciled PROJECT_GUIDE.md's Dashboard section and TECHNICAL_DESIGN.md's use-case bullet with the 3 shipped slices per D-2's ruling.

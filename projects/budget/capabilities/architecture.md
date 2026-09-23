@@ -13,13 +13,12 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **The seam** · **Severity calls** · **Escalate rather than decide**
+**Always read:** **The seam** · **Severity calls** · **Escalate rather than decide** · **Technique skills**
 
 | Section | Read it when |
 |---|---|
 | Design pass checklist | you are running DESIGN |
 | Integration review checks | you are running INTEGRATION |
-| Technique skills (mattpocock-skills) | you're naming the contract or seam in DESIGN, or judging reuse and consistency in INTEGRATION |
 
 ---
 
@@ -49,6 +48,9 @@ talking.
 
 ## Design pass checklist
 
+- [ ] Call the Skill tool with `mattpocock-skills:codebase-design` (see §
+      Technique skills for scope constraints) before naming the interface
+      below — every DESIGN pass, not only when unsure.
 - [ ] Name the exact `Contracts` interface(s) that change, and their new
       shape, before `backend` or `frontend` starts.
 - [ ] For any migration: what happens to existing rows (backfill, default,
@@ -81,14 +83,19 @@ talking.
 - [ ] `contract_notes` from `backend` and `frontend` agree with each other —
       the shape one lane says it shipped is the shape the other lane says it
       consumed.
+- [ ] Before writing any reuse/consistency judgment into `risks` or the
+      orchestrator brief, call `mattpocock-skills:codebase-design` (see §
+      Technique skills).
+- [ ] This includes citing an existing pattern as precedent for what another
+      lane did — not only when unsure.
 
 ## Technique skills (mattpocock-skills)
 
-Naming the contract, the seam, or judging reuse and consistency: call the
-Skill tool with `mattpocock-skills:codebase-design` for its deep-module
-vocabulary. This plugin is enabled for `budget` only — no other project's
-lane should reach for it unless its own `.claude/settings.json` says
-otherwise.
+Reference for the calls Design pass checklist and Integration review checks
+already require — this section is scope constraints for `codebase-design`,
+not a separate trigger. This plugin is enabled for `budget` only — no other
+project's lane should reach for it unless its own `.claude/settings.json`
+says otherwise.
 
 Adapted to this lane's constraints:
 

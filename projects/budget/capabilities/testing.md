@@ -19,7 +19,7 @@ convention you never read is not.
 |---|---|
 | Where things live | you are adding a test file, or looking for where one lives |
 | Bank-recipe fixtures | your order tests import/categorization behavior |
-| Technique skills (mattpocock-skills) | you're picking between mocking and hitting the real thing, unsure a test is worth keeping, or a failing/flaky test resists your first diagnosis |
+| Technique skills (mattpocock-skills) | you are making the `tdd` call Definition of done requires, or a failing or flaky test resists your first diagnosis |
 
 ---
 
@@ -35,6 +35,13 @@ tests/
 Add a test in the project that owns the behavior — a categorization
 precedence case goes in `Domain.Tests`, a use-case orchestration case in
 `Application.Tests`, a migration or repository case in `Infrastructure.Tests`.
+
+`HomeCharts.Application.Tests.csproj` already project-references
+`HomeCharts.Presentation.csproj`. That means `Presentation` view-model
+behavior (e.g. `MainWindowViewModel`) is already coverable from
+`Application.Tests` — by wiring its constructor dependencies to in-memory
+fakes and driving it through its public methods — without a separate
+`HomeCharts.Presentation.Tests` project.
 
 ## Running tests
 
@@ -61,12 +68,10 @@ precedence case goes in `Domain.Tests`, a use-case orchestration case in
 
 ## Technique skills (mattpocock-skills)
 
-Picking between mocking and hitting the real thing, or unsure a test you're
-about to write is worth keeping: call the Skill tool with
-`mattpocock-skills:tdd` for its test-quality and anti-pattern guidance — you
-still never touch `src/**` to turn a test green (see Scope discipline in your
-role file). Seams for a new test are the ones your order's `inputs` name;
-don't pause to ask which seam, that's already decided upstream.
+Constraints for the `tdd` call Definition of done requires: you still never
+touch `src/**` to turn a test green (see Scope discipline in your role
+file). Seams for a new test are the ones your order's `inputs` name; don't
+pause to ask which seam, that's already decided upstream.
 
 A failing or flaky test resists your first diagnosis: call the Skill tool
 with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled for `budget`
@@ -101,6 +106,11 @@ Adapted to this lane's constraints:
 ## Definition of done for this lane
 
 - [ ] New/changed tests live in the project that owns the behavior
+- [ ] If you chose between mocking and a real dependency, or accepted
+      test/production coupling as a tradeoff, you called `mattpocock-skills:tdd`
+      first (see § Technique skills).
+- [ ] Not only noted that tradeoff in `risks` afterward — the call happens
+      before you finalize the choice.
 - [ ] Realistic `BankRecipes`-style rows used where the case involves import
       or categorization, not synthetic placeholders
 - [ ] Deterministic ordering and tie-breaking asserted explicitly wherever the

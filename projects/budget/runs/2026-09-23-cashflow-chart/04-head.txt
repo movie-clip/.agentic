@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-cashflow-chart/04
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-23-cashflow-chart\04-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          Build succeeded, 0 Warning(s)/0 Error(s). Tests: Domain.Tests 5/5 passed, Application.Tests 37/37 passed (34 pre-existing + 3 new), Infrastructure.Tests 11/11 passed (10 pre-existing + 1 new). All pas
+changed:         4
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+risks:           3
+headline:        Added coverage for soft-delete filtering, trend-anchor capping, and shared-max bar scaling; all 53 solution tests pass.

@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-cashflow-chart/05
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-23-cashflow-chart\05-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          Both builds succeeded, 0 Warning(s)/0 Error(s) each. Tests: HomeCharts.Domain.Tests 5/5 passed, HomeCharts.Application.Tests 37/37 passed, HomeCharts.Infrastructure.Tests 11/11 passed. 53/53 total, 0 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         0
+risks:           2
+headline:        Backend, frontend and test lanes are coherent â€” shared-scale contract holds end to end, all guardrails clean, builds and tests pass.

@@ -19,6 +19,7 @@ convention you never read is not.
 |---|---|
 | Design pass checklist | you are running DESIGN |
 | Integration review checks | you are running INTEGRATION |
+| Technique skills (mattpocock-skills) | you're naming the contract or seam in DESIGN, or judging reuse and consistency in INTEGRATION |
 
 ---
 
@@ -80,6 +81,25 @@ talking.
 - [ ] `contract_notes` from `backend` and `frontend` agree with each other —
       the shape one lane says it shipped is the shape the other lane says it
       consumed.
+
+## Technique skills (mattpocock-skills)
+
+Naming the contract, the seam, or judging reuse and consistency: call the
+Skill tool with `mattpocock-skills:codebase-design` for its deep-module
+vocabulary. This plugin is enabled for `budget` only — no other project's
+lane should reach for it unless its own `.claude/settings.json` says
+otherwise.
+
+Adapted to this lane's constraints:
+
+- Read only the main `SKILL.md` glossary and principles, not its "Going
+  deeper" material.
+- Do not open `DESIGN-IT-TWICE.md` — it assumes an `Agent` tool you don't
+  have.
+- Do not open `DEEPENING.md` — it tells the reader to delete files, which no
+  lane here can do.
+- This is reference vocabulary: it sharpens your contract and reuse
+  judgments — the TECHNICAL PLAN in DESIGN, change requests in INTEGRATION.
 
 ## Severity calls
 

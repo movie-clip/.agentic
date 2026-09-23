@@ -23,6 +23,7 @@ convention you never read is not.
 |---|---|
 | Layout | you are adding a file, or looking for where one lives |
 | Migration conventions | your order adds or changes a SQL migration |
+| Diagnosing a stuck bug | your first fix attempt didn't hold |
 
 ---
 
@@ -59,6 +60,23 @@ Existing use cases, for finding prior art: `ImportBankStatementUseCase`,
   model already reads is a `design`-fires case (`phases.md` § "Why `design`
   fires whenever a migration is involved") — do not write the migration ahead
   of that pass deciding what happens to existing rows.
+
+## Diagnosing a stuck bug
+
+Your first fix attempt didn't hold: call the Skill tool with
+`mattpocock-skills:diagnosing-bugs` rather than guessing again. This plugin is
+enabled for `budget` only — no other project's lane should reach for it
+unless its own `.claude/settings.json` says otherwise.
+
+Adapted to this lane's constraints:
+
+- Diagnose the root cause and apply the fix — that part is yours.
+- Do not write the regression test: name it in `handoff` for the test lane
+  instead (you touch no test files, per the definition of done below).
+- The skill's "ask the user" moments become a `risks` entry instead.
+- Any scratch/repro file it has you create is named in `handoff` with its
+  `git rm <path>` command — you have no delete tool.
+- No commit. Your report is the protocol's report block, not a commit message.
 
 ## Reuse — do not re-derive these
 

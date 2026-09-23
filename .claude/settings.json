@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "agentic-core@agentic": true,
+    "mattpocock-skills@claude-plugins-official": true
+  }
+}

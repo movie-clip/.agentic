@@ -19,6 +19,7 @@ convention you never read is not.
 |---|---|
 | Where things live | you are adding a test file, or looking for where one lives |
 | Bank-recipe fixtures | your order tests import/categorization behavior |
+| Technique skills (mattpocock-skills) | you're picking between mocking and hitting the real thing, unsure a test is worth keeping, or a failing/flaky test resists your first diagnosis |
 
 ---
 
@@ -57,6 +58,30 @@ precedence case goes in `Domain.Tests`, a use-case orchestration case in
   explicitly as required coverage, not nice-to-haves.
 - A migration or persistence-behavior change should get at least one
   integration-style test in `Infrastructure.Tests` where practical.
+
+## Technique skills (mattpocock-skills)
+
+Picking between mocking and hitting the real thing, or unsure a test you're
+about to write is worth keeping: call the Skill tool with
+`mattpocock-skills:tdd` for its test-quality and anti-pattern guidance — you
+still never touch `src/**` to turn a test green (see Scope discipline in your
+role file). Seams for a new test are the ones your order's `inputs` name;
+don't pause to ask which seam, that's already decided upstream.
+
+A failing or flaky test resists your first diagnosis: call the Skill tool
+with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled for `budget`
+only — no other project's lane should reach for it unless its own
+`.claude/settings.json` says otherwise.
+
+Adapted to this lane's constraints:
+
+- If the defect is in the test itself, fix it — that's your job.
+- If the defect is in production code, stop at diagnosis: report it as a
+  finding per Scope discipline, and do not patch `src/**`.
+- The skill's "ask the user" moments become a `risks` entry instead.
+- Any scratch/repro file it has you create is named in `handoff` with its
+  `git rm <path>` command — you have no delete tool.
+- No commit. Your report is the protocol's report block, not a commit message.
 
 ## Gotchas
 

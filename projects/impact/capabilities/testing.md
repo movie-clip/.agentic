@@ -14,24 +14,27 @@ for this lane**
 
 ## Gotchas
 
-- **Unity batchmode fails if the project is already open in the Editor.**
-  Close it first, or ask the human to run the same test from the open
-  Editor's Test Runner window — do not treat the failure as a test bug.
+- **Unity batchmode fails if the project is already open in the Editor** —
+  close it first, or run the same test from the open Editor's Test Runner
+  instead of treating it as a test bug.
 - **Compile before running tests.** `dotnet build Impact.sln` first; a stale
   compile produces confusing failures that look like test bugs.
 - **Always write results to a file**, never rely on console output alone —
-  `AGENTS.md` § Single-Test Guidance states this as a repo convention, not an
-  optional nicety, since a human or a later gate needs to inspect failures
-  after the process exits.
+  a human or a later gate needs to inspect failures after the process exits.
 - **`Run-UnityTests.ps1`'s `-UnityPath` default has drifted from the actual
   Editor version before** (it pointed at `6000.1.8f1` while the project was
-  on `6000.4.0f1`) — if a run behaves as though it used the wrong Editor,
-  check the script's default against
-  `Impact/ProjectSettings/ProjectVersion.txt` before assuming a test bug.
+  on `6000.4.0f1`).
+- Check the script's `-UnityPath` default against
+  `Impact/ProjectSettings/ProjectVersion.txt` before assuming a wrong-Editor
+  run is a test bug.
 
 ## Running the suite
 
-Fast path, Core-tagged regression:
+Run these from `Impact\` (one level below the repo root) — the `.\Tools\`
+paths are relative to that directory, not the git root.
+
+`-CoreOnly` now passes `-testCategory "Core"`, a true NUnit category match,
+and selects the full 35-test Core suite; `-Filter` is unaffected.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Tools\Run-UnityTests.ps1 -Platform EditMode -CoreOnly

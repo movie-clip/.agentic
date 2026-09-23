@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-fix-cr1-cr2/05
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-09-23-fix-cr1-cr2\05-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          Validation passed, 0 errors across plugin.json and all agent frontmatter. Anchors beyond the rule text: 02-test.md and 03-integration.md (independent 35/35 re-run) for PC-1's factual claim, and test-e
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         0
+risks:           3
+headline:        PC-1 applied verbatim to capabilities/testing.md and accurate to CR-1's actual fix; all eight authoring rules pass and the prior round-2 bullet-length fix still holds.

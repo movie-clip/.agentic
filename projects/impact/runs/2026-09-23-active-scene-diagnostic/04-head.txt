@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-active-scene-diagnostic/04
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-09-23-active-scene-diagnostic\04-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          dotnet build: 0 Error(s), 17 Warning(s) — same pre-existing MSB3277 vendored-assembly-conflict set every prior report in this run logged, none referencing the two files in scope. Run-UnityTests.ps1 -C
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         1
+risks:           6
+headline:        ActiveSceneDiagnosticSystem and its test exactly mirror the SessionStartDiagnosticSystem precedent; build clean, -CoreOnly 36/36 — PASS, no CRs.

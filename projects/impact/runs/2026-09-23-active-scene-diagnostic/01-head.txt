@@ -1,0 +1,12 @@
+REPORT HEAD 2026-09-23-active-scene-diagnostic/01
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-09-23-active-scene-diagnostic\01-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          Build succeeded. 0 Error(s), 17 Warning(s) — all 17 are pre-existing MSB3277 assembly-conflict warnings from vendored packages, none reference the new file. Active scene name read via UnityEngine.Scen
+changed:         1
+contract_notes:  2
+pack_corrections: 0
+handoff:         3
+risks:           0
+headline:        Added ActiveSceneDiagnosticSystem to athena.core, mirroring the precedent; dotnet build clean, no new .asmdef reference needed.

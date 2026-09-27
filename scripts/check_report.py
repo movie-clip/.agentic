@@ -46,9 +46,10 @@ VERDICT = {"PASS", "FAIL", "CHANGES_REQUESTED", "NONE"}
 RESULT = {"PASS", "FAIL", "NOT_RUN"}
 
 SECTIONS = ["changed", "verification", "contract_notes",
-            "pack_corrections", "handoff", "risks"]
+            "pack_corrections", "handoff", "skill_calls", "risks"]
 # Sections the head reports a count for. `verification` is a scalar, not a list.
-COUNTED = ["changed", "contract_notes", "pack_corrections", "handoff", "risks"]
+COUNTED = ["changed", "contract_notes", "pack_corrections", "handoff",
+           "skill_calls", "risks"]
 
 LANES = {"product", "quant", "recon", "story", "design", "backend", "frontend",
          "test", "docs", "quant-audit", "integration", "review",

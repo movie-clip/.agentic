@@ -31,6 +31,9 @@ pack_corrections:
 handoff:
   - one item
 
+skill_calls:
+  - none
+
 risks:
   - none
 """
@@ -45,6 +48,7 @@ changed:         0
 contract_notes:  0
 pack_corrections: 0
 handoff:         1
+skill_calls:     0
 risks:           0
 headline:        did the thing
 """

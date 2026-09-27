@@ -51,6 +51,8 @@ talking.
 - [ ] Call the Skill tool with `mattpocock-skills:codebase-design` (see §
       Technique skills for scope constraints) before naming the interface
       below — every DESIGN pass, not only when unsure.
+- [ ] Record that call in your report's `skill_calls:` field — not only in
+      `handoff` or the orchestrator brief.
 - [ ] Name the exact `Contracts` interface(s) that change, and their new
       shape, before `backend` or `frontend` starts.
 - [ ] For any migration: what happens to existing rows (backfill, default,
@@ -88,12 +90,14 @@ talking.
       Technique skills).
 - [ ] This includes citing an existing pattern as precedent for what another
       lane did — not only when unsure.
+- [ ] Record that call (or its absence) in `skill_calls:` — the field a
+      reader checks against § Reuse and consistency for a contradiction.
 
 ## Technique skills (mattpocock-skills)
 
 Reference for the calls Design pass checklist and Integration review checks
 already require — this section is scope constraints for `codebase-design`,
-not a separate trigger. This plugin is enabled for `budget` only — no other
+not a separate trigger. This plugin is enabled per repo (`budget`, `impact`) — no other
 project's lane should reach for it unless its own `.claude/settings.json`
 says otherwise.
 

@@ -119,6 +119,14 @@ right ones. Run the checks the architecture pack names as your responsibility.
 — but whether they test the *contract* rather than the implementation. A test
 that would pass after the requirement changed is not coverage.
 
+**7. Skill-call fidelity.** For every report this pass reads — backend,
+frontend, and the test lane alike — set its `skill_calls:` field against the
+rest of that same report. A tradeoff named in `risks`, or an existing pattern
+cited as precedent, with `skill_calls` saying none is a contradiction the lane
+wrote into its own artifact — raise it as a change request naming the exact
+bullet, not a note you resolve for them by rereading their reasoning
+charitably.
+
 ### Change requests
 
 The shape is `PROTOCOL.md` § 5 — one file per finding at

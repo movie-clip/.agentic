@@ -80,11 +80,11 @@ public component/singleton shape, correctly skips `design`.
 
 **`integration` runs `dotnet build Impact.sln` and
 `Tools/Run-UnityTests.ps1 -Platform EditMode -CoreOnly` at minimum**, plus
-`-Platform PlayMode` when the change reaches runtime/session/player flow, and
-drops `-CoreOnly` for the fuller suite when the order's `verification` field
-says so or the change touches the crate/content pipeline directly.
-`architecture.md` carries the escalation rule and diagnostic commands to
-localise a failure.
+`-Platform PlayMode -CoreOnly` when the change reaches runtime/session/player
+flow or the crate/content pipeline. `-CoreOnly` already selects every project
+test, so there is no fuller suite to escalate to. `architecture.md` § "When
+the test gate does not reach the change" carries what to add when tests
+cannot cover a change: the batchmode compile, and a named missing test.
 
 **`review`** verifies the story's acceptance criteria one by one, the same
 shape as every other project — no repo-specific variation here.

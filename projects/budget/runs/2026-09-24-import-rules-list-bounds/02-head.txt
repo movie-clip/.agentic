@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-24-import-rules-list-bounds/02
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-24-import-rules-list-bounds\02-frontend.md
+status:          PARTIAL
+verdict:         NONE
+verification:    FAIL
+detail:          Both commands fail with MSB3021 (2 errors): bin\Debug\net9.0\HomeCharts.App.exe is locked by a running HomeCharts.App.exe (PID 45296), not by the edit. App build to a temp dir (-o) gave 0 Warning(s), 
+changed:         2
+contract_notes:  0
+pack_corrections: 0
+handoff:         4
+skill_calls:     1
+risks:           5
+headline:        Import tab now sits in the content grid's * row so the rules list scrolls in-window and the pager header wraps; the builds are blocked by a running app instance, and the fix is unverified visually.

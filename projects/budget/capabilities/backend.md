@@ -65,7 +65,7 @@ Existing use cases, for finding prior art: `ImportBankStatementUseCase`,
 
 Your first fix attempt didn't hold: call the Skill tool with
 `mattpocock-skills:diagnosing-bugs` rather than guessing again. This plugin is
-enabled for `budget` only — no other project's lane should reach for it
+enabled per repo (`budget`, `impact`) — no other project's lane should reach for it
 unless its own `.claude/settings.json` says otherwise.
 
 Adapted to this lane's constraints:
@@ -77,6 +77,7 @@ Adapted to this lane's constraints:
 - Any scratch/repro file it has you create is named in `handoff` with its
   `git rm <path>` command — you have no delete tool.
 - No commit. Your report is the protocol's report block, not a commit message.
+- Record the call in `skill_calls:` (`PROTOCOL.md` § 7).
 
 ## Reuse — do not re-derive these
 

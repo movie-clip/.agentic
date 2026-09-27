@@ -127,6 +127,9 @@ pack_corrections:
 handoff:
   - <what the next lane needs: fixture names, prop shapes, route paths>
 
+skill_calls:
+  - <skill> — called | not called, <one-line why>
+
 risks:
   - <anything you were unsure about, or a guardrail you had to interpret>
 ```
@@ -214,6 +217,7 @@ changed:     <integer — number of `changed` bullets>
 contract_notes: <integer>
 pack_corrections: <integer>
 handoff:     <integer>
+skill_calls: <integer>
 risks:       <integer>
 blocked_on:  <one line, only when status is BLOCKED or REFUSED; otherwise omit>
 headline:    <one sentence, under 200 characters, outcome not method>
@@ -367,6 +371,12 @@ Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
 - `contract_notes` is how cross-lane drift gets caught. A backend agent that
   changes a schema **must** emit a contract note naming the client type and the
   contract doc that now lag.
+- `skill_calls` is where a capability pack's skill pointer proves it fired —
+  not `risks`.
+- If your pack names a condition for calling the Skill tool and this order met
+  it, record it here before you finalize the choice the condition gates.
+- A tradeoff named elsewhere in your own report with `skill_calls` denying it
+  is a contradiction in your own artifact, and the next gate treats it as one.
 - Empty sections stay in with a **bare** `- none`. Silence is ambiguous, and
   `- none — because X` is counted as one real entry, so your head advertises
   work that does not exist. If the reason matters, it is a `risks` bullet.

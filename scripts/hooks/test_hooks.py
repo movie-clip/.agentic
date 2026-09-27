@@ -38,6 +38,9 @@ pack_corrections:
 handoff:
   - one item
 
+skill_calls:
+  - none
+
 risks:
   - none
 """

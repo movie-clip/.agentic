@@ -6,22 +6,30 @@ engineering gate).
 
 ## Index
 
-**Always read:** **Package dependency chain** · **What `integration` must
-run** · **Design decisions this lane owns, not the engineer**
+**Always read:** **Package dependency graph** · **What `integration` must
+run** · **Design decisions this lane owns, not the engineer** · **Technique
+skills (mattpocock-skills)**
 
 | Section | Read it when |
 |---|---|
 | Known weak spots | your order touches the crate/content pipeline, asset loading, or the hybrid visual pipeline |
-| Escalating past `-CoreOnly` | a failure needs a fuller run to localise, or the order's scope suggests one up front |
+| Design pass checklist | you are in DESIGN mode |
+| Integration review checks | you are in INTEGRATION mode |
+| When the test gate does not reach the change | the change touches a package no test assembly references, or codegen/baking |
 
-## Package dependency chain
+## Package dependency graph
 
-`athena.core` (no deps) → `athena.contentmanagement` → `athena.shared`
-(gameplay/runtime orchestration core) → `athena.gameplay` /
-`athena.charactercontroller` / `athena.sceneslice`. A design decision that
-would make a lower package depend on a higher one is wrong by construction —
-check the direction before approving a contract, not just its shape.
-Full map: `PACKAGE_ARCHITECTURE.md`.
+The real graph is the table under `project.md` § Hard guardrails, read from
+the `.asmdef` files. `PACKAGE_ARCHITECTURE.md`'s diagram is wrong about one
+edge: it draws `athena.charactercontroller` as depending on `athena.shared`.
+In fact `athena.shared` references charactercontroller, not the reverse.
+
+- Check the direction before approving a contract, not just its shape.
+- A design that needs charactercontroller to read an `athena.shared` type is
+  a cycle. The shape belongs lower down (charactercontroller or core), or
+  shared pushes the data down.
+- `athena.gameplay` sees only `Athena.Shared.Components`, not
+  `Athena.Shared.Runtime`. A contract gameplay reads must live in Components.
 
 ## Design decisions this lane owns, not the engineer
 
@@ -42,6 +50,53 @@ Settle the shape once here; a `backend` dispatch that hits one of these
 without a `design` order behind it should treat that as a scope violation
 worth flagging, not a decision to make alone.
 
+## Design pass checklist
+
+- [ ] Call the Skill tool with `mattpocock-skills:codebase-design` before
+      naming the component/singleton shape — every DESIGN pass.
+- [ ] Record that call in your report's `skill_calls:` field.
+- [ ] Name each changed component/singleton and its new fields before
+      `backend` starts, with the package and assembly that owns it.
+- [ ] Check every new reference against the dependency graph above.
+- [ ] State the system ordering the change relies on (`UpdateInGroup`,
+      `UpdateBefore`/`UpdateAfter`) — ordering is where this repo regresses.
+- [ ] Say which test assembly can reach the change (`testing.md` § Which
+      packages a test can see), or that none can.
+
+## Integration review checks
+
+- [ ] `dotnet build Impact.sln` clean, from `Impact/`.
+- [ ] The test runs in § What `integration` must run passed; read the counts
+      from the results XML.
+- [ ] No edit under `Packages/com.projectdawn.navigation/` or
+      `Library/PackageCache/` (guardrail 1).
+- [ ] No new `.asmdef` reference that runs against the graph above.
+- [ ] No new `IAspect` type (`AGENTS.md` § Type Usage Conventions).
+- [ ] `contract_notes` from each build lane agree on any shared
+      component/singleton shape.
+- [ ] Before writing a reuse or consistency judgment into `risks` or the
+      orchestrator brief, call `mattpocock-skills:codebase-design`.
+- [ ] Record that call (or its absence) in `skill_calls:`.
+
+## Technique skills (mattpocock-skills)
+
+Scope constraints for the `codebase-design` calls the two checklists
+require; this is not a separate trigger. Impact's `.claude/settings.json`
+enables the plugin.
+
+- Read only the main `SKILL.md` glossary and principles, not its "Going
+  deeper" material.
+- Do not open `DESIGN-IT-TWICE.md` — it assumes an `Agent` tool you don't
+  have.
+- Do not open `DEEPENING.md` — it tells the reader to delete files, which no
+  lane here can do.
+- Map its terms onto ECS: a *module* is a package or a system group; its
+  *interface* is the components and singletons other packages read.
+- A *seam* is an `.asmdef` boundary. "Deep" means few public components
+  carrying a lot of behaviour behind one system group.
+- This is reference vocabulary: it sharpens the TECHNICAL PLAN in DESIGN and
+  the change requests in INTEGRATION.
+
 ## Known weak spots
 
 Mirrors `backend.md`'s summary, condensed further to what a design/
@@ -60,15 +115,20 @@ integration judgment needs — `ARCHITECTURE_REVIEW.md` is the full source:
 ## What `integration` must run
 
 Minimum: `dotnet build Impact.sln`, then
-`Tools/Run-UnityTests.ps1 -Platform EditMode -CoreOnly`.
+`Tools/Run-UnityTests.ps1 -Platform EditMode -CoreOnly`, both from `Impact/`.
 Add `-Platform PlayMode -CoreOnly` when the change reaches runtime/session/
-player flow. `status: DONE` requires both to pass; a compile-only check is
-not a substitute for the test gate.
+player flow or the crate/content pipeline. `status: DONE` requires every run
+to pass; a compile-only check is not a substitute for the test gate.
 
-## Escalating past `-CoreOnly`
+`-CoreOnly` already runs every project test (`testing.md` § Running the
+suite). Dropping it is not an escalation.
 
-Drop `-CoreOnly` for the fuller suite when: the order's own `verification`
-field says so, the change touches the crate/content pipeline directly (see
-Known weak spots), or a `-CoreOnly` run passed but the change's blast radius
-(per the dependency chain above) reaches a package the Core tag does not
-cover. Note the escalation and why in the report's `risks`.
+## When the test gate does not reach the change
+
+- No test assembly references `athena.charactercontroller`, `athena.gameplay`
+  or `athena.ai`. A change confined to them passes the test gate untested.
+- Say so in `risks`, and name the missing test in a change request to the
+  test lane when the change carries logic.
+- Baking, source generators and `[BurstCompile]` output are not checked by
+  `dotnet build`. For those, add the Unity batchmode compile
+  (`AGENTS.md` § Build / Compile Commands).

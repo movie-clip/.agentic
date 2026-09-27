@@ -74,8 +74,8 @@ file). Seams for a new test are the ones your order's `inputs` name; don't
 pause to ask which seam, that's already decided upstream.
 
 A failing or flaky test resists your first diagnosis: call the Skill tool
-with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled for `budget`
-only — no other project's lane should reach for it unless its own
+with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled per repo (`budget`,
+`impact`) — no other project's lane should reach for it unless its own
 `.claude/settings.json` says otherwise.
 
 Adapted to this lane's constraints:
@@ -109,8 +109,8 @@ Adapted to this lane's constraints:
 - [ ] If you chose between mocking and a real dependency, or accepted
       test/production coupling as a tradeoff, you called `mattpocock-skills:tdd`
       first (see § Technique skills).
-- [ ] Not only noted that tradeoff in `risks` afterward — the call happens
-      before you finalize the choice.
+- [ ] The call happens before you finalize the choice — recorded in
+      `skill_calls:`, not only noted in `risks` afterward.
 - [ ] Realistic `BankRecipes`-style rows used where the case involves import
       or categorization, not synthetic placeholders
 - [ ] Deterministic ordering and tie-breaking asserted explicitly wherever the

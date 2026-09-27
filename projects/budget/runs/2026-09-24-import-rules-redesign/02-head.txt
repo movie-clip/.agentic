@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-24-import-rules-redesign/02
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-24-import-rules-redesign\02-design.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only design pass, order verification NONE
+changed:         0
+contract_notes:  4
+pack_corrections: 0
+handoff:         6
+skill_calls:     1
+risks:           7
+headline:        One PotentialRulesViewModel replaces the rules-queue block, with decision logic moved to Domain/Application; backend, frontend, test, docs order; two open decisions.

@@ -9,22 +9,22 @@ pack is the one implementation pack for the whole codebase.
 
 **Always read:** **Guardrails, in code terms** · **Package map and where
 responsibility actually sits** · **Known weak spots — read before touching
-these** · **Unity CLI for fast iteration** · **Definition of done for this
-lane**
+these** · **Definition of done for this lane**
 
 | Section | Read it when |
 |---|---|
 | Crate/content-loading pipeline | your order touches crate registration, loading, or content-management ownership |
 | Player/character/skin flow | your order touches player, character spawn, or skin systems |
+| Diagnosing a stuck bug | your first fix attempt didn't hold |
 
 ## Guardrails, in code terms
 
-Guardrail 1 (vendored read-only): `Impact/Packages/com.unity.entities@*/**`.
-Guardrail 2 (asmdef boundaries): open the target package's `.asmdef` before
-adding a reference; the dependency chain is `athena.core` (no deps) →
-`athena.contentmanagement` → `athena.shared` → `athena.gameplay` /
-`athena.charactercontroller` / `athena.sceneslice` — never add a reference
-that runs the chain backwards. Guardrail 3 (compile before done):
+Guardrail 1 (third-party read-only): `Packages/com.projectdawn.navigation/**`
+and `Library/PackageCache/**`. Guardrail 2 (asmdef boundaries): open the
+target package's `.asmdef` before adding a reference; the real graph is the
+table under `project.md` § Hard guardrails. The trap is
+`athena.charactercontroller`: `athena.shared` references it, so it can never
+reference `athena.shared` back. Guardrail 3 (compile before done):
 `dotnet build Impact.sln` is the floor; use Unity batchmode compile
 (`AGENTS.md` § Build/Compile Commands) when the change touches codegen,
 baking, or package-generated assemblies. `AGENTS.md` §§ Naming Conventions,
@@ -45,14 +45,22 @@ makes — read as part of your context load, not repeated here.
   load orchestration, session setup and level switching, player allocation,
   character spawning and skin switching, hybrid ECS/GameObject visual
   lifecycle, world/bootstrap/service glue.
-- `athena.charactercontroller` — movement/camera. Depends heavily on
-  `athena.shared` ownership and correct character-spawn behaviour; not
-  usually the source of session/crate bugs, but breaks visibly when those are
-  wrong.
+- `athena.charactercontroller` — movement/camera. A dependency of
+  `athena.shared`; references no Athena package.
+- At runtime, charactercontroller relies on `athena.shared` spawning
+  characters correctly. It breaks visibly when session/crate code is wrong,
+  without being the source.
 - `athena.gameplay` — thin glue package, still small, not yet the real home
   of most game rules.
+- `athena.sceneslice` — scene composition tool; no Athena references.
+- `athena.ai`, `com.ai.shared`, `com.ai.utility` — AI decision code on its
+  own branch of the graph. `athena.ai` is immature; read around it before
+  extending.
+- `athena.templatepackage` — a template for new packages; not game code.
 
-Full dependency chain and "where do I find X" table: `PACKAGE_ARCHITECTURE.md`.
+"Where do I find X" tables: `PACKAGE_ARCHITECTURE.md`. Its hierarchy diagram
+is wrong about `athena.charactercontroller`, so use the `.asmdef` graph for
+direction.
 
 ## Known weak spots — read before touching these
 
@@ -93,22 +101,49 @@ Skin switching does real on-demand crate loading and deferred visual
 rebuild — it must wait for real skin-crate readiness before the visual
 rebuild fires; do not short-circuit that wait to simplify a change.
 
-## Unity CLI for fast iteration
+## Diagnosing a stuck bug
 
-Once the Editor is open on this project, use the `unity-cli` skill (from the
-project-scoped `unity-agent-plugin`) for exact current syntax rather than a
-remembered command — `unity command eval` takes the C# snippet positionally
-plus required `--caller`/`--skill` flags, and the syntax has already drifted
-once since this pack's authoring. `unity pipeline list` confirms the Editor
-is connected. This is for iteration only — it does not substitute for the
-`dotnet build` / `Run-UnityTests.ps1` commands `integration` actually runs.
+Your first fix attempt didn't hold: call the Skill tool with
+`mattpocock-skills:diagnosing-bugs` rather than guessing again. Impact's
+`.claude/settings.json` enables this plugin.
+
+Adapted to this lane and to Unity:
+
+- The skill's feedback loop here is a single test run:
+  `Run-UnityTests.ps1 -Platform EditMode -Filter "<fully qualified name>"`.
+- Run `dotnet build Impact.sln` before each run. A compile error there wastes
+  the whole boot.
+- If no existing test reaches the bug, there is no fast loop. Test assemblies
+  are not yours to edit, so name the repro test the test lane should write in
+  `handoff`. Record the missing loop in `risks`.
+- Each batchmode run is a cold Unity boot, not seconds. Batch hypotheses per
+  run rather than one probe per boot.
+- Batchmode needs the Editor closed (`testing.md` § Gotchas). If it is open,
+  say so in `risks` instead of working around it.
+- For a runtime error the human saw, read
+  `C:\Users\MovieClip\AppData\Local\Unity\Editor\Editor.log` first
+  (`AGENTS.md` § Working Directories).
+- Tag every probe `Debug.Log("[DEBUG-xxxx] ...")`, and grep the tag to remove
+  them all before you report.
+- For "is this API used right", read the package's
+  `Library/PackageCache/<pkg>@*/Documentation~/`, e.g. Entities'
+  `common-errors.md`.
+- Diagnose the root cause and apply the fix — that part is yours.
+- Do not write the regression test: name it in `handoff` for the test lane
+  instead (you touch no test files).
+- Name any scratch file you create in `handoff` with its `git rm <path>`
+  command — you have no delete tool.
+- The skill's "ask the user" moments become a `risks` entry instead.
+- No commit. Your report is the protocol's report block, not a commit message.
+- Record the call in `skill_calls:` (`PROTOCOL.md` § 7).
 
 ## Definition of done for this lane
 
 - `dotnet build Impact.sln` is clean (or the equivalent Unity batchmode
   compile check, when the change needs it).
-- No edit under a vendored `@<hash>` package, unless the order specifically
-  targets it.
+- No edit under `Packages/com.projectdawn.navigation/` or
+  `Library/PackageCache/`, unless the order specifically targets it.
+- No new `IAspect` type (`AGENTS.md` § Type Usage Conventions).
 - Every new cross-package reference matches an already-declared `.asmdef`
   dependency, or the order added one deliberately and said so.
 - `contract_notes` names any changed component/singleton shape another

@@ -272,7 +272,9 @@ is the reference; the artifact is the content.
 
 Planning lanes (`product`, `design`, `story`, `quant` RESEARCH) produce
 artifacts far longer than the report block — story sets, technical plans,
-metrics inventories. Those artifacts **must** open with:
+metrics inventories. Directly below the report block — never above it; the
+block's `REPORT` line is always the artifact's first — those artifacts
+**must** carry:
 
 ```markdown
 ## Orchestrator brief

@@ -216,6 +216,19 @@ check("the pack queue is not a report",
 check("the sweep exits 0 with every artifact clean",
       cr.main(["check_report.py", str(sweep)]) == 0)
 
+print("F3 - a report with text above its block is still swept, and fails")
+misplaced = sweep / "02-recon.md"
+misplaced.write_text("## Orchestrator brief\n\n- a finding\n\n" + BLOCK,
+                     encoding="utf-8")
+check("a brief above the block does not hide the report",
+      cr._is_report(misplaced))
+check("the misplaced block is named as the failure",
+      any("first non-blank line" in x for x in cr.check(misplaced, "recon")),
+      str(cr.check(misplaced, "recon")))
+check("the sweep fails on it instead of skipping it",
+      cr.main(["check_report.py", str(sweep)]) == 1)
+misplaced.unlink()
+
 print("F3 - the lane is read from anywhere in the name, once")
 for _name, _want in [("T-40.1.3-T-40.2.2a-backend.md", "backend"),
                      ("INTEGRATION-tech-lead.md", "integration"),

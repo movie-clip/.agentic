@@ -25,7 +25,8 @@ directly -- exits 0 untouched.
 Bounded. Two blocks per subagent, then it allows the stop and says so. A hook
 that can refuse forever is a hook that can hang a run, and the close-out sweep
 (`check_report.py <run_dir>/ --require-heads`) is still there to catch what got
-through -- a missing head file fails it.
+through -- a missing head file fails it, and so does an artifact whose block
+is not on its first line.
 
 Advisories ride along, and never cause a hold. This is the only place the `~`
 half of check_report.py reaches the three lanes with no Bash: the CLI is one
@@ -126,11 +127,21 @@ def main() -> None:
                          "the absolute path you wrote the report to."])
 
     artifact = Path(raw)
-    if not artifact.is_file() or not cr._is_report(artifact):
+    if not artifact.is_file():
         _hold(agent_id, [
-            f"REPORT HEAD names artifact {raw!r}, which is not a report file on "
-            "disk. Write the full report to your order's report_to path first; "
-            "the head is a summary of it, not a replacement for it."])
+            f"REPORT HEAD names artifact {raw!r}, which does not exist. Write "
+            "the full report to your order's report_to path first; the head is "
+            "a summary of it, not a replacement for it."])
+    # The file exists but carries no REPORT line. Say what is in it: the old
+    # message ("not a report file on disk") read as a path problem, and the
+    # scout it held in run 2026-09-27-sort-potential-rules-by-frequency re-read
+    # the file, found it present, and resent the same head twice.
+    if not cr._is_report(artifact):
+        _hold(agent_id, [
+            f"{artifact.name} exists but has no 'REPORT <id>' line, so it is not "
+            "a report. Its first line must be the report block's 'REPORT "
+            "<run id>/<nn>' (PROTOCOL.md section 3); any document goes below "
+            "the block."])
 
     # Artifact first, head second. They fail for unrelated reasons and the fix
     # differs: a malformed artifact is the lane's own writing, a wrong head is

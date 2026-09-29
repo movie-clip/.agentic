@@ -101,7 +101,7 @@ with `docs/<slug>.md`, which was written from the same script.
 
 ## Research mode: brief sections
 
-Your artifact opens with the `## Orchestrator brief` (PROTOCOL.md § 4), then:
+Below the report block comes the `## Orchestrator brief` (PROTOCOL.md § 4), then:
 
 - **Concept** — what the number means to a trader, in one paragraph.
 - **Formula** — stated in mathematics, then in Pine terms, with every parameter

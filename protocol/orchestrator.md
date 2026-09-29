@@ -528,8 +528,8 @@ sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/04-backend.md
 **Planning artifacts are read by their brief.** `product`, `design`, `story` and
 `quant` RESEARCH produce artifacts far longer than the report block — a plan and
 its stories run to hundreds of lines, and perhaps thirty of them are routing
-decisions you act on. Every such artifact opens with a `## Orchestrator brief`
-of at most 15 lines. Read the brief. Read the sections the brief names, if you
+decisions you act on. Every such artifact carries, directly below its report
+block, a `## Orchestrator brief` of at most 15 lines. Read the brief. Read the sections the brief names, if you
 need them. Do not read the document.
 
 **This is safe because the brief is checked for completeness, not just length.**
@@ -562,6 +562,16 @@ only thing that varies:
   Then paste the lane's `headline` over the placeholder the script leaves in
   angle brackets — it is the one line the script cannot produce and the lane
   can. Everything else comes from the artifact.
+- **The artifact itself fails the check** — the lane is not closed, and
+  nothing about it is routable. Deriving a head fixes nothing here:
+  `--emit-head` counts whatever the broken file holds.
+  - Do not write `<nn>-head.txt` and do not edit the artifact yourself; it is
+    the lane's writing, and a report you corrected is no longer its report.
+  - Write the slot's Artifacts row with status `INVALID`.
+  - Re-dispatch the lane as the next slot. Quote the validator's output in the
+    order and pass the failed artifact as an `inputs` path, so the retry
+    re-files findings rather than redoing the exploration.
+  - The retry costs a unit of budget, as a `LOST` retry does.
 
 **The head is a file, not a paragraph in your ledger.** A run whose `<nn>-head.txt`
 is missing has an Artifacts row backed by nothing: the row says `DONE` and the

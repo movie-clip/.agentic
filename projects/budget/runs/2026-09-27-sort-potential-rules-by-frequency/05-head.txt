@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-27-sort-potential-rules-by-frequency/05
+artifact:    C:\projects\investments\.agentic\projects\budget\runs\2026-09-27-sort-potential-rules-by-frequency\05-docs.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      Order specified verification: NONE — read-only docs accuracy fix, no command to run.
+changed:     1
+contract_notes: 0
+pack_corrections: 0
+handoff:     1
+skill_calls: 0
+risks:       0
+headline:    docs/PROJECT_GUIDE.md § Rule Management now documents the most-repeated-pattern-first default order and its parse-order tie-break.

@@ -237,15 +237,22 @@ def counts(text: str) -> dict[str, int]:
 
 
 def _is_report(path: Path) -> bool:
-    """True when the file is an agent report rather than a ledger or a queue."""
+    """True when the file is an agent report rather than a ledger or a queue.
+
+    Any line opening `REPORT <id>` makes it one, not only the first. Run
+    2026-09-27-sort-potential-rules-by-frequency's recon put its brief above
+    the block; a first-line test made that artifact invisible to the write
+    hook, the stop gate and the close-out sweep alike, so the one check whose
+    job was to reject it never opened it. `check` still fails the misplaced
+    block - this only decides which files get asked.
+    """
     try:
         with path.open(encoding="utf-8") as fh:
-            for line in fh:
-                if line.strip():
-                    return line.startswith("REPORT ")
+            return any(line.startswith("REPORT ")
+                       and not line.startswith("REPORT HEAD")
+                       for line in fh)
     except (OSError, UnicodeDecodeError):
         return False
-    return False
 
 
 # Names filenames actually use that are not the lane's own name. Each entry is
@@ -1530,13 +1537,13 @@ def main(argv: list[str]) -> int:
         return 0
 
     if target.is_dir():
-        # A report is a file whose first line says so — PROTOCOL.md § 3's own
-        # definition. The rule used to be the filename regex `^\d{2}-`, which
-        # silently skipped every ticket-named artifact once runs started using
-        # them: a sweep of a 10-artifact run reported "ok" having opened 3,
-        # including neither the AUDIT nor the INTEGRATION gate. run.md is the
-        # ledger and pack-corrections.md is a queue; neither opens with REPORT,
-        # so neither needs naming here.
+        # A report is a file carrying a `REPORT <id>` line (_is_report). The
+        # rule used to be the filename regex `^\d{2}-`, which silently skipped
+        # every ticket-named artifact once runs started using them: a sweep of
+        # a 10-artifact run reported "ok" having opened 3, including neither
+        # the AUDIT nor the INTEGRATION gate. run.md is the ledger and
+        # pack-corrections.md is a queue; neither carries a REPORT line, so
+        # neither needs naming here.
         files = sorted(p for p in target.glob("*.md") if _is_report(p))
     else:
         files = [target]

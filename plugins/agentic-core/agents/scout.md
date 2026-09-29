@@ -57,7 +57,10 @@ Do not propose an implementation. Do not estimate. Do not decide whether the
 change is a good idea. You establish facts; the orchestrator and the user decide
 what to do with them.
 
-## Your artifact opens with an orchestrator brief
+## Your report block comes first, then an orchestrator brief
+
+The first line of your artifact is the block's `REPORT <run id>/<nn>`. Nothing
+goes above it.
 
 Your report block is followed by a real document — the map itself, section by
 section. The orchestrator does not read that document end to end, and should not

@@ -104,6 +104,12 @@ code, err = run(ARTIFACT_GATE, {"tool_input": {"file_path": str(ledger)}})
 check("the ledger is not a report and is left alone", (code, err) == (0, ""),
       f"{code} {err}")
 
+above = d / "08-recon.md"
+above.write_text("## Orchestrator brief\n\n- a finding\n\n" + BLOCK, encoding="utf-8")
+code, err = run(ARTIFACT_GATE, {"tool_input": {"file_path": str(above)}})
+check("a brief written above the block is caught at write time",
+      code == 2 and "first non-blank line" in err, f"{code} {err}")
+
 code, err = run(ARTIFACT_GATE, {"tool_input": {"file_path": str(d / "gone.md")}})
 check("a path that does not exist is ignored", (code, err) == (0, ""),
       f"{code} {err}")
@@ -156,7 +162,22 @@ check("a head that disagrees on status is held",
 _named = cr._scalar(HEAD, "artifact")
 code, err = run(HEAD_GATE, payload(HEAD.replace(_named, str(d / "nope.md"))))
 check("a head naming an artifact that is not there is held",
-      code == 2 and "not a report file" in err, f"{code} {err}")
+      code == 2 and "does not exist" in err, f"{code} {err}")
+
+# Run 2026-09-27-sort-potential-rules-by-frequency: the recon wrote its brief
+# above the block. The gate must say what is wrong with the file, not imply
+# the path is.
+top = d / "08-recon.md"
+top.write_text("## Orchestrator brief\n\n- a finding\n\n" + BLOCK, encoding="utf-8")
+code, err = run(HEAD_GATE, payload(HEAD.replace(_named, str(top)), lane="scout"))
+check("a brief above the block is held and named as the reason",
+      code == 2 and "first non-blank line" in err, f"{code} {err}")
+
+prose = d / "10-recon.md"
+prose.write_text("## Orchestrator brief\n\n- a finding\n", encoding="utf-8")
+code, err = run(HEAD_GATE, payload(HEAD.replace(_named, str(prose)), lane="scout"))
+check("a file with no REPORT line is held with what to put first",
+      code == 2 and "has no 'REPORT <id>' line" in err, f"{code} {err}")
 
 code, err = run(HEAD_GATE, payload(head_for_text(art)))
 check("an unedited --emit-head placeholder is held",

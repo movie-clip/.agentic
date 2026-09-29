@@ -2,8 +2,9 @@
 """PostToolUse hook: check a run artifact the moment a lane writes it.
 
 Wired on `Write|Edit`. Silent unless the file is a report artifact under a run
-directory -- first non-blank line `REPORT `, which is PROTOCOL.md section 3's
-own definition and the same test the directory sweep uses.
+directory -- any line opening `REPORT <id>`, the same test the directory sweep
+uses. Not only the first line: a report with a document above its block is
+exactly the file this hook exists to reject, and a first-line test skipped it.
 
 Exit 2 on PostToolUse feeds stderr back to the agent without undoing the write;
 the tool already ran. Exit 0 stays silent.

@@ -171,7 +171,10 @@ questionable, that is a producer finding for `risks`.
 
 ---
 
-## Your artifact opens with an orchestrator brief
+## Your report block comes first, then an orchestrator brief
+
+The first line of your artifact is the block's `REPORT <run id>/<nn>`. Nothing
+goes above it.
 
 Your report block is followed by a real document — the formulas, trust classes and metrics inventory (RESEARCH mode). The orchestrator
 does not read that document, and should not have to: it dispatches from it, and

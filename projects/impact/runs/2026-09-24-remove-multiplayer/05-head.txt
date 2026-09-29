@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-24-remove-multiplayer/05
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-09-24-remove-multiplayer\05-backend-b.md
+status:          PARTIAL
+verdict:         NONE
+verification:    FAIL
+detail:          `dotnet build Impact.sln` alone (first half of the compound command) already fails with 14 CS errors, all confined to Assets/Tests/EditMode/Crates/CrateSystemEditModeTests.cs and LevelCrateEditModeTes
+changed:         19
+contract_notes:  3
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           4
+headline:        All target-shape edits and D-4 rename land clean; solution build fails only on 2 test files reserved for the Test lane.

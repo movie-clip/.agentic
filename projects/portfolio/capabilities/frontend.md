@@ -25,6 +25,7 @@ convention you never read is not.
 | Layout | you are adding a file, or looking for where one lives |
 | The eight primitives | your order builds or changes any UI |
 | The canonical card pattern | your order adds or changes a card |
+| Diagnosing a stuck bug | your first fix attempt didn't hold |
 
 ---
 
@@ -178,6 +179,27 @@ deliberately deferred to a dedicated story.
 If your story touches one of those surfaces, keep the legacy pattern there or
 flag it. A half-migration leaves the codebase in a state neither pattern
 describes, which is worse than either.
+
+## Diagnosing a stuck bug
+
+Your first fix attempt didn't hold: call the Skill tool with
+`mattpocock-skills:diagnosing-bugs` rather than guessing again
+(`project.md` § Technique skills). Adapted to this lane's constraints:
+
+- Your feedback loop is `run_tests(scope="frontend", path=...)` on the one
+  spec, plus `tsc --noEmit`.
+- Diagnose the root cause and apply the fix — that part is yours.
+- If the root cause is a wrong or missing value from the engine, stop at
+  diagnosis and report it for the backend lane. Never compute or default the
+  value in a component (§ Guardrails, in UI terms).
+- Do not write the regression test: name it in `handoff` for the test lane
+  instead (you touch no test files, per the definition of done below).
+- The skill's "ask the user" moments become a `risks` entry instead.
+- Any scratch/repro file it has you create is named in `handoff` with its
+  `git rm <path>` command — you have no delete tool. Remove every
+  `console.log` probe before you report.
+- No commit. Your report is the protocol's report block, not a commit message.
+- Record the call in `skill_calls:` (`PROTOCOL.md` § 7).
 
 ## Definition of done for this lane
 

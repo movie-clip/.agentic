@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-29-refine-potential-rules-frequency-sort/03
+artifact:        C:\projects\investments\.agentic\projects\budget\runs\2026-09-29-refine-potential-rules-frequency-sort\03-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          build 0 warnings 0 errors; tests Domain 17/17, Infrastructure 11/11, Application 82 of 83 passed, the one failure being the expected ExecuteAsync_PatternsWithEqualOccurrenceCounts_PreserveOriginalPars
+changed:         1
+contract_notes:  2
+pack_corrections: 0
+handoff:         3
+skill_calls:     0
+risks:           2
+headline:        Potential rules now sort by count desc, then pattern first line, then line; "= 0" default dropped; build clean, only the expected tie-order test fails.

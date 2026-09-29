@@ -15,7 +15,7 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **The seams** · **Project tool server — prefer it over the raw command** · **Escalate rather than decide**
+**Always read:** **The seams** · **Project tool server — prefer it over the raw command** · **Escalate rather than decide** · **Technique skills (mattpocock-skills)**
 
 | Section | Read it when |
 |---|---|
@@ -43,6 +43,10 @@ attribution, correlation, currency-risk, stress, drawdown, distribution,
 provenance}`, `/portfolios/import`, `/market-data`, `/cache`, `/health`.
 
 ## Design pass: what to settle before the engineers start
+
+**Call `mattpocock-skills:codebase-design` first**, on every DESIGN pass, not
+only when unsure — before naming the contract below. Record the call in your
+report's `skill_calls:` field.
 
 **The contract, field by field.** Name, type, nullability, units (in the field
 name: `_pct`, `_pp`, `_usd`), and the trust enum accompanying anything that can
@@ -123,6 +127,11 @@ Watch specifically for the two brittleness patterns this repo has been bitten
 by: exact equality on structures designed to grow, and assertions that pin an
 implicit default the test never set.
 
+**8. Reuse and consistency judgments.** Before writing one into `risks` or a
+change request, call `mattpocock-skills:codebase-design`. That includes
+citing an existing pattern as precedent for what a lane did. Record the call,
+or its absence, in `skill_calls:`.
+
 ## Project tool server — prefer it over the raw command
 
 On an INTEGRATION order, three `mcp__project__*` tools do the running for you:
@@ -138,6 +147,23 @@ On an INTEGRATION order, three `mcp__project__*` tools do the running for you:
 Each returns a parsed verdict rather than raw output, which matters here: an
 integration report cites what failed, and a four-hundred-line dump is not a
 citation. The raw commands still work and are still correct.
+
+## Technique skills (mattpocock-skills)
+
+Reference for the calls the Design pass and Integration check 8 already
+require — scope constraints for `codebase-design`, not a separate trigger
+(`project.md` § Technique skills). Adapted to this lane:
+
+- Read only the main `SKILL.md` glossary and principles, not its "Going
+  deeper" material.
+- Do not open `DESIGN-IT-TWICE.md` — it assumes an `Agent` tool you don't
+  have.
+- Do not open `DEEPENING.md` — it tells the reader to delete files, which no
+  lane here can do.
+- This is reference vocabulary. It sharpens the contract and the named reuse
+  in DESIGN, and change requests in INTEGRATION.
+- It never overrides § The seams. `app/schemas/` stays the contract source of
+  truth, and a "deeper module" that merges truth classes breaks guardrail 3.
 
 ## Severity calls
 

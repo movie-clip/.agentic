@@ -3,12 +3,13 @@ request:      review MainBootstrap scene and MainBootstrap script, analyze how i
 agentic_root: C:\projects\investments\.agentic
 project:      impact
 story:        NONE
-status:       DISPATCHING
+status:       BLOCKED
 phase:        build
 plan:         v1
 budget:       8 — 6 triggered phases: ground-truth 1 + framing 1 + design 1 + build 3 (backend x2, test x1) + integration 1 + close 1 (docs) = 8
-spent:        3
-next:         dispatch 04 Backend-A (backend-engineer): package removal + WorldType/WorldFlags dead-branch collapse
+spent:        6
+blocked_on:   EditMode test run needs the open Unity Editor on this project closed first
+next:         await human: close Unity Editor, then re-run Tools/Run-UnityTests.ps1 EditMode -CoreOnly (or confirm via Editor's own Test Runner), then dispatch integration gate
 gates:        integration pending · review skipped (no story) · protocol-lint pending (pack-corrections.md non-empty, applied at close)
 
 ## Phases
@@ -29,10 +30,17 @@ gates:        integration pending · review skipped (no story) · protocol-lint 
 | 01 | recon | — | scout | sonnet | 01-recon.md | DONE | — |
 | 02 | product | — | producer | sonnet | 02-delivery-brief.md | DONE | — |
 | 03 | design | DESIGN | tech-lead | sonnet | 03-technical-plan.md | DONE | — |
+| 04 | backend | — | backend-engineer | sonnet | 04-backend-a.md | PARTIAL | — |
+| 05 | backend | — | backend-engineer | sonnet | 05-backend-b.md | PARTIAL | — |
+| 06 | test | — | test-engineer | sonnet | 06-test.md | PARTIAL | — |
 
 ## Open
 | kind | from | ref | one-line | state |
 |---|---|---|---|---|
+| should_fix | 04-backend-a | 04-backend-a.md § handoff | git rm Impact/ProjectSettings/MultiplayerManager.asset to complete D-3 | CARRIED |
+| should_fix | 05-backend-b | 05-backend-b.md § handoff | git mv AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs | CARRIED |
+| contract_note | 05-backend-b | CRATE_ASSET_LOADING_FLOW.md, PLAYER_SESSION_CHARACTER_FLOW.md, ARCHITECTURE_REVIEW.md, athena.shared PACKAGE_DOCUMENTATION.md | stale Client/Server/Synchronize + Authoritative-naming docs | OPEN |
+| should_fix | 06-test | 06-test.md § verification | git mv GameAuthoritativeConfiguration.cs -> GameSessionConfiguration.cs and AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs still outstanding | CARRIED |
 
 ## Closed
 | kind | from | absorbed by | one-line |

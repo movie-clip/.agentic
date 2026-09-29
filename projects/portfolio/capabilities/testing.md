@@ -23,6 +23,7 @@ convention you never read is not.
 | Where things live | you are adding a test file |
 | Assertion conventions (backend + frontend) | you are writing assertions |
 | Trust-state discipline in tests | your test touches trust or availability state |
+| Technique skills (mattpocock-skills) | you are making the `tdd` call Definition of done requires, or a failing or flaky test resists your first diagnosis |
 
 ---
 
@@ -221,12 +222,51 @@ That makes trust states a first-class test target, not an edge case:
 - Frontend: assert the unavailable state renders as unavailable — never as zero,
   never as a placeholder.
 
+## Technique skills (mattpocock-skills)
+
+Portfolio's `.claude/settings.json` enables this plugin (`project.md` §
+Technique skills). Constraints for the `mattpocock-skills:tdd` call
+Definition of done requires:
+
+- You still never touch production code to turn a test green (Scope
+  discipline in your role file).
+- The seams for a new test are the ones your order's `inputs` name. Don't
+  pause to ask which seam; that was decided upstream.
+- The mocking decision is already made at the boundary. Market data is mocked
+  through `install_market_data_mock` on the engine module, and providers at
+  the library (§ Gotchas). The skill's advice does not override either.
+- Its "test behaviour, not implementation" advice is this repo's
+  containment / no-implicit-default rules. Where they differ, § Assertion
+  conventions wins.
+- Prove red once on the narrow command (`run_tests(scope="backend", k=...)`
+  or one vitest file), then green.
+
+A failing or flaky test resists your first diagnosis: call the Skill tool
+with `mattpocock-skills:diagnosing-bugs`. Adapted to this lane:
+
+- Your feedback loop is the narrow command above, or `probe_engine` to see
+  what a route actually returns.
+- Check the known false signals first: goldens drift, a missing
+  `setup.tsx` shim, a patch on the service module, `SocketConnectBlockedError`.
+- If the defect is in the test itself, fix it — that's your job.
+- If the defect is in production code, stop at diagnosis: report it as a
+  finding per Scope discipline, and do not patch it.
+- The skill's "ask the user" moments become a `risks` entry instead.
+- Name any scratch file in `handoff` with its `git rm <path>` command — you
+  have no delete tool.
+- No commit. Your report is the protocol's report block, not a commit message.
+- Record each call in `skill_calls:` (`PROTOCOL.md` § 7).
+
 ## Definition of done for this lane
 
 - Tests exist for every behaviour the work order names, including the missing
   and degraded paths.
 - Shared fixtures reused; any new scaffolding added to `fixtures.py` and
   reported in `handoff`.
+- If you chose between a mock and a real dependency, or accepted
+  test/production coupling as a tradeoff, you called `mattpocock-skills:tdd`
+  before finalizing the choice. The call is recorded in `skill_calls:`, not
+  only noted in `risks` afterward.
 - New engine routes registered in the response-integrity test.
 - Assertions follow the containment / no-implicit-default rules.
 - The order's `verification` command was actually run and passed.

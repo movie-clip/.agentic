@@ -75,7 +75,7 @@ pause to ask which seam, that's already decided upstream.
 
 A failing or flaky test resists your first diagnosis: call the Skill tool
 with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled per repo (`budget`,
-`impact`) — no other project's lane should reach for it unless its own
+`impact`, `portfolio`) — no other project's lane should reach for it unless its own
 `.claude/settings.json` says otherwise.
 
 Adapted to this lane's constraints:

@@ -24,6 +24,7 @@ convention you never read is not.
 | Dead-code gate | your verification command includes the dead-code gate |
 | Contract notes you must emit | your order changes a schema or a response shape |
 | Changing a published contract | the shape you are changing has already shipped |
+| Diagnosing a stuck bug | your first fix attempt didn't hold |
 
 ---
 
@@ -279,6 +280,30 @@ no mandate to change. The breakdown was derived at the CLI instead.
 
 Widening a contract is usually safe; narrowing or re-typing one is a scope
 decision that belongs to the tech lead and the producer.
+
+## Diagnosing a stuck bug
+
+Your first fix attempt didn't hold: call the Skill tool with
+`mattpocock-skills:diagnosing-bugs` rather than guessing again
+(`project.md` § Technique skills). Adapted to this lane's constraints:
+
+- Your feedback loop is `probe_engine` on the failing route, or
+  `run_tests(scope="backend", k=...)` on one test. Don't write a throwaway
+  script for what `probe_engine` already returns.
+- Diagnose the root cause and apply the fix — that part is yours.
+- If the root cause is the formula or the methodology, stop at diagnosis.
+  Report it for `quant-audit`; never adjust a formula until a number looks
+  right (guardrail 1).
+- A fix that makes a value appear by weakening an admission gate is not a fix
+  (§ Guardrails, in code terms — fail closed).
+- Do not write the regression test: name it in `handoff` for the test lane
+  instead (you touch no test files, per the definition of done below).
+- The skill's "ask the user" moments become a `risks` entry instead.
+- Any scratch/repro file it has you create is named in `handoff` with its
+  `git rm <path>` command — you have no delete tool. Remove any `[DEBUG-…]`
+  probes before you report; the dead-code gate will not catch a print.
+- No commit. Your report is the protocol's report block, not a commit message.
+- Record the call in `skill_calls:` (`PROTOCOL.md` § 7).
 
 ## Definition of done for this lane
 

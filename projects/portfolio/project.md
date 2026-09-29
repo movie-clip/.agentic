@@ -31,6 +31,7 @@ convention you never read is not.
 | Delivery model | you are the producer, or shaping a slice into stories |
 | Lane routing | you are choosing which lane owns a piece of work |
 | Repo skills agents may invoke | you are about to reach for anything in `portfolio/.claude/skills/`, whether or not your order named it — one of them is superseded and must not run |
+| Technique skills (mattpocock-skills) | you hold the `Skill` tool and are about to call a `mattpocock-skills:*` skill, or your pack's trigger for one just fired |
 | PR convention | your order asks you to open or describe a PR |
 
 Elsewhere: **`phases.md`** — which lane fills each phase and the clause that
@@ -135,6 +136,34 @@ the repo docs.
 **If `build-story` loads for a request that belongs to this network, stop and
 route to `orchestrate-feature` instead.** A slice built through it has no run
 ledger, no gate verdicts, no contract notes, and ends with an agent commit.
+
+## Technique skills (mattpocock-skills)
+
+`portfolio/.claude/settings.json` enables `mattpocock-skills` alongside
+`agentic-core` and `frontend-design`. The lanes that hold the `Skill` tool
+are `backend-engineer`, `frontend-engineer`, `test-engineer` and `tech-lead`.
+Their packs name each call and its trigger:
+
+| Skill | Lane | Pack section |
+|---|---|---|
+| `mattpocock-skills:diagnosing-bugs` | backend | `backend.md` § Diagnosing a stuck bug |
+| `mattpocock-skills:diagnosing-bugs` | frontend | `frontend.md` § Diagnosing a stuck bug |
+| `mattpocock-skills:diagnosing-bugs`, `mattpocock-skills:tdd` | test | `testing.md` § Technique skills (mattpocock-skills) |
+| `mattpocock-skills:codebase-design` | tech-lead (DESIGN, INTEGRATION) | `architecture.md` § Technique skills (mattpocock-skills) |
+
+- Do not call any `mattpocock-skills:*` skill outside this table. Its trigger
+  and lane adaptations have not been written for portfolio.
+- These are technique, not house style. The repo skills above still own the
+  conventions: `write-tests` for fixtures and assertions, `ui-polish` for
+  cards. When a technique skill's advice conflicts with a repo skill or a
+  pack, the repo skill or pack wins.
+- A technique skill never licenses a formula change. A wrong number is a
+  finding for `quantitative-researcher`, and guardrail 1 still applies.
+- The skills that need a human interview, an issue tracker or the `Agent`
+  tool (`grilling`, `prototype`, `research`, `code-review`, `wizard`) do not
+  fit a dispatched lane.
+- `quantitative-researcher` has no `Skill` tool, so the `quant` and
+  `quant-audit` lanes get no technique skill.
 
 ## Mechanical gates — never bypass
 

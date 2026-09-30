@@ -74,9 +74,8 @@ file). Seams for a new test are the ones your order's `inputs` name; don't
 pause to ask which seam, that's already decided upstream.
 
 A failing or flaky test resists your first diagnosis: call the Skill tool
-with `mattpocock-skills:diagnosing-bugs`. This plugin is enabled per repo (`budget`,
-`impact`, `portfolio`) — no other project's lane should reach for it unless its own
-`.claude/settings.json` says otherwise.
+with `mattpocock-skills:diagnosing-bugs`. Budget's own
+`.claude/settings.json` enables this plugin.
 
 Adapted to this lane's constraints:
 

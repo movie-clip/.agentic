@@ -196,8 +196,8 @@ Your first fix attempt didn't hold: call the Skill tool with
   instead (you touch no test files, per the definition of done below).
 - The skill's "ask the user" moments become a `risks` entry instead.
 - Any scratch/repro file it has you create is named in `handoff` with its
-  `git rm <path>` command — you have no delete tool. Remove every
-  `console.log` probe before you report.
+  `git rm <path>` command — you have no delete tool.
+- Remove every `console.log` probe before you report.
 - No commit. Your report is the protocol's report block, not a commit message.
 - Record the call in `skill_calls:` (`PROTOCOL.md` § 7).
 

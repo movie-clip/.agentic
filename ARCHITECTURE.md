@@ -1,15 +1,15 @@
 # `.agentic` — agent network architecture
 
-Version **0.7.13**. Lives at `C:\projects\investments\.agentic`, one level above
-the repos it drives. One project is bound: `portfolio` (quant-research-lab).
-`plugins/agentic-core/.claude-plugin/plugin.json` is the authority on the
-version — this heading has been wrong before.
+Lives at `C:\projects\investments\.agentic`, one level above the repos it
+drives. Five projects are bound: `portfolio`, `budget`, `impact`,
+`tradingview` and `datoro`. `plugins/agentic-core/.claude-plugin/plugin.json`
+is the authority on the version. Examples below use `portfolio`.
 
 **This file is the current design and the reasoning behind it.** How each rule
-was discovered, and which run exposed it, is in
-[`CHANGELOG.md`](./CHANGELOG.md). Installation, the directory tree, and the
-honest table of what is enforced by a script versus by asking an agent nicely
-are in [`README.md`](./README.md).
+was discovered is in [`CHANGELOG.md`](./CHANGELOG.md). Installation and the
+directory tree are in [`README.md`](./README.md). What is wrong or missing is
+in [`TECH-DEBT.md`](./TECH-DEBT.md); what comes next is in
+[`ROADMAP.md`](./ROADMAP.md).
 
 ---
 
@@ -378,24 +378,19 @@ procedural knowledge the repo owns and versions with its code (`ui-polish`,
 `fmp-data`). An agent is a worker with a context budget. Agents *invoke* repo
 skills; the network's own two skills carry sequence, not rules.
 
-## 8. Known gaps
+**Third-party technique skills are enabled per repo and fired by a pack.**
+`mattpocock-skills` is on in `budget`, `impact` and `portfolio`, through each
+repo's `.claude/settings.json`. It supplies technique (`diagnosing-bugs`,
+`tdd`, `codebase-design`), never house style. A lane calls one only where its
+capability pack names the trigger and adapts the skill to the lane's fences.
+The profile's skills section lists every allowed call. A skill with
+`disable-model-invocation` (`to-spec`, `to-tickets`, `handoff`) cannot be
+wired to a lane at all. Every call, made or skipped, lands in the report's
+`skill_calls:` field, which the tech lead's INTEGRATION pass checks against
+the rest of each report.
 
-Open by choice or by not-yet, and each is checkable:
+## 8. Gaps and plans
 
-- **Only one project is bound.** The agnostic/specific split is asserted, not
-  tested — `projects/` holds `portfolio` and nothing else, so no line has yet
-  been forced to prove it carries no portfolio assumption.
-- **`build-story` is superseded, not deleted.** It still sits in
-  `portfolio/.claude/skills/`, now opening "SUPERSEDED - do not use for
-  implementation" and routing its old triggers to `orchestrate-feature`.
-  Deleting it is the clean end; it has not happened.
-- **The scope fence is prose.** Across eight runs and roughly 110 dispatches
-  there is no recorded breach — every mention of scope in a ledger is a lane
-  stopping at its fence. Enforcing it mechanically was proposed and dropped:
-  there is nothing yet to enforce. Revisit on the first real breach.
-- **`Bash` is still a write primitive** for the lanes that hold it, including
-  ones that are otherwise bounded by having no `Edit`.
-
-`README.md` § "Not yet mechanical" is the full line-by-line account of which
-rules are backed by a script or a hook and which are backed by asking an agent
-nicely. Knowing which is which is the point of that table.
+What is wrong or missing is in [`TECH-DEBT.md`](./TECH-DEBT.md), with the map of
+which rules a script enforces and which rest on an agent's judgment. What comes
+next is in [`ROADMAP.md`](./ROADMAP.md).

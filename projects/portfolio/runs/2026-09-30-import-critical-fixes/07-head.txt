@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/07
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\07-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          freedom24 pytest: 2 failed, 3 passed, 23 deselected (both failures expected-red, see handoff). Probe: dates [2026-03-31, 2026-04-01, 2026-04-07]; fees 2.56/2.12/2.08 on 2026-04-07; total 6.76; 0 FEE r
+changed:         3
+contract_notes:  2
+pack_corrections: 0
+handoff:         7
+skill_calls:     0
+risks:           3
+headline:        Freedom24 trades now use statement trade dates and commission is charged once; probe gives the pinned dates, fees 6.76 and cash 52.04, and only the two expected tests fail.

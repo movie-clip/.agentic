@@ -1,0 +1,112 @@
+                                               Broker's report for the period             Freedom24
+                                               2025-12-31 23:59:59 - 2026-04-11 23:59:59  Cyprus, 4041, Limassol, Christaki Kranou 20, Freedom Tower, 5th Floor, Germasogeia
+
+Account details                                                                                 Private account for individuals
+                                                                                                Anton Ametov
+  Account type                                                                                  185960
+  Client                                                                                        USD
+  Client ID                                                                                     Smart in USD
+  Commission currency                                                                           2021-03-11
+  Service plan:                                                                                 2021-03-22
+  Date of signing the contract
+  Date of first deposit
+Beginning balance (2025-12-31 23:59:59)  2 900.12
+
+  Net assets, USD                            911.23
+  Funds in the trading account           1 988.89
+  USD
+  Opened positions, USD
+Ending balance (2026-04-11 23:59:59)  3 071.00
+
+  Net assets, USD                           52.04
+  Funds in the trading account        3 018.96
+  USD
+  Opened positions, USD
+Securities
+
+Ticker      ISIN          Account  Asset type  Beginning balance               Ending balance              Price    Currency     Valuation in USD
+SCHD.US     US8085247976  Trading  Funds                                  28                          0          0          USD                       0.00
+VTI.US      US9229087690  Trading  Funds                                    3                         9
+VWO.US      US9220428588  Trading  Funds                                    4                         0  335.44                                 3 018.96
+                                                                                                                 0                                    0.00
+Cash deposits/ withdrawals
+
+Type       Date Account Amount Currency                                                       Comment
+
+Dividends  2026-03-     trading  7.19   USD  Dividends on security (Schwab US Dividend Equity ETF (SCHD.US)), record date 2026-03-25. Per security 0.2569 USD. Balance on the record
+                    31                                                                                                                                                                                                                             date is 28
+
+Taxes      2026-03-     trading  -1.08  USD  Corporate action tax on security ( SCHD.US ), record date 2026-03-25 . Tax rate 15 Balance on the record date is 28
+                    31
+
+Dividends  2026-04-     trading  2.99   USD  Dividends on security (Vanguard Total Stock Market ETF (VTI.US)), record date 2026-03-27. Per security 0.9982 USD. Balance on the record date
+                    01                                                                                                                                                                                                                                             is 3
+
+Taxes      2026-04-     trading  -0.45  USD  Corporate action tax on security ( VTI.US ), record date 2026-03-27 . Tax rate 15 Balance on the record date is 3
+                    01
+
+Total deposits/withdrawals for the period on trading accounts in foreign currency USD : 8.65
+Securities deposits/withdrawals/conversions
+
+Type  Date                                   Account  Quantity  Ticker  ISIN  Comment
+Transactions
+
+Ticker  ISIN               Market Direction Quantity  Price      Amount Realized P/L                              Fee               Trade date  Settlement Date                            Order ID
+                                                                                                                       2026-04-07 16:35:44                2026-04-08  638027902/561497563
+SCHD.US US8085247976 ITS   Sell  28                   30.632000  857.70USD  121.16 2.56USD                             2026-04-07 17:17:58                2026-04-08  638042122/561528881
+                                                                                                                       2026-04-07 16:30:05                2026-04-08  638024717/561455274
+VTI.US  US9229087690 ITS   Buy   6 322.426000 1 934.56USD                   0.00 2.12USD
+
+VWO.US US9220428588 ITS    Sell  4                    53.946000  215.78USD  49.86 2.08USD
+
+Total cash flow on trades (the sum of purchases and sales) in trading accounts in foreign currency USD : -861.08
+
+Realized P/L USD : 171.02
+Commissions                      Date        Amount  Currency                                                                                                                        Commission details & explanation
+
+  Type                  2026-04-07           2.08    USD       Market: usa, security type: stocks, commission currency: USD, service plan: Smart in USD, trade currency: USD. The
+  For trade: 638024717      16:30:05                             minimum commission for each security in a trade: 0.02 USD. Additional commissions for a trade have been added:
+                                             2.56    USD                                                                                Minimum for the order: 2 USD. Total additional commissions: 2 USD
+  For trade: 638027902  2026-04-07
+                            16:35:44                           Market: usa, security type: stocks, commission currency: USD, service plan: Smart in USD, trade currency: USD. The
+                                                                 minimum commission for each security in a trade: 0.02 USD. Additional commissions for a trade have been added:
+For trade: 638042122    2026-04-07           2.12    USD                                                                                Minimum for the order: 2 USD. Total additional commissions: 2 USD
+                            17:17:58
+                                                               Market: usa, security type: stocks, commission currency: USD, service plan: Smart in USD, trade currency: USD. The
+                                                                 minimum commission for each security in a trade: 0.02 USD. Additional commissions for a trade have been added:
+                                                                                                                                        Minimum for the order: 2 USD. Total additional commissions: 2 USD
+
+Total commissions for the period USD : 6.76
+Corporate actions
+
+Type       Date Asset Amount For 1 Currency               Ticker  ISIN         Record       Number of               Tax           Tax                                                                     Comment
+                                                                                  Date  securities on     Deducted       Withheld
+                                                                                                          at Source                     Dividends on security (Schwab US Dividend Equity ETF
+                                                                                           the date of                              by         (SCHD.US)), record date 2026-03-25. Per security
+                                                                                                fixation        (TDS)        Broker                  0.2569 USD. Balance on the record date is 28
+
+Dividends  2026-  Cash  6.11 0.2569                  USD SCHD.US US8085247976  2026-    28                0USD -1.08USD                     Dividends on security (Vanguard Total Stock Market
+           03-31                                                               03-25                                                         ETF (VTI.US)), record date 2026-03-27. Per security
+
+Dividends  2026-  Cash  2.54 0.9982                  USD  VTI.US US9229087690  2026-    3                 0USD -0.45USD                                0.9982 USD. Balance on the record date is 3
+           04-01                                                               03-27
+
+Total for the period in foreign currency USD : 8.65
+Cash Flow   Beginning balance             Trading transactions              Commissions          Deposits/ Withdrawals                Ending balance
+                                911.23                           -861.08                   6.76                                 8.65                   52.04
+  Currency                          0.00                              0.00                 0.00                                 0.00                     0.00
+  USD
+  EUR
+Cash Flow (Non-Trading Accounts)
+
+Account  Currency                 Beginning balance  Commissions  Deposits/ Withdrawals  Ending balance
+Securities Flow
+
+Ticker           ISIN          Beginning balance               Trades      Withdrawals/Deposits                  Ending balance
+SCHD.US          US8085247976                             28         -28                                      0                         0
+VTI.US           US9229087690                               3           6                                     0                         9
+VWO.US           US9220428588                               4          -4                                     0                         0
+Securities flow (Non-trading accounts)
+
+Ticker  ISIN                            Beginning balance  Trades  Withdrawals/Deposits  Ending balance
+

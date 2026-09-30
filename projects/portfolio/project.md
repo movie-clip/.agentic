@@ -140,9 +140,8 @@ ledger, no gate verdicts, no contract notes, and ends with an agent commit.
 ## Technique skills (mattpocock-skills)
 
 `portfolio/.claude/settings.json` enables `mattpocock-skills` alongside
-`agentic-core` and `frontend-design`. The lanes that hold the `Skill` tool
-are `backend-engineer`, `frontend-engineer`, `test-engineer` and `tech-lead`.
-Their packs name each call and its trigger:
+`agentic-core` and `frontend-design`. Each lane's pack names its calls and
+their triggers:
 
 | Skill | Lane | Pack section |
 |---|---|---|
@@ -154,16 +153,14 @@ Their packs name each call and its trigger:
 - Do not call any `mattpocock-skills:*` skill outside this table. Its trigger
   and lane adaptations have not been written for portfolio.
 - These are technique, not house style. The repo skills above still own the
-  conventions: `write-tests` for fixtures and assertions, `ui-polish` for
-  cards. When a technique skill's advice conflicts with a repo skill or a
-  pack, the repo skill or pack wins.
+  conventions: `write-tests` for fixtures and assertions, `ui-polish` for cards.
+- When a technique skill's advice conflicts with a repo skill or a pack, the
+  repo skill or pack wins.
 - A technique skill never licenses a formula change. A wrong number is a
   finding for `quantitative-researcher`, and guardrail 1 still applies.
 - The skills that need a human interview, an issue tracker or the `Agent`
   tool (`grilling`, `prototype`, `research`, `code-review`, `wizard`) do not
   fit a dispatched lane.
-- `quantitative-researcher` has no `Skill` tool, so the `quant` and
-  `quant-audit` lanes get no technique skill.
 
 ## Mechanical gates — never bypass
 

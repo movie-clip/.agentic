@@ -97,9 +97,7 @@ talking.
 
 Reference for the calls Design pass checklist and Integration review checks
 already require — this section is scope constraints for `codebase-design`,
-not a separate trigger. This plugin is enabled per repo (`budget`, `impact`, `portfolio`) — no other
-project's lane should reach for it unless its own `.claude/settings.json`
-says otherwise.
+not a separate trigger. Budget's own `.claude/settings.json` enables this plugin.
 
 Adapted to this lane's constraints:
 

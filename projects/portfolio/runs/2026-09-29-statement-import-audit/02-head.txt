@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-29-statement-import-audit/02
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-29-statement-import-audit\02-quant-audit.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          pytest: 161 passed, 860 deselected, 6 warnings. anchor: raw statement (own csv parse of IB2026.csv + its MTM qty + Cash Report roll-forward; pdftotext of FF/ESPP); statement_truths.py not used. IB CSV
+changed:         0
+contract_notes:  2
+pack_corrections: 0
+handoff:         8
+skill_calls:     0
+risks:           6
+headline:        IBKR CSV positions/cash/totals exact; FAIL on 4 CRITICAL: Freedom24 fabricated dates and cost basis, desktop add-statement double-counts holdings and mislabels admission trust.

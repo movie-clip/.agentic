@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/02
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\02-quant.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          5 scripts ran. F1: engine reproduces golden -1.20% (A); true dates+single fee give TWR 3.81% vs my own path 3.8064%. F3 re-add Dashboard identical: True. anchors: raw PDF lines + own arithmetic; rest 
+changed:         0
+contract_notes:  5
+pack_corrections: 1
+handoff:         15
+skill_calls:     1
+risks:           8
+headline:        F1-F4 settled with fixture numbers (FF TWR 3.81%, IB re-add = IB alone, cost basis null+unavailable); F2 rule and FF window start need human rulings.

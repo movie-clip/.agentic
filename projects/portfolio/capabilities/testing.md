@@ -232,14 +232,23 @@ Definition of done requires:
   discipline in your role file).
 - The seams for a new test are the ones your order's `inputs` name. Don't
   pause to ask which seam; that was decided upstream.
-- The mocking decision is already made at the boundary. Market data is mocked
-  through `install_market_data_mock` on the engine module, and providers at
-  the library (§ Gotchas). The skill's advice does not override either.
+- A mock § Gotchas prescribes does not fire the trigger: market data via
+  `install_market_data_mock`, providers at the library.
+- A local `vi.mock('recharts')` is exempt only to read an unexported chart
+  transform's data back (§ Gotchas). Any other `vi.mock` fires the trigger.
+- Any other mock-or-real decision fires it. Examples: patching an engine
+  function in a route test, or stubbing a service instead of `TestClient`.
 - Its "test behaviour, not implementation" advice is this repo's
   containment / no-implicit-default rules. Where they differ, § Assertion
   conventions wins.
-- Prove red once on the narrow command (`run_tests(scope="backend", k=...)`
-  or one vitest file), then green.
+- Red-first is usually unavailable: `build` runs implementation before
+  tests, so the behaviour already exists when you write the test.
+- Apply its tautology rule instead. Expected values come from the
+  methodology doc, a worked example or a statement-truth pin — never
+  recomputed the way the engine does.
+- Red-first does apply to a regression test for a bug not yet fixed. Prove
+  red once on the narrow command (`run_tests(scope="backend", k=...)` or one
+  vitest file).
 
 A failing or flaky test resists your first diagnosis: call the Skill tool
 with `mattpocock-skills:diagnosing-bugs`. Adapted to this lane:
@@ -264,9 +273,8 @@ with `mattpocock-skills:diagnosing-bugs`. Adapted to this lane:
 - Shared fixtures reused; any new scaffolding added to `fixtures.py` and
   reported in `handoff`.
 - If you chose between a mock and a real dependency, or accepted
-  test/production coupling as a tradeoff, you called `mattpocock-skills:tdd`
-  before finalizing the choice. The call is recorded in `skill_calls:`, not
-  only noted in `risks` afterward.
+  test/production coupling, you called `mattpocock-skills:tdd` first.
+- That call is recorded in `skill_calls:`, not only noted in `risks`.
 - New engine routes registered in the response-integrity test.
 - Assertions follow the containment / no-implicit-default rules.
 - The order's `verification` command was actually run and passed.

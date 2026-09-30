@@ -5,7 +5,8 @@
 # Protocol extension — authoring rules
 
 Read in full. Every section is a rule `protocol-linter` can fail a file on, and
-a `FAIL` must cite one by name.
+a `FAIL` must cite one by name — except § "Writing for the reader you actually
+have", which it reports as `SHOULD_FIX` and never fails on alone.
 
 ## Contents
 
@@ -15,6 +16,8 @@ a `FAIL` must cite one by name.
   `effort:` and `tools:` are text until it does
 - **Choosing a model for an agent** — `model:`, `effort:`, and escalation
 - **Writing for the reader you actually have** — what earns a line its place
+- **Two instructions may not disagree** — a lane reading both must know which
+  action to take
 - **Indexing a pack or profile** — `## Index` vs `## Contents`, and the
   always-read test
 - **A pack may not instruct a tool the lane does not have** — check `tools:`
@@ -233,6 +236,22 @@ The human-facing artifacts are the exception, and there are only four: the
 delivery brief's recommendation, the story's acceptance criteria, the gate
 verdicts, and the close-out report. Those are read by the person who approves
 them. Write those for that person.
+
+## Two instructions may not disagree
+
+A lane that reads two instructions directing different actions in the same
+situation picks one, and nothing records which. Neither a test nor a gate sees
+it: the lane's report reads as compliant with whichever one it chose.
+
+- **Within a file and across files a lane reads together** — its pack, the
+  profile, and the repo skill the pack names.
+- **A rule and its exception are one fact.** Splitting them into separate
+  bullets is fine only when each bullet still says which cases it covers.
+- **An exception may not be broader than the section that grants it.** A
+  carve-out naming a tool the Gotchas prescribe for one case covers that case.
+
+The fix is to reword one of them, or to state which wins. "The pack wins" is a
+valid resolution; silence is not.
 
 ## Indexing a pack or profile
 

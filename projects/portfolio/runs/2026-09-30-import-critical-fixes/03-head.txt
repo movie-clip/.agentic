@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/03
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\03-story.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order verification was NONE; drafts only, no command run
+changed:         4
+contract_notes:  4
+pack_corrections: 0
+handoff:         6
+skill_calls:     1
+risks:           7
+headline:    Four draft stories US-46.1..46.4 written as backlog with pinned ACs, test plans and tickets; DRAFT for human review, not approved. Three rulings still block ticketing.

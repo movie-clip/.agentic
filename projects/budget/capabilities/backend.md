@@ -64,9 +64,8 @@ Existing use cases, for finding prior art: `ImportBankStatementUseCase`,
 ## Diagnosing a stuck bug
 
 Your first fix attempt didn't hold: call the Skill tool with
-`mattpocock-skills:diagnosing-bugs` rather than guessing again. This plugin is
-enabled per repo (`budget`, `impact`, `portfolio`) — no other project's lane should reach for it
-unless its own `.claude/settings.json` says otherwise.
+`mattpocock-skills:diagnosing-bugs` rather than guessing again. Budget's own
+`.claude/settings.json` enables this plugin.
 
 Adapted to this lane's constraints:
 

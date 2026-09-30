@@ -1,0 +1,556 @@
+{
+ "change_in_nav": {
+  "Starting Value": "52381.120971276",
+  "Mark-to-Market": "3677.845599",
+  "Deposits & Withdrawals": "9963",
+  "Dividends": "125.72",
+  "Withholding Tax": "-17.93",
+  "Change in Dividend Accruals": "-20.74",
+  "Interest": "1.64",
+  "Other Fees": "-1.05",
+  "Commissions": "-216.8612606",
+  "Other FX Translations": "-0.01",
+  "Ending Value": "65892.735311283"
+ },
+ "nav": {
+  "Cash": "146.065631283",
+  "Stock": "65746.66968",
+  "Dividend Accruals": "0",
+  "Total": "65892.735311283",
+  "TWR": "5.506619351%"
+ },
+ "implied_fx": {
+  "EUR": "1.1583000000",
+  "EUR_cost": "1.1583000000",
+  "GBP": "1.3535000000",
+  "GBP_cost": "1.3535000000",
+  "USD": "1.0000000000"
+ },
+ "positions": [
+  {
+   "Asset Category": "Stocks",
+   "Currency": "EUR",
+   "Symbol": "DEFS",
+   "Quantity": "500",
+   "Mult": "1",
+   "Cost Price": "5.59295003",
+   "Cost Basis": "2796.475015",
+   "Close Price": "6.148",
+   "Value": "3074",
+   "Unrealized P/L": "277.524985"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "EUR",
+   "Symbol": "SXRV",
+   "Quantity": "6",
+   "Mult": "1",
+   "Cost Price": "1326.929835333",
+   "Cost Basis": "7961.579012",
+   "Close Price": "1470.6",
+   "Value": "8823.6",
+   "Unrealized P/L": "862.020988"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "GBP",
+   "Symbol": "SEMI",
+   "Quantity": "200",
+   "Mult": "1",
+   "Cost Price": "13.815",
+   "Cost Basis": "2763",
+   "Close Price": "14.428",
+   "Value": "2885.6",
+   "Unrealized P/L": "122.6"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "ADBE",
+   "Quantity": "2",
+   "Mult": "1",
+   "Cost Price": "358.516979",
+   "Cost Basis": "717.033958",
+   "Close Price": "291.52",
+   "Value": "583.04",
+   "Unrealized P/L": "-133.993958"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "ALLO",
+   "Quantity": "45",
+   "Mult": "1",
+   "Cost Price": "15.295595911",
+   "Cost Basis": "688.301816",
+   "Close Price": "2.02",
+   "Value": "90.9",
+   "Unrealized P/L": "-597.401816"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "CIBR",
+   "Quantity": "40",
+   "Mult": "1",
+   "Cost Price": "51.4345",
+   "Cost Basis": "2057.38",
+   "Close Price": "61.78",
+   "Value": "2471.2",
+   "Unrealized P/L": "413.82"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "CRSP",
+   "Quantity": "8",
+   "Mult": "1",
+   "Cost Price": "83.51869625",
+   "Cost Basis": "668.14957",
+   "Close Price": "57.72",
+   "Value": "461.76",
+   "Unrealized P/L": "-206.38957"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "DUOL",
+   "Quantity": "7",
+   "Mult": "1",
+   "Cost Price": "218.610342143",
+   "Cost Basis": "1530.272395",
+   "Close Price": "146.98",
+   "Value": "1028.86",
+   "Unrealized P/L": "-501.412395"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "EDIT",
+   "Quantity": "42",
+   "Mult": "1",
+   "Cost Price": "16.724483381",
+   "Cost Basis": "702.428302",
+   "Close Price": "3.16",
+   "Value": "132.72",
+   "Unrealized P/L": "-569.708302"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "IAUP",
+   "Quantity": "80",
+   "Mult": "1",
+   "Cost Price": "42.61375",
+   "Cost Basis": "3409.1",
+   "Close Price": "47.35",
+   "Value": "3788",
+   "Unrealized P/L": "378.9"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "ICOM",
+   "Quantity": "300",
+   "Mult": "1",
+   "Cost Price": "9.82548889",
+   "Cost Basis": "2947.646667",
+   "Close Price": "10.46",
+   "Value": "3138",
+   "Unrealized P/L": "190.353333"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "IDFN",
+   "Quantity": "300",
+   "Mult": "1",
+   "Cost Price": "10.328366667",
+   "Cost Basis": "3098.51",
+   "Close Price": "10.231",
+   "Value": "3069.3",
+   "Unrealized P/L": "-29.21"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "LYFT",
+   "Quantity": "40",
+   "Mult": "1",
+   "Cost Price": "21.576205275",
+   "Cost Basis": "863.048211",
+   "Close Price": "17.7",
+   "Value": "708",
+   "Unrealized P/L": "-155.048211"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "PYPL",
+   "Quantity": "13",
+   "Mult": "1",
+   "Cost Price": "98.995462538",
+   "Cost Basis": "1286.941013",
+   "Close Price": "53.66",
+   "Value": "697.58",
+   "Unrealized P/L": "-589.361013"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "SBIO",
+   "Quantity": "10",
+   "Mult": "1",
+   "Cost Price": "70.783",
+   "Cost Basis": "707.83",
+   "Close Price": "74.65",
+   "Value": "746.5",
+   "Unrealized P/L": "38.67"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "SGLD",
+   "Quantity": "7",
+   "Mult": "1",
+   "Cost Price": "198.156667429",
+   "Cost Basis": "1387.096672",
+   "Close Price": "438.5",
+   "Value": "3069.5",
+   "Unrealized P/L": "1682.403328"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "VDST",
+   "Quantity": "270",
+   "Mult": "1",
+   "Cost Price": "58.922846111",
+   "Cost Basis": "15909.16845",
+   "Close Price": "59.518",
+   "Value": "16069.86",
+   "Unrealized P/L": "160.69155"
+  },
+  {
+   "Asset Category": "Stocks",
+   "Currency": "USD",
+   "Symbol": "VUAA",
+   "Quantity": "80",
+   "Mult": "1",
+   "Cost Price": "126.0182892",
+   "Cost Basis": "10081.463136",
+   "Close Price": "150.06",
+   "Value": "12004.8",
+   "Unrealized P/L": "1923.336864"
+  }
+ ],
+ "position_count": 18,
+ "positions_by_ccy": {
+  "EUR": 2,
+  "GBP": 1,
+  "USD": 15
+ },
+ "mv_base": "65746.669680",
+ "mv_raw_mixed": "62843.220000",
+ "cost_basis_base": "62255.144669",
+ "pos_checks": [
+  {
+   "sym": "DEFS",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "SXRV",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "SEMI",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "ADBE",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "ALLO",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "CIBR",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "CRSP",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "DUOL",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "EDIT",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "IAUP",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "ICOM",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "IDFN",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "LYFT",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "PYPL",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "SBIO",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "SGLD",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "VDST",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  },
+  {
+   "sym": "VUAA",
+   "qty_x_close_minus_value": "0.000000",
+   "value_minus_cost_minus_upnl": "0.000000"
+  }
+ ],
+ "cash_report": {
+  "Base Currency Summary": {
+   "Starting Cash": "4672.035671276",
+   "Commissions": "-216.8612606",
+   "Deposits": "9963",
+   "Dividends": "125.72",
+   "Broker Interest Paid and Received": "1.64",
+   "Trades (Sales)": "153308.69712795",
+   "Trades (Purchase)": "-167683.56467436",
+   "Other Fees": "-1.05",
+   "Withholding Tax": "-17.93",
+   "Cash FX Translation Gain/Loss": "-5.621233",
+   "Ending Cash": "146.065631283",
+   "Ending Settled Cash": "146.065631283"
+  },
+  "EUR": {
+   "Starting Cash": "0",
+   "Commissions": "-25.75765208",
+   "Trades (Sales)": "27789.93",
+   "Trades (Purchase)": "-27764.17234792",
+   "Ending Cash": "0",
+   "Ending Settled Cash": "0"
+  },
+  "GBP": {
+   "Starting Cash": "0",
+   "Commissions": "-17.4488",
+   "Trades (Sales)": "19501.2071",
+   "Trades (Purchase)": "-19483.7583",
+   "Ending Cash": "0",
+   "Ending Settled Cash": "0"
+  },
+  "USD": {
+   "Starting Cash": "4672.035671276",
+   "Commissions": "-163.5676113",
+   "Deposits": "9963",
+   "Dividends": "125.72",
+   "Broker Interest Paid and Received": "1.64",
+   "Trades (Sales)": "94743.42093523",
+   "Trades (Purchase)": "-109177.20336394",
+   "Other Fees": "-1.05",
+   "Withholding Tax": "-17.93",
+   "Ending Cash": "146.065631283",
+   "Ending Settled Cash": "146.065631283"
+  }
+ },
+ "stock_trades": {
+  "EUR": {
+   "n": "20",
+   "buy": "13",
+   "sell": "7",
+   "zero": "0",
+   "proceeds": "-9953.99",
+   "comm": "-25.757652077"
+  },
+  "GBP": {
+   "n": "17",
+   "buy": "12",
+   "sell": "5",
+   "zero": "0",
+   "proceeds": "-2916.40",
+   "comm": "-17.44880"
+  },
+  "USD": {
+   "n": "133",
+   "buy": "68",
+   "sell": "65",
+   "zero": "0",
+   "proceeds": "1069.5738",
+   "comm": "-137.567611283"
+  }
+ },
+ "stock_trade_counts": {
+  "BUY": 93,
+  "SELL": 77
+ },
+ "forex_trades": {
+  "GBP": {
+   "n": "1",
+   "buy": "1",
+   "sell": "0",
+   "zero": "0",
+   "proceeds": "-1266.9770624",
+   "comm": "0"
+  },
+  "USD": {
+   "n": "88",
+   "buy": "60",
+   "sell": "28",
+   "zero": "0",
+   "proceeds": "-15503.356228710",
+   "comm": "-26"
+  }
+ },
+ "forex_trade_count": 89,
+ "forex_comm_usd": "-26",
+ "trade_rows_skipped_other": {},
+ "forex_cash_effect_by_ccy": {
+  "EUR": "9979.74765208",
+  "GBP": "2933.8488000",
+  "USD": "-15529.356228710"
+ },
+ "cash_flows": {
+  "Dividends": {
+   "n": 25,
+   "signed": "125.72",
+   "abs": "125.72",
+   "positive_rows": 25,
+   "negative_rows": 0
+  },
+  "Withholding Tax": {
+   "n": 28,
+   "signed": "-17.93",
+   "abs": "24.45",
+   "positive_rows": 2,
+   "negative_rows": 26
+  },
+  "Interest": {
+   "n": 1,
+   "signed": "1.64",
+   "abs": "1.64",
+   "positive_rows": 1,
+   "negative_rows": 0
+  },
+  "Fees": {
+   "n": 5,
+   "signed": "-1.05",
+   "abs": "1.05",
+   "positive_rows": 0,
+   "negative_rows": 5
+  },
+  "Deposits & Withdrawals": {
+   "n": 1,
+   "signed": "9963",
+   "abs": "9963",
+   "positive_rows": 1,
+   "negative_rows": 0
+  }
+ },
+ "cash_rollforward": {
+  "USD": {
+   "starting": "4672.035671276",
+   "stock_trades_net": "932.006188717",
+   "cashflows": "10071.38",
+   "ending_without_forex": "15675.421860",
+   "ending_with_forex": "146.065631",
+   "statement_ending": "146.065631283"
+  },
+  "EUR": {
+   "starting": "0",
+   "stock_trades_net": "-9979.747652077",
+   "cashflows": "0",
+   "ending_without_forex": "-9979.747652",
+   "ending_with_forex": "0.000000",
+   "statement_ending": "0"
+  },
+  "GBP": {
+   "starting": "0",
+   "stock_trades_net": "-2933.84880",
+   "cashflows": "0",
+   "ending_without_forex": "-2933.848800",
+   "ending_with_forex": "0.000000",
+   "statement_ending": "0"
+  }
+ },
+ "corporate_actions": [
+  [
+   "Corporate Actions",
+   "Data",
+   "Stocks",
+   "EUR",
+   "2026-07-09",
+   "2026-07-08, 20:25:00",
+   "LQQ(FR0010342592) Split 200 for 1 (LQQ, AMUND NASDAQ 100 DALY LEV, FR0010342592)",
+   "199",
+   "0",
+   "0",
+   "0",
+   ""
+  ],
+  [
+   "Corporate Actions",
+   "Data",
+   "Total",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "0",
+   "0",
+   "0",
+   ""
+  ],
+  [
+   "Corporate Actions",
+   "Data",
+   "Total in USD",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "0",
+   "0",
+   "0",
+   ""
+  ]
+ ]
+}

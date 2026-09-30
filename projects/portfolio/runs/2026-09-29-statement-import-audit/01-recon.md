@@ -40,16 +40,16 @@ risks:
 - Pipeline is 12 stages: desktop pick (App.tsx:661) -> analyze-upload route (imports.py:71) -> format detection (statement_importer.py:19) -> 4 parsers -> combine (:66) -> bootstrap (import_engine.py:50) -> admission (import_admission.py:462) -> desktop projection/persist (IndexedDB).
 - Parsers: IBKR CSV (canonical, docs/IB2026.csv), IBKR PDF, Freedom24 PDF, ESPP PDF; only IBKR CSV/PDF are advertised in current-product-state.md.
 - Corporate actions are NOT parsed by any importer; the CSV has a Corporate Actions section (LQQ 200:1 split, IB2026.csv:585) and Forex trades that are dropped; splits are handled downstream by a price-ratio heuristic.
-- Only tech-debt-register entry on import is the Medium "Currency provenance" row (portfolio_snapshot_builder.py); the snapshot builder also fabricates cost_basis, unrealized_pnl, quantity and importer (S-19).
-- Persisted-import doc claims ("content-addressed, immutable", "no derived analytics persisted") are contradicted by the desktop code (S-28, S-29).
-- Desktop has a second, different merge (overlayImportedSnapshot) that sums by symbol across accounts and currencies; backend combine replaces same-account (S-27).
+- Only tech-debt-register entry on import is the Medium "Currency provenance" row (portfolio_snapshot_builder.py); the snapshot builder also fabricates cost_basis, unrealized_pnl, quantity and importer (S-27).
+- Persisted-import doc claims ("content-addressed, immutable", "no derived analytics persisted") are contradicted by the desktop code (S-34, D-01, D-02).
+- Desktop has a second, different merge (overlayImportedSnapshot) that sums by symbol across accounts and currencies; backend combine replaces same-account (S-31).
 - No blocker for dispatch; premise holds except that Freedom24/ESPP exist beyond the IBKR-only product doc.
-- ## Pipeline map: stage-by-stage table with file:line, inputs, outputs, truth class, methodology section.
-- ## Broker parser specifics: per-parser extraction rules, defaults and hard-coded literals.
-- ## Fixtures and test coverage: statements/fixtures inventory, tests per stage, named gaps.
-- ## Known debt and documented limitations: register and doc entries touching import.
-- ## Suspicions: S-01..S-34 with file:line, grouped by stage (silent default/drop/zero, sign, truth-class mixing).
-- ## Doc and code disagreements: D-01..D-07.
+- Section "Pipeline map": stage-by-stage table with file:line, inputs, outputs, truth class, methodology section.
+- Section "Broker parser specifics": per-parser extraction rules, defaults and hard-coded literals.
+- Section "Fixtures and test coverage": statements/fixtures inventory, tests per stage, gaps G-01..G-08.
+- Section "Known debt and documented limitations": register and doc entries touching import.
+- Section "Suspicions": S-01..S-36 with file:line, grouped by stage (silent default/drop/zero, sign, truth-class mixing).
+- Section "Doc and code disagreements": D-01..D-07.
 
 ## Pipeline map
 
@@ -140,7 +140,7 @@ Tests by stage (names only; bodies not audited):
 
 Coverage gaps (by name or absence found; not exhaustive):
 - G-01: no test found that parses or asserts on the `Corporate Actions` section or `Forex` trades of IB2026.csv; the importer silently ignores both.
-- G-02: `test_importer.py` uses silent `return` when a fixture is missing (:38-39, :82-83, :96-97, :110-111, :127-128, :146-147, :242-ish tests likewise), against testing-architecture.md:93; `IB2026.pdf` is absent, so `test_preview_pdf_statement_extracts_core_metadata_for_2026` (:109) and `test_import_statement_2026_...` (:145) pass vacuously, and :32-34 checks only the extension.
+- G-02: `test_importer.py` uses silent `return` when a fixture is missing (:38-39, :82-83, :96-97, :110-111, :127-128, :146-147), against testing-architecture.md:93; `IB2026.pdf` is absent, so `test_preview_pdf_statement_extracts_core_metadata_for_2026` (:109) and `test_import_statement_2026_...` (:145) pass vacuously, and :32-34 checks only the extension.
 - G-03: no CSV-specific upload-route test found in `test_routes.py` (PDF, Freedom24, ESPP only); temp-file cleanup and the temp `source_path` provenance (S-22) have no test found.
 - G-04: desktop `overlayImportedSnapshot` tests cover same-symbol summing and IB->FF->ESPP; none found for same account across two periods, mixed currencies, base-currency mismatch, or fxRates carry-over.
 - G-05: no test found that pins the multi-currency admission outcome for the canonical IB2026.csv (S-24); admission tests use single-currency fixtures.
@@ -151,9 +151,9 @@ Coverage gaps (by name or absence found; not exhaustive):
 ## Known debt and documented limitations
 
 - `docs/tech-debt-register.md` "Currency provenance" (Medium): `portfolio_snapshot_builder.py` assigns base or USD currency when a generic request omits a position currency; states "Imported broker statements are unaffected". This is the only open row that concerns import. Code anchor: portfolio_snapshot_builder.py:43.
-- Same row's scope is narrower than the builder's other defaults (cost_basis, unrealized_pnl, quantity, importer, account_id; S-19).
+- Same row's scope is narrower than the builder's other defaults (cost_basis, unrealized_pnl, quantity, importer, account_id; S-27).
 - `docs/tech-debt-register.md` rows "Trust semantics" (withheld investor-economics/drawdown) and "Synthetic history" (coverage) touch downstream of import, not import itself.
-- All other register rows are Rolling Factor Analysis findings (F2, F3, F5, F6, F8, F9, F10) or dependency advisories (FastAPI/Starlette, pypdf and python-multipart among the Medium dependency row); none concern the import pipeline. The pypdf/python-multipart advisory row is import-adjacent (PDF parsing and multipart upload libraries).
+- All other register rows are Rolling Factor Analysis findings (F2, F3, F5, F6, F8, F9, F10) or dependency advisories (FastAPI/Starlette; and a Medium row naming pypdf and python-multipart, which are import-adjacent: PDF parsing and multipart upload libraries); none concern the import pipeline logic.
 - `docs/product/current-product-state.md:52-55`: import API accepts a user-selected filesystem path with no authentication; acceptable only while localhost single-user. `docs/architecture/system-architecture.md:222-235` restates it as an accepted tradeoff (`statement_path`/`statement_paths`, `_resolve_statement_paths` checks existence only; desktop upload does not use those routes).
 - `docs/product/current-product-state.md:65-67`: currency-less positions through the generic request path can be assigned a currency.
 - `docs/finance/financial-methodology.md:59-92` "Importer resilience rule": malformed records are skipped, never zero-filled; gaps "surface through statement reconciliation". ESPP declared "not reachable" for malformed-number failures (:74-80).
@@ -189,18 +189,18 @@ Freedom24 and ESPP
 - S-17 [mix] Freedom24 position `cost_basis` is synthesised as `ending_balance * close_price` in both branches (freedom24.py:180-183), so `unrealized_pnl = market_value - cost_basis` (:192) is about zero and not broker truth; it flows into overview totals (overview.py:43-44).
 - S-18 [hard-code] Freedom24 currency USD hard-coded for trades (:269), instruments (:405) and positions lacking a currency token (:172); base currency default USD (:103); totals bound to "Net assets, USD" (:112-139); `fx_rates` only `USDUSD` (:109). A EUR-commission-currency statement would be labelled inconsistently.
 - S-19 [default] Freedom24 trades and fees dated at the first of the statement-start month (:46-51); ledger chronology is month-granular; fallback `date(2026, 1, 1)` at :48 is unreachable (period None raises at :420).
-- S-20 [dup] Freedom24 fee counted twice candidates: per-trade `fee` reduces `net_amount` (:253-256) and a separate period-total FEE entry is emitted (:348-378); `commissions_total` and `other_fees_total` are set from the same regex (:125-126). Whether cash_effect double counts is unverified.
+- S-20 [dup] Freedom24 possible fee double count: per-trade `fee` reduces `net_amount` (:253-256) and a separate period-total FEE entry is emitted (:348-378); `commissions_total` and `other_fees_total` are set from the same regex (:125-126). Whether cash_effect double counts is unverified.
 - S-21 [drop] Freedom24 sections read `page_texts[idx] if len(page_texts) > idx else ""` (:145,:208,:236,:284,:349): a layout shift yields empty sections without an error; non-"funds" or non-"trading" position rows are dropped (:177).
 - S-23 [mix] Freedom24 enrichment (:454-467, `except Exception: pass`) makes the import output depend on network and API key state, and overwrites `description`/`instrument_type` from a vendor profile (instrument_enrichment.py:97-100) with no marker on `ImportedInstrument` that the fields are vendor-derived.
-- S-24a [sign] ESPP `_normalize_number` replaces "-" with "0" (espp.py:35): "-1.83" becomes "01.83"; the `-?` regexes at :72-73, :177 rely on later `abs()` for subtractions/tax, but `change_match` is used signed at :95.
-- S-24b [hard-code] ESPP: symbol MSFT (:79,:112,:124,:216), FYIXX fund (:101), "Jan 1"/"Dec 31" anchors (:70-71); only the first "Employee Purchase" is read (:141) so multiple offering periods drop; DEPOSIT entry synthesised as price*shares (:150-160) though labelled from the statement; `deposits_total` = position cost (:92-93); `other_fees_total` and `withholding_tax_total` both take "Subtractions" (:87-88).
+- S-35 [sign] ESPP `_normalize_number` replaces "-" with "0" (espp.py:35): "-1.83" becomes "01.83"; the `-?` regexes at :72-73, :177 rely on later `abs()` for subtractions/tax, but `change_match` is used signed at :95.
+- S-36 [hard-code] ESPP: symbol MSFT (:79,:112,:124,:216), FYIXX fund (:101), "Jan 1"/"Dec 31" anchors (:70-71); only the first "Employee Purchase" is read (:141) so multiple offering periods drop; DEPOSIT entry synthesised as price*shares (:150-160) though labelled from the statement; `deposits_total` = position cost (:92-93); `other_fees_total` and `withholding_tax_total` both take "Subtractions" (:87-88).
 
 Domain, identity, admission, consumer
 - S-25 [zero] `ledger.py:204` `cash_effect = entry.net_amount or 0.0`; `ledger.py:205` `asset_currency` from open positions only (None for fully sold symbols); `ledger.py:265` lot unit cost = BUY price ignoring fees; `:244` opening-lot cost estimated from ending average cost (flagged `cost_basis_is_estimated`); FIFO consumption assumed; no split adjustment.
 - S-26 [default] `registry.py:246-270` substring keywords ("ETC", "DEF", "QQQ" in description) drive ETF category; `:244` currency default "USD"; `:211` `get_sector` default "Other" (used defensively at overview.py:68) vs "Unclassified" elsewhere; `:181` `.replace(".L", "")`/`.replace(".AS", "")` removes those substrings anywhere in a symbol. A registry-known ticker takes the curated sector even when the ISIN check flags a mismatch (instrument_identity.py:75-83; flag only).
 - S-27 [default] `portfolio_snapshot_builder.py:37-43`: `quantity or 0`, `cost_basis := market_value`, `unrealized_pnl := 0`, `close_price := market_value` when quantity missing, currency default; also `importer or 'interactive_brokers'` (:10), `account_id='snapshot-workspace'` (:14), `datetime.utcnow()` (:8). The register covers currency only.
 - S-28 [zero] `overview.py:47` `balance.ending_cash or 0` (ignores `ending_settled_cash`, unlike `import_admission.py:47-51`); `overview.py:43-44` cost basis and unrealized P&L converted at the statement-end static rate.
-- S-24 (admission) [default] `import_admission.py:75-79,236,257,330,351`: comparability requires a single currency across positions, cash and statement currency; the canonical IB2026.csv has USD/EUR/GBP positions (statement_truths.py:37), so positions, NAV and cash checks resolve `unavailable` and the summary cannot reach `admitted/verified` (:471-480) even though `fx_rates` exist. Inferred, not executed.
+- S-24 [default] Admission single-currency gate: `import_admission.py:75-79,236,257,330,351` comparability requires a single currency across positions, cash and statement currency; the canonical IB2026.csv has USD/EUR/GBP positions (statement_truths.py:37), so positions, NAV and cash checks resolve `unavailable` and the summary cannot reach `admitted/verified` (:471-480) even though `fx_rates` exist. Inferred, not executed.
 - S-29 [default] `import_engine.py:66-77` `risk_summary` is a stub (observations 0, all metrics None, methodology 'import_bootstrap'); honest None, but present in the bootstrap payload.
 
 Desktop

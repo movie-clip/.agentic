@@ -258,13 +258,6 @@ valid resolution; silence is not.
 Packs and profiles are read by index (core § 1, steps 4–5). Every one of them
 opens with:
 
-**Unless it is read in full, in which case it opens with `## Contents`.**
-`phases.md` is the case: it has exactly one reader, that reader needs all of
-it, and an index inviting it to skip a section would be wrong. Give a
-full-read file over ~100 lines a `## Contents` list instead — same job of
-letting a partial read see the whole scope, without the instruction to skip.
-An index is a claim that skipping is safe; make it only where it is.
-
 ```markdown
 ## Index
 Always read: <the sections no lane may skip — guardrails, trust rules>
@@ -273,6 +266,13 @@ Always read: <the sections no lane may skip — guardrails, trust rules>
 | Fixtures | your order adds or changes a test |
 | FMP cache | your order touches market data |
 ```
+
+**Unless it is read in full, in which case it opens with `## Contents`.**
+`phases.md` is the case: it has exactly one reader, that reader needs all of
+it, and an index inviting it to skip a section would be wrong. Give a
+full-read file over ~100 lines a `## Contents` list instead — same job of
+letting a partial read see the whole scope, without the instruction to skip.
+An index is a claim that skipping is safe; make it only where it is.
 
 Three rules keep that honest.
 
@@ -313,9 +313,7 @@ not there.
 This is the one false premise `pack_corrections` does not catch. That loop is
 aimed at facts about the *code* — a path that moved, a fixture that was renamed
 — and an agent that cannot run a command tends to substitute something and
-mention it in `risks`, not to emit a correction. In the first closed run the
-docs lane hit exactly this three times and never once filed it as a pack
-correction.
+mention it in `risks`, not to emit a correction.
 
 So the check belongs here, at authoring time: **every command in a pack must be
 runnable by the lane that pack belongs to.**
@@ -346,11 +344,23 @@ pack must name the underlying command too.
 
 **Grant per lane, and grant narrowly.** A subagent's `tools:` line is also what
 loads into its context on every dispatch, so an unused tool schema is a standing
-cost for no return. The current grants: engines and tests get everything;
-`quantitative-researcher` gets the probing tools because AUDIT recomputes
-independently and must be able to call the engine it is judging rather than
-read the code and infer; `reviewer` gets no mutating tool, because a gate that
-verifies must not also change the tree it is verifying.
+cost for no return. Those `tools:` lines are the authority on who holds what —
+open the one you need, per the section above. What belongs here is why each grant
+is the shape it is, because that is what tells you whether a pack section you are
+about to write has a tool to stand on:
+
+- `backend-engineer` and `test-engineer` hold all five. They are the two lanes
+  that write engine code and its fixtures, which is the work `probe_engine` and
+  `build_snapshot` exist for.
+- `quantitative-researcher` holds the three probing tools, because AUDIT
+  recomputes independently and must be able to call the engine it is judging
+  rather than read the code and infer.
+- `frontend-engineer` and `tech-lead` hold `run_tests`, `check_gates` and
+  `reset_goldens`, and deliberately **not** `probe_engine` or `build_snapshot`:
+  neither lane writes engine code, so a probe either lane needs is a backend
+  report it should be reading instead.
+- `reviewer` holds `run_tests` and `check_gates` and no mutating tool, because a
+  gate that verifies must not also change the tree it is verifying.
 
 ## Adding a project
 

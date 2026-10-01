@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/10
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\10-test.md
+status:          PARTIAL
+verdict:         NONE
+verification:    FAIL
+detail:          4 failed, 1103 passed. Reds: test_analytics.py::test_ff2026_dashboard_truth_values_match_imported_history_and_overview (T-2, new FF window), test_golden_pipeline_determinism x2 (H-1 recapture), test_b
+changed:         7
+contract_notes:  0
+pack_corrections: 0
+handoff:         8
+skill_calls:     2
+risks:           6
+headline:        T-1 backend tests pin all four fixes (88 net new passing); the 4 remaining reds are T-2, H-1 and stale ROADMAP.md, none caused by this lane.

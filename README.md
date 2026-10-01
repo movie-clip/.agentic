@@ -18,10 +18,15 @@ problems in [`TECH-DEBT.md`](./TECH-DEBT.md).
 │  ├─ packs.md             applying pack_corrections at close-out
 │  └─ authoring.md         rules for writing agents, packs and protocol
 ├─ scripts/check_report.py                ← validates an artifact, its head, and the run ledger
-├─ scripts/test_check_report.py           ← pins the validator's own behaviour
+├─ scripts/ledger.py                      ← applies one head's worth of ledger updates in a call
+├─ scripts/check_network_edit.py          ← a network-layer edit with no passing protocol-lint
+├─ scripts/pine_check.py                  ← tradingview's Pine linter
+├─ scripts/test_*.py                      ← pins each of the four above
 ├─ scripts/hooks/report_artifact_gate.py  ← PostToolUse: checks an artifact as it is written
 ├─ scripts/hooks/report_head_gate.py      ← SubagentStop: no lane finishes on a bad head
-├─ scripts/hooks/test_hooks.py            ← pins both hooks' exit codes
+├─ scripts/hooks/network_edit_gate.py     ← Stop: says so when a network edit has no lint
+├─ scripts/hooks/test_hooks.py            ← pins all three hooks' exit codes and bounds
+├─ .claude/settings.json                  ← this repo's own session: plugins + the Stop hook
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
@@ -172,7 +177,7 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 ## Current state
 
-v0.7.16 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
+v0.7.17 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
 Eleven agents. Five bound projects, each with its own profile and packs under
 `projects/`: `portfolio`, `budget`, `impact`, `tradingview` and `datoro`.
 

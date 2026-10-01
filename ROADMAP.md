@@ -9,38 +9,40 @@ How the network gets better from here. Problems live in
 - When an item ships, delete it here, delete its debt rows, and record both in
   `CHANGELOG.md` under the version that shipped them.
 - Change priorities on evidence from runs, not on a hunch.
+- **A run that is mid-flight is not an item here.** Its ledger carries `status`,
+  `next` and `blocked_on`, and that is the authority; a copy in this file is a
+  second place to go stale. This file is for changes to the network itself.
 
-Last reviewed: 2026-09-30, at v0.7.16.
+Last reviewed: 2026-10-02, at v0.7.17.
 
 ---
 
-## Now — clean state
+## Now — finish the authoring gate, and prove the entry point
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 1 | Resume or close the three stalled runs | TD-18 | each is `CLOSED`, or has a current `next:` you intend to act on |
-| 2 | Lint v0.7.16 (linter + `authoring.md` rule 9) against the other agent files as anchor | TD-05 (for this edit) | a `protocol-lint` artifact exists for it |
+| 1 | Live-test the entry guard: send "this number looks wrong" in `portfolio`, `budget` or `impact` and see which skill loads | TD-11 | the request opens a run, not `diagnosing-bugs` |
+| 2 | `scripts/check_pack.py` — index rows ↔ headings, and one section per index row | TD-08, TD-03 | an index row naming a heading that does not exist fails a check instead of an Opus read |
+| 3 | Decide `frontend-design` in `portfolio`: write its trigger into `frontend.md`, or disable it | TD-12 | no enabled skill without a pack trigger |
 
-## Next — make the entry point and the authoring gate reliable
-
-| # | Item | Closes | Done when |
-|---|---|---|---|
-| 3 | Live-test the orchestrator entry guard: send "this number looks wrong" in portfolio and check which skill loads | TD-11 (portfolio) | the request opens a run, not `diagnosing-bugs` |
-| 4 | Add the same guard to `budget` and `impact` `CLAUDE.md` | TD-11 | all three repos with `mattpocock-skills` carry it |
-| 5 | `scripts/check_pack.py`: index rows ↔ headings, one section per index row, bullet length on added lines | TD-03, TD-08 | the linter cites the script's output instead of counting |
-| 6 | Flag unlinted network edits at close-out or commit | TD-05 | a diff to agents, protocol or packs with no lint artifact fails or warns |
-| 7 | Decide `frontend-design` in portfolio: write its trigger into `frontend.md`, or disable it | TD-12 | no enabled skill without a pack trigger |
+Item 2 is the half of the authoring gate worth mechanising: an index row pointing
+at a heading that is not there means a lane never reads that section, silently.
+Bullet length is the other half and is deliberately not in it — v0.7.16 already
+ruled that non-blocking, so a script for it buys cheaper lint rounds, not
+correctness.
 
 ## Later — coverage and cross-checks
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 8 | First `datoro` run on a small real request | TD-15 | a closed datoro run |
-| 9 | Cross-check the tech lead's own `skill_calls:` (reviewer or close-out) | TD-02 | some reader other than the author judges it |
-| 10 | Delete `build-story` from portfolio through a portfolio run | TD-13 | the skill is gone from the repo |
-| 11 | Review skill-call honesty across the next 5 runs with a technique trigger | TD-01 | a decision: keep the field as is, or strengthen it |
-| 12 | Use or drop the unused tool-server tools | TD-16 | each tool appears in a run, or is removed |
-| 13 | Bind-time check that each repo's hooks are installed | TD-14 | the orchestrator reports a missing hook at intake |
+| 4 | Clear the four rule-8 bullets `2026-10-01-lint-v0.7.16-network-edit/02` left open in `authoring.md` — `:357-360`, `:220`, `:223`, `:230` | TD-03 | a reader stops meeting a 298-character bullet in the file that sets the limit at 200 |
+| 5 | Wire `check_network_edit.py --strict` as a pre-commit hook in this repo | TD-05 | an unlinted network edit cannot be committed, rather than being mentioned once at `Stop` |
+| 6 | First `datoro` run on a small real request | TD-15 | a closed datoro run |
+| 7 | Cross-check the tech lead's own `skill_calls:` (reviewer, or the close-out sweep) | TD-02 | some reader other than the author judges it |
+| 8 | Delete `build-story` from portfolio through a portfolio run | TD-13 | the skill is gone from the repo |
+| 9 | Review skill-call honesty across the next 5 runs with a technique trigger | TD-01 | a decision: keep the field as is, or strengthen it |
+| 10 | Use or drop the unused tool-server tools | TD-16 | each tool appears in a run, or is removed |
+| 11 | Bind-time check that each repo's hooks are installed, including this repo's own `Stop` hook | TD-14, TD-05 | a missing hook is reported at intake instead of being silent |
 
 ## Watching — reopen only on evidence
 

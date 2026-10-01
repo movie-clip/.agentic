@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-01-lint-v0.7.16-network-edit/01
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-10-01-lint-v0.7.16-network-edit\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate PASS, 0 errors; a scratch copy with a colon-broken description DID error, so the check covers agent frontmatter. check_agents() returned []. Anchor: the 10 other agent files listed from disk,
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+skill_calls:     0
+risks:           4
+headline:        FAIL on one blocking rule-9 contradiction in authoring.md:349 about per-lane mcp__project__ grants; protocol-linter.md passed every rule; two rule-8 SHOULD_FIX items.

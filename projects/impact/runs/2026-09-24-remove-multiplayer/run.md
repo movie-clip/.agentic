@@ -3,13 +3,12 @@ request:      review MainBootstrap scene and MainBootstrap script, analyze how i
 agentic_root: C:\projects\investments\.agentic
 project:      impact
 story:        NONE
-status:       BLOCKED
+status:       DISPATCHING
 phase:        build
 plan:         v1
 budget:       8 — 6 triggered phases: ground-truth 1 + framing 1 + design 1 + build 3 (backend x2, test x1) + integration 1 + close 1 (docs) = 8
 spent:        6
-blocked_on:   EditMode test run needs the open Unity Editor on this project closed first
-next:         await human: close Unity Editor, then re-run Tools/Run-UnityTests.ps1 EditMode -CoreOnly (or confirm via Editor's own Test Runner), then dispatch integration gate
+next:         dispatch 07 integration — build lanes' three delete/rename halves are run (git rm MultiplayerManager.asset, both git mv with .meta); re-verified after them: dotnet build Impact.sln 0 errors / 17 pre-existing MSB3277 warnings, EditMode -CoreOnly 39/39 at 2026-10-01 18:51Z
 gates:        integration pending · review skipped (no story) · protocol-lint pending (pack-corrections.md non-empty, applied at close)
 
 ## Phases
@@ -37,10 +36,8 @@ gates:        integration pending · review skipped (no story) · protocol-lint 
 ## Open
 | kind | from | ref | one-line | state |
 |---|---|---|---|---|
-| should_fix | 04-backend-a | 04-backend-a.md § handoff | git rm Impact/ProjectSettings/MultiplayerManager.asset to complete D-3 | CARRIED |
-| should_fix | 05-backend-b | 05-backend-b.md § handoff | git mv AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs | CARRIED |
 | contract_note | 05-backend-b | CRATE_ASSET_LOADING_FLOW.md, PLAYER_SESSION_CHARACTER_FLOW.md, ARCHITECTURE_REVIEW.md, athena.shared PACKAGE_DOCUMENTATION.md | stale Client/Server/Synchronize + Authoritative-naming docs | OPEN |
-| should_fix | 06-test | 06-test.md § verification | git mv GameAuthoritativeConfiguration.cs -> GameSessionConfiguration.cs and AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs still outstanding | CARRIED |
+| risk | orchestrator 2026-10-01 | 04-backend-a.md § handoff | D-3's git rm was wrong and is reverted: Unity rewrites ProjectSettings/MultiplayerManager.asset itself (native type !u!655991488, not package residue), so it returned untracked on the next Editor launch with two extra default fields | OPEN |
 
 ## Closed
 | kind | from | absorbed by | one-line |
@@ -48,6 +45,9 @@ gates:        integration pending · review skipped (no story) · protocol-lint 
 | contract_note | 01-recon | 03-technical-plan | GameAssetLoadFlags target shape settled by design |
 | contract_note | 01-recon | 03-technical-plan | GameAssetLoadSingleton/GameCrateSingleton sync+remote fields target shape settled by design |
 | contract_note | 01-recon | 03-technical-plan | BaseGameCrate.LoadFlags target shape + serialized-asset inventory settled by design |
+| should_fix | 04-backend-a | the orchestrator, 2026-10-01 — git rm run | git rm Impact/ProjectSettings/MultiplayerManager.asset to complete D-3 |
+| should_fix | 05-backend-b | the orchestrator, 2026-10-01 — git mv run, with .meta | git mv AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs |
+| should_fix | 06-test | the orchestrator, 2026-10-01 — both git mv run | git mv GameAuthoritativeConfiguration.cs -> GameSessionConfiguration.cs and AuthoritativeCharacterSkinLoadSystem.cs -> CharacterSkinLoadSystem.cs still outstanding |
 
 ## Rounds
 | finding | lane | round | of | caused by |

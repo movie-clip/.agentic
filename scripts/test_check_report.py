@@ -444,6 +444,17 @@ _ok = _gates("quant-audit PASS · integration skipped (express route) · "
              "review skipped (no story to accept)")
 check("skipping a gate on purpose is clean", _ok == [], str(_ok))
 
+# The window the `skip` search uses must be this gate's own segment. A 40-char
+# slice read the *next* gate's "skipped" as this one's, so a mid-run ledger
+# reading `quant-audit pending · integration pending · review skipped (...)`
+# passed on integration and failed only on quant-audit - the same state, two
+# answers, decided by how long the neighbouring reason happened to be.
+_bleed = _gates("quant-audit PASS · integration pending · "
+                "review skipped (no story to accept)")
+check("a neighbouring gate's `skipped` does not cover this one",
+      [x for x in _bleed if "no verdict row" in x and "integration" in x]
+      and not any("review" in x for x in _bleed), str(_bleed))
+
 # `Open` holds what is still open. The rule changed in v0.4.2 and two files went
 # on instructing the superseded one, so prose alone did not hold it.
 _OPEN_HEAD = "\n## Open\n| kind | from | ref | one-line | state |\n|---|---|---|---|---|\n"

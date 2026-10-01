@@ -1,4 +1,4 @@
-"""Regression suite for the two report hooks.
+"""Regression suite for the three hooks.
 
     python scripts/hooks/test_hooks.py
 
@@ -16,6 +16,7 @@ import check_report as cr
 
 ARTIFACT_GATE = HOOKS / "report_artifact_gate.py"
 HEAD_GATE = HOOKS / "report_head_gate.py"
+NETWORK_GATE = HOOKS / "network_edit_gate.py"
 
 BLOCK = """REPORT test/06
 status:      DONE
@@ -230,6 +231,47 @@ code, err = run(HEAD_GATE, payload(head_for_text(_adv), lane="docs-engineer"))
 check("but a real violation carries the advisories with it",
       code == 2 and "do not block" in err and "target 300" in err,
       f"{code} {err}")
+
+print("C — bounding, which is what keeps a hook from hanging a session")
+
+# `stop_hook_active` is the documented bound: Claude Code sets it once a stop
+# hook has blocked this turn, and a hook that ignores it loops until the
+# platform's hard cap overrides it. Each gate must release on sight of it, in
+# the exact state that would otherwise hold.
+_p = payload(HEAD)
+_p["last_assistant_message"] = "no head at all"
+code, err = run(HEAD_GATE, _p)
+check("the head gate holds a lane with no head", code == 2, f"{code} {err}")
+_p["stop_hook_active"] = True
+code, err = run(HEAD_GATE, _p)
+check("and releases it when stop_hook_active is set", (code, err) == (0, ""),
+      f"{code} {err}")
+
+# The network gate needs a real unlinted file to have anything to hold on, so it
+# plants one and removes it either way. `projects/*/capabilities/**` is in scope
+# and a `zz-` name sorts clear of anything the network ships.
+_probe = HOOKS.parent.parent / "projects" / "budget" / "capabilities" / "zz-test-hooks-probe.md"
+try:
+    _probe.parent.mkdir(parents=True, exist_ok=True)
+    _probe.write_text("# probe" + chr(10), encoding="utf-8")
+    _sid = f"test-hooks-{os.getpid()}"
+    code, err = run(NETWORK_GATE, {"session_id": _sid})
+    check("the network gate holds on an unlinted pack",
+          code == 2 and _probe.name in err, f"{code} {err}")
+    code, err = run(NETWORK_GATE, {"session_id": _sid})
+    check("one hold per session, then it releases and says so",
+          code == 0 and "letting this session stop" in err, f"{code} {err}")
+    code, err = run(NETWORK_GATE, {"session_id": f"{_sid}-b", "stop_hook_active": True})
+    check("and stop_hook_active releases it outright", (code, err) == (0, ""),
+          f"{code} {err}")
+    # With no session to key on there is no marker to write, and writing one
+    # under a shared name would let a single hold exempt every later session.
+    code, _ = run(NETWORK_GATE, {})
+    code2, _ = run(NETWORK_GATE, {})
+    check("with no session_id it still holds every time, not once",
+          (code, code2) == (2, 2), f"{code} {code2}")
+finally:
+    _probe.unlink(missing_ok=True)
 
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

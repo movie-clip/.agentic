@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/08
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\08-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          108 passed, 3 failed, 910 deselected; all 3 failures are the Freedom24 reds already owned by BE-2 (none from BE-3). Dead-code strict clean. Probe: IB 62255.14/3491.53 stated; FF None/None unavailable;
+changed:         12
+contract_notes:  7
+pack_corrections: 0
+handoff:         13
+skill_calls:     2
+risks:           7
+headline:        Cost basis and unrealized P&L are now null with trust unavailable, and overview totals are null when any input is null. EnrichedPosition is removed. IB2026 is unchanged, and no fabrication remains.

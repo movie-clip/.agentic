@@ -11,7 +11,7 @@ What is wrong or missing in the network **right now**. Each item has an ID;
 - A gap kept on purpose stays listed, marked **by choice**, with the
   condition that would reopen it.
 
-Last reviewed: 2026-09-30, at v0.7.16.
+Last reviewed: 2026-10-01, at v0.7.17.
 
 ---
 
@@ -23,7 +23,7 @@ Last reviewed: 2026-09-30, at v0.7.16.
 | TD-02 | **Nobody checks the tech lead's own `skill_calls:`.** Check 7 reads the reports the tech lead reviews, not the one it writes. | v0.7.14: the tech lead cited the trigger's exact case as precedent and never called the skill. | Give the check to `reviewer`, or to the close-out sweep as a human-read `Open` row. |
 | TD-03 | **The authoring gate is judgment, not a check.** Only frontmatter parsing and `model:`/`effort:` are mechanical. Index correctness, bullet length and contradictions are read by an Opus agent. | `2026-09-30-lint-mattpocock-skills`: 7 style FAILs, 1 real contradiction filed as a risk; the 200-char rule blocked in one earlier run and not in another. v0.7.16 made style non-blocking and added rule 9. | Script the countable parts (`check_pack.py`: index ↔ headings, bullet length on added lines). Leave only contradictions and placement to the agent. |
 | TD-04 | **A lint `PASS` says nothing about facts.** The linter never opens the bound repo. | Every skill name and path in the mattpocock wiring was unverified at PASS. | `UNVERIFIED:` risks (v0.7.16) make it visible. A fact check stays with the lanes' `pack_corrections`. |
-| TD-05 | **Network edits are gated only when someone asks.** Main-session edits to packs, agents or protocol skip `protocol-lint` unless a lint run is requested. | impact's skill wiring shipped unlinted. v0.7.16's own edit to `protocol-linter.md` and `authoring.md` is unlinted. | A close-out or pre-commit check that flags a diff under `plugins/`, `protocol/` or `projects/*/{project,phases}.md`/`capabilities/` with no lint artifact. |
+| TD-05 | **Nothing blocks an unlinted network edit — the `Stop` hook only mentions it.** `check_network_edit.py` decides the condition and `network_edit_gate.py` puts it in front of whoever is finishing the session, then releases. Claude Code's own guidance is that a hook is not where a hard deny belongs; `--strict` in a pre-commit hook is. | v0.7.17 built the check after v0.7.16's contradiction sat live for a day. The reminder half shipped; the blocking half did not. | ROADMAP item 5 wires `--strict` as a pre-commit hook. Until then, same shape as TD-14: run it by hand. |
 | TD-06 | **A work order's factual claims are unchecked.** `orchestrator.md` § 6 requires each claim to be sourced; nothing verifies it. | The first phase-model run asserted a file that was never in git. | Hard to mechanise. Watch for it in gate findings. |
 | TD-07 | **A phase skipped on a false clause may stay skipped.** The clause is on disk; whether anyone re-reads it when it turns true is prose. | — | Watch. |
 | TD-08 | **Conditional pack sections rely on the agent choosing to read them.** | — | Covered by the always-read rule in `authoring.md`; TD-03's script would check index shape. |
@@ -34,7 +34,7 @@ Last reviewed: 2026-09-30, at v0.7.16.
 
 | ID | Problem | Evidence | Fix direction |
 |---|---|---|---|
-| TD-11 | **Plugin skills compete with `orchestrate-feature` in the main session.** `diagnosing-bugs` matches "this number looks wrong". If the main session takes it, the run silently no-ops and a formula can change with no quant audit. | Only `portfolio/CLAUDE.md` guards it, in prose, never tested live. `budget` and `impact` have no guard. | Test the portfolio guard with a live request; add the same paragraph to `budget` and `impact` `CLAUDE.md`. |
+| TD-11 | **The entry-point guard has never been tested live.** All three repos that enable `mattpocock-skills` — `portfolio`, `budget`, `impact` — now carry the paragraph, each naming its own consequence. Whether a main session actually obeys it over `diagnosing-bugs` is unmeasured. | `tradingview` and `datoro` enable no competing skill, so there is nothing there to guard. | Send a matching request in one of the three and see which skill loads. Prose is all this can ever be — nothing can intercept the main session's own skill choice. |
 | TD-12 | **`frontend-design` is enabled in `portfolio` with no pack guidance.** The frontend lane can call it and nothing says when; it may compete with the mandatory `ui-polish`. | `portfolio/.claude/settings.json`. | Either write the trigger into `frontend.md` or disable it there. |
 | TD-13 | **`build-story` is superseded, not deleted.** It still sits in `portfolio/.claude/skills/`, now routing to `orchestrate-feature`. | — | Delete it through a portfolio run (repo file, not network wiring). |
 | TD-14 | **Hook installation is unverifiable from here.** The hooks live in each bound repo's `.claude/settings.json`; an uninstalled hook is silent. | `test_hooks.py` pins behaviour, not installation. | The close-out sweep is the backstop; a bind-time check could confirm it. |
@@ -45,12 +45,6 @@ Last reviewed: 2026-09-30, at v0.7.16.
 |---|---|---|
 | TD-15 | **`datoro` is bound but has never run.** Its profile, phases and packs are untested. | One small real request. |
 | TD-16 | **`probe_engine`, `build_snapshot` and `reset_goldens` are tested but unused.** Only `run_tests` and `check_gates` appear in a run. | Keep until a run needs them; drop if still unused after several portfolio runs. |
-
-## Housekeeping
-
-| ID | Problem | Fix direction |
-|---|---|---|
-| TD-18 | **Three runs are stalled open.** `tradingview/2026-09-15-fix-systemic-stress-dashboard` waits on a human ruling since 09-15. `impact/2026-09-24-remove-multiplayer` waits on the Unity Editor being closed. `budget/2026-09-29-refine-potential-rules-frequency-sort` stopped at "dispatch 04 frontend". | Resume or close each; a closed-unfinished run records why. |
 
 ---
 
@@ -73,12 +67,13 @@ worse than one you know is on trust.
 | A run that edited network files accounts for `protocol-lint` | script — when `pack-corrections.md` is non-empty |
 | Planning artifacts carry a brief | script — `check_report.py`; usefulness unchecked |
 | Agent frontmatter parses; model and effort pinned | command + script — `claude plugin validate`, `check_agents` |
-| The validator and hooks are correct | tests — `test_check_report.py` 210, `test_hooks.py` 25, `test_ledger.py` 43 |
+| The validator, hooks and checks are correct | tests — `test_check_report.py` 211, `test_hooks.py` 31, `test_ledger.py` 43, `test_check_network_edit.py` 15, `test_pine_check.py` 55 |
 | A run survives a restart | the ledger on disk |
 | Read-only lanes don't edit | tool grant — no `Edit`; see TD-10 |
-| A network file edit is sound | gate by judgment — TD-03, TD-04, TD-05 |
+| A network file edit is sound | gate by judgment — TD-03, TD-04 |
+| A network file edit was gated at all | script — `check_network_edit.py --strict`, exit 1. `network_edit_gate.py` at `Stop` is the reminder that it exists, not the enforcement: a `Stop` hook releases after one hold, does not block on a timeout, and is one settings line from gone. The enforcement point is the commit, TD-05 |
 | A technique skill is called when triggered | prose + field — TD-01, TD-02 |
-| The orchestrator is the entry point | prose — TD-11 |
+| The orchestrator is the entry point | prose in three `CLAUDE.md` files, untested live — TD-11 |
 | A work order's claims are true | prose — TD-06 |
 | A pack section is read when needed | prose + `## Index` — TD-08 |
 | `scope` fences a work order | prose, by choice — TD-09 |

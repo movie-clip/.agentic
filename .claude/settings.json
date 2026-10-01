@@ -2,5 +2,17 @@
   "enabledPlugins": {
     "agentic-core@agentic": true,
     "mattpocock-skills@claude-plugins-official": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/hooks/network_edit_gate.py\""
+          }
+        ]
+      }
+    ]
   }
 }

@@ -22,8 +22,12 @@ rather than a hardcoded list, so adding a lane does not silently exempt it.
 Every other subagent -- Explore, general-purpose, anything the human runs
 directly -- exits 0 untouched.
 
-Bounded. Two blocks per subagent, then it allows the stop and says so. A hook
-that can refuse forever is a hook that can hang a run, and the close-out sweep
+Bounded twice over. `stop_hook_active` is checked first: Claude Code sets it once
+a stop hook has already blocked this turn, and a hook that ignores it loops until
+the platform's hard cap overrides it. Two blocks per subagent is the fallback
+behind that flag, for when it does not propagate. Then it allows the stop and
+says so. A hook that can refuse forever is a hook that can hang a run, and the
+close-out sweep
 (`check_report.py <run_dir>/ --require-heads`) is still there to catch what got
 through -- a missing head file fails it, and so does an artifact whose block
 is not on its first line.
@@ -41,6 +45,7 @@ import json
 import re
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -49,6 +54,11 @@ import check_report as cr  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent.parent
 LANE_DIR = ROOT / "plugins" / "agentic-core" / "agents"
 MAX_BLOCKS = 2
+_STATE = Path(tempfile.gettempdir()) / "agentic-head-gate"
+# A counter is per-subagent state, dead the moment that subagent ends. Nothing
+# tells a hook when that happened, so they age out rather than accumulating one
+# file per lane dispatch for the life of the machine.
+_STALE_SECONDS = 24 * 60 * 60
 
 
 def _lanes() -> set[str]:
@@ -64,14 +74,25 @@ def _blocks_so_far(agent_id: str) -> int:
     if not agent_id:
         return 0
     safe = re.sub(r"[^A-Za-z0-9_-]", "", agent_id)[:64] or "anon"
-    counter = Path(tempfile.gettempdir()) / "agentic-head-gate" / safe
+    counter = _STATE / safe
     try:
         counter.parent.mkdir(parents=True, exist_ok=True)
+        _prune()
         n = int(counter.read_text(encoding="utf-8")) if counter.is_file() else 0
         counter.write_text(str(n + 1), encoding="utf-8")
         return n
     except (OSError, ValueError):
         return 0
+
+
+def _prune() -> None:
+    cutoff = time.time() - _STALE_SECONDS
+    try:
+        for old in _STATE.iterdir():
+            if old.is_file() and old.stat().st_mtime < cutoff:
+                old.unlink()
+    except OSError:
+        pass
 
 
 def _head_block(message: str) -> str | None:
@@ -103,6 +124,12 @@ def main() -> None:
     try:
         payload = json.load(sys.stdin)
     except (json.JSONDecodeError, UnicodeDecodeError):
+        sys.exit(0)
+
+    # Set once a stop hook has already blocked this turn. Honouring it is the
+    # documented way not to loop; the counter below is the fallback for when it
+    # does not arrive.
+    if payload.get("stop_hook_active"):
         sys.exit(0)
 
     # Plugin-scoped types arrive as `agentic-core:scout`; bare ones as `scout`.

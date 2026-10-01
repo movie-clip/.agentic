@@ -741,7 +741,7 @@ def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]
         elif g in ran and ran[g].lower() not in low:
             problems.append(f"`gates:` disagrees with the rows on {g}: rows "
                             f"recorded {ran[g]}")
-        elif g not in ran and "skip" not in low.split(g, 1)[1][:40]:
+        elif g not in ran and "skip" not in low.split(g, 1)[1].split("·")[0]:
             problems.append(f"{g} has no verdict row, and `gates:` does not "
                             f"mark it skipped - a gate that quietly did not "
                             f"run is the one failure close-out cannot see")

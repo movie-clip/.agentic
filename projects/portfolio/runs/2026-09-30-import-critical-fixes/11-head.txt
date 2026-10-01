@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/11
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\11-frontend.md
+status:          PARTIAL
+verdict:         NONE
+verification:    FAIL
+detail:          tsc: 11 errors, all portfolioSnapshot.test.ts (FE-1 overlay tests), none elsewhere. vitest: 2 files failed, 41 passed (43); 26 failed, 368 passed (394). Reds: 9 overlay (FE-1), 5 FE-1 App add tests, 1
+changed:         2
+contract_notes:  3
+pack_corrections: 0
+handoff:         11
+skill_calls:     2
+risks:           10
+headline:        Legacy saved nodes now re-derive through analyze-combined on load, in memory; a failed node shows nothing. 12 App restore tests are red until T-3 stamps derivationVersion on fixtures.

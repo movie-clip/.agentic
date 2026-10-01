@@ -7,9 +7,9 @@ status:       DISPATCHING
 phase:        build
 plan:         v1
 budget:       7 — ground-truth 1 (recon) + design 1 + build 3 (backend, frontend, test) + integration 1 + close 1
-spent:        3
-next:         dispatch 04 frontend
-gates:        integration pending · review pending
+spent:        4
+next:         dispatch 05 test — rename ExecuteAsync_PatternsWithEqualOccurrenceCounts_PreserveOriginalParseOrder, expect LineNumber [1,3,2,4], assert OccurrenceText ×1/×3, drop the OccurrenceCount Assert in FromRow_StartsAtBaselineAndUnmodified
+gates:        integration pending · review skipped (no story to accept)
 
 ## Phases
 | phase | lane | fires when | state |
@@ -29,6 +29,7 @@ gates:        integration pending · review pending
 | 01 | recon | — | scout | sonnet | 01-recon.md | DONE | — |
 | 02 | design | DESIGN | tech-lead | sonnet | 02-design.md | DONE | — |
 | 03 | backend | — | backend-engineer | sonnet | 03-backend.md | DONE | — |
+| 04 | frontend | — | frontend-engineer | sonnet | 04-frontend.md | PARTIAL | — |
 
 ## Open
 | kind | from | ref | one-line | state |
@@ -36,6 +37,8 @@ gates:        integration pending · review pending
 | contract_note | 02-design | 02-design.md § contract (OccurrenceText) | PotentialRuleRowViewModel.OccurrenceText + new Count column in MainWindow.axaml | OPEN |
 | contract_note | 02-design | 02-design.md § lanes (docs) | docs/PROJECT_GUIDE.md:30-33 tie-order sentence goes stale | OPEN |
 | handoff | 03-backend | 03-backend.md § handoff | tie-order test fails until test lane renames it and expects [1,3,2,4] | OPEN |
+| handoff | 04-frontend | 04-frontend.md § handoff | test lane asserts OccurrenceText as ×N, U+00D7 then the integer, no space | OPEN |
+| contract_note | 04-frontend | docs/PROJECT_GUIDE.md:34-36 | per-row description lacks the new Count column; docs lane owns it at close-out | OPEN |
 
 ## Closed
 | kind | from | absorbed by | one-line |

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-09-30-import-critical-fixes/13
+artifact:        C:\projects\investments\.agentic\projects\portfolio\runs\2026-09-30-import-critical-fixes\13-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          tsc clean. vitest: Test Files 46 passed (46); Tests 470 passed (470). Knip clean. dashboardGoldens.ts untouched. No remaining red, H-1 or otherwise.
+changed:         11
+contract_notes:  0
+pack_corrections: 2
+handoff:         10
+skill_calls:     2
+risks:           8
+headline:        Desktop suite is green (470 pass, tsc and knip clean); all 26 reds rewritten to the analyze-combined behaviour, with an App-level falsifier and legacy re-derive tests.

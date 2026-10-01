@@ -8,8 +8,8 @@ phase:        specification
 plan:         v1
 budget:       9 — 7 triggered-phase dispatches (specification/quant 1, build backend+docs+test 3, verify quant-audit+integration 2, close/docs 1) + 2 for one anticipated change-request round on the math gate (a fix dispatch plus the gate re-run)
 spent:        1
-next:         get human ruling on FINDING 3 composite-level display (basis row vs withhold), then dispatch build/backend (02)
-gates:        pending
+next:         dispatch 02 backend on 01-quant.md §§ FINDING 1 fix / FINDING 2 and 3 fix plus decisions.md § D-1 (Basis row adopted, table.new 2,6 -> 2,7)
+gates:        quant-audit pending · integration pending · review skipped (no story to accept)
 
 ## Phases
 | phase | lane | fires when | state |
@@ -41,12 +41,12 @@ gates:        pending
 | should_fix | ../2026-09-14-audit-systemic-stress-dashboard/03-quant-audit.md | § FINDING 6-8 | MINOR x3: missing lookahead arg, unvalidated weights/thresholds, symbols not confirmed via TV search | OPEN |
 | should_fix | ../2026-09-14-audit-systemic-stress-dashboard/04-docs.md | § handoff | missing docs/<slug>.md and fixtures/ dirs are a pre-existing, repo-wide gap — human to decide whether to open as its own order | CARRIED |
 | risk | ../2026-09-14-audit-systemic-stress-dashboard/01-recon.md | § Repo listing notes | CLAUDE.md documents fixtures/ and docs/ dirs but neither exists in repo | CARRIED |
-| contract_note | 01-quant | 01-quant.md § FINDING 3 | table.new row count 6->7 needed IF basis row adopted (pending human decision) | OPEN |
 | contract_note | 01-quant | 01-quant.md § Header disclosure required | docs must add dispersion-floor disclosure paragraph (wording supplied) | OPEN |
 
 ## Closed
 | kind | from | absorbed by | one-line |
 |---|---|---|---|
+| contract_note | 01-quant | decisions.md § D-1 | table.new row count 6->7 needed IF basis row adopted (pending human decision) |
 
 ## Rounds
 | finding | lane | round | of | caused by |

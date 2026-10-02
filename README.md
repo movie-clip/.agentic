@@ -1,14 +1,13 @@
 # `.agentic`
 
 An orchestrated agent network for the repos under `C:\projects\investments\`.
-Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); version history in
-[`CHANGELOG.md`](./CHANGELOG.md); plans in [`ROADMAP.md`](./ROADMAP.md); open
-problems in [`TECH-DEBT.md`](./TECH-DEBT.md).
+Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
+[`ROADMAP.md`](./ROADMAP.md); open problems in
+[`TECH-DEBT.md`](./TECH-DEBT.md). Version history is `git log`.
 
 ```
 .agentic/
 ├─ ARCHITECTURE.md                        ← the current design and why (human-facing)
-├─ CHANGELOG.md                           ← provenance: what changed per version, and the evidence
 ├─ ROADMAP.md                             ← what comes next, ordered
 ├─ TECH-DEBT.md                           ← what is wrong or missing now + the enforcement map
 ├─ PROTOCOL.md                            ← THE contract, core. Everyone reads this.
@@ -184,7 +183,7 @@ Eleven agents. Five bound projects, each with its own profile and packs under
 - **What is wrong or missing:** [`TECH-DEBT.md`](./TECH-DEBT.md), including the
   enforcement map — which rules a script backs and which rest on trust.
 - **What comes next:** [`ROADMAP.md`](./ROADMAP.md).
-- **How it got here:** [`CHANGELOG.md`](./CHANGELOG.md).
+- **How it got here:** `git log`.
 
 ## Extending
 

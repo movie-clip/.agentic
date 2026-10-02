@@ -31,7 +31,7 @@ Scope, and why each exclusion is deliberate:
         not an authoring change
   out   projects/*/runs/** -- artifacts and ledgers, written by a run, judged by
         `check_report.py`; a lint of them would be a category error
-  out   README/ARCHITECTURE/CHANGELOG/ROADMAP/TECH-DEBT -- human-facing, read by
+  out   README/ARCHITECTURE/ROADMAP/TECH-DEBT -- human-facing, read by
         no lane, and `authoring.md` sends provenance to them on purpose
   out   scripts/** -- code, and its gate is its tests
 
@@ -42,8 +42,8 @@ The linter's own output format earns (b): a `FAIL` must name the rule, the file
 and the line, and a `PASS` names what it covered in `verification.detail`.
 
 (c) is the one that took a bug to find. Without it, `protocol/authoring.md`
-passed on `2026-09-17-bind-datoro/02-protocol-lint.md`, which names that path
-only as the *anchor* it judged a datoro profile against -- a 1990s-era "mentioned
+passed on a lint from run 2026-09-17-bind-datoro, which names that path only as
+the *anchor* it judged a datoro profile against -- a 1990s-era "mentioned
 somewhere, therefore covered". Any file ever cited by any passing lint would have
 been exempt from every later edit, which is the same shape as the 40-character
 window `check_gates` was reading a neighbouring gate's `skipped` through.
@@ -177,7 +177,9 @@ def main() -> int:
 
     print(f"\n{len(missing)} of {len(rows)} network file(s) changed have no "
           f"passing protocol-lint artifact naming them.")
-    print("Dispatch `protocol-linter` over them before this ships. When the "
+    print("Dispatch `protocol-linter` over them from a bound repo session "
+          "before this ships - `.agentic` itself is not bound, so a linter "
+          "dispatched from here reports BLOCKED at its bind step. When the "
           "subject is `authoring.md` or `protocol-linter.md` itself, the anchor "
           "is the other agent files, not the rule text.")
     return 1 if args.strict else 0

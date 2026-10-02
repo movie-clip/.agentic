@@ -15,7 +15,7 @@ gates:        quant-audit pending · integration pending · review pending · pr
 ## Phases
 | phase | lane | fires when | state |
 |---|---|---|---|
-| ground-truth | recon | the area is unfamiliar, or the run would otherwise build on an unverified claim | not triggered (prior artifacts cover the area: runs/2026-09-29-statement-import-audit/01-recon.md and 02-quant-audit.md) |
+| ground-truth | recon | the area is unfamiliar, or the run would otherwise build on an unverified claim | not triggered (run 2026-09-29-statement-import-audit already recon'd and quant-audited this area; that run is pruned, see git history) |
 | framing | product | the request changes what the product does: new capability, new scope, or a re-prioritisation | satisfied — 01 |
 | specification | quant (RESEARCH) | the work changes a trust classification | satisfied — 02 |
 | specification | story | framing produced scope no approved story covers and the slice needs ticketing (two build lanes, schema contract crossing) | satisfied — 03, 04 |

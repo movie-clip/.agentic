@@ -6,8 +6,8 @@ How the network gets better from here. Problems live in
 **Rules for this file.**
 
 - Every item cites the debt IDs it closes, or says it is new capability.
-- When an item ships, delete it here, delete its debt rows, and record both in
-  `CHANGELOG.md` under the version that shipped them.
+- When an item ships, delete it here, delete its debt rows, and say what shipped
+  in the commit message that ships it.
 - Change priorities on evidence from runs, not on a hunch.
 - **A run that is mid-flight is not an item here.** Its ledger carries `status`,
   `next` and `blocked_on`, and that is the authority; a copy in this file is a
@@ -35,7 +35,7 @@ correctness.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 4 | Clear the four rule-8 bullets `2026-10-01-lint-v0.7.16-network-edit/02` left open in `authoring.md` — `:357-360`, `:220`, `:223`, `:230` | TD-03 | a reader stops meeting a 298-character bullet in the file that sets the limit at 200 |
+| 4 | Clear the four rule-8 bullets run 2026-10-01-lint-v0.7.16-network-edit left open in `authoring.md` — `:357-360`, `:220`, `:223`, `:230` | TD-03 | a reader stops meeting a 298-character bullet in the file that sets the limit at 200 |
 | 5 | Wire `check_network_edit.py --strict` as a pre-commit hook in this repo | TD-05 | an unlinted network edit cannot be committed, rather than being mentioned once at `Stop` |
 | 6 | First `datoro` run on a small real request | TD-15 | a closed datoro run |
 | 7 | Cross-check the tech lead's own `skill_calls:` (reviewer, or the close-out sweep) | TD-02 | some reader other than the author judges it |

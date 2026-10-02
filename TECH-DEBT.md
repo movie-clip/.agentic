@@ -6,7 +6,7 @@ What is wrong or missing in the network **right now**. Each item has an ID;
 **Rules for this file.**
 
 - Present tense only. When an item is fixed, delete it here and record the
-  fix in `CHANGELOG.md`. No "done" rows, no history.
+  fix in the commit that fixes it. No "done" rows, no history.
 - One item per problem: what is wrong, the evidence, the direction of the fix.
 - A gap kept on purpose stays listed, marked **by choice**, with the
   condition that would reopen it.
@@ -45,6 +45,7 @@ Last reviewed: 2026-10-01, at v0.7.17.
 |---|---|---|
 | TD-15 | **`datoro` is bound but has never run.** Its profile, phases and packs are untested. | One small real request. |
 | TD-16 | **`probe_engine`, `build_snapshot` and `reset_goldens` are tested but unused.** Only `run_tests` and `check_gates` appear in a run. | Keep until a run needs them; drop if still unused after several portfolio runs. |
+| TD-17 | **The authoring gate fires where its remedy cannot be run.** `network_edit_gate.py` is installed in `.agentic`, which is the only session that edits network files — and `.agentic` carries no `.agentic.json`, so a `protocol-linter` dispatched from there reports `BLOCKED` at its bind step. The lint has to be dispatched from a bound repo instead. | Found 2026-10-02 by the hook's first live firing, on an edit to `authoring.md` and `protocol-linter.md`. Both messages now name the bound-repo remedy, so nobody else loses the turn to it. | Either `.agentic` gets its own binding, or lint dispatch stays a bound-repo job and that stays documented. ROADMAP item 5's pre-commit hook has the same constraint. |
 
 ---
 

@@ -92,7 +92,7 @@ check("run artifacts and ledgers are out of scope",
       not ne.is_network("projects/budget/runs/2026-01-01-x/run.md"))
 check("human-facing docs are out of scope",
       not any(ne.is_network(p) for p in
-              ("README.md", "ROADMAP.md", "TECH-DEBT.md", "CHANGELOG.md")))
+              ("README.md", "ROADMAP.md", "TECH-DEBT.md", "ARCHITECTURE.md")))
 check("scripts are out of scope - their gate is their tests",
       not ne.is_network("scripts/ledger.py"))
 
@@ -122,7 +122,7 @@ check("an artifact naming a different file is not coverage",
       _other[0][1] is None, str(_other))
 
 # The bug this check shipped with. `protocol/authoring.md` passed on
-# 2026-09-17-bind-datoro/02-protocol-lint.md, which names that path only as the
+# a lint from run 2026-09-17-bind-datoro, which named that path only as the
 # anchor it judged a datoro profile against - so any file ever cited by any
 # passing lint would have been exempt from every later edit.
 print("an artifact older than the edit is not evidence for it")

@@ -138,10 +138,13 @@ def main() -> None:
           "`protocol-linter` is the gate on them (TD-05):", file=sys.stderr)
     for row in rows:
         print(f"  {row}", file=sys.stderr)
-    print("Dispatch `protocol-linter` over them, or say plainly that this edit "
-          "is shipping ungated and why. When the subject is `authoring.md` or "
-          "`protocol-linter.md` itself, the anchor is the other agent files, "
-          "not the rule text.", file=sys.stderr)
+    print("Dispatch `protocol-linter` over them from a BOUND REPO session - "
+          "portfolio, budget, impact, tradingview or datoro. Not from here: "
+          "`.agentic` carries no `.agentic.json`, so the linter's bind step "
+          "reports BLOCKED. Or say plainly that this edit is shipping ungated "
+          "and why. When the subject is `authoring.md` or `protocol-linter.md` "
+          "itself, the anchor is the other agent files, not the rule text.",
+          file=sys.stderr)
     _record_block(session_id)
     sys.exit(2)
 

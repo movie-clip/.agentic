@@ -221,10 +221,10 @@ per run. That changes what earns its place:
   followed more reliably than a bare imperative, and the consequence is often
   the thing that lets an agent handle a case the rule did not anticipate.
 - **Cut the history of how the rule was discovered.** "v0.2 had eleven copies
-  and two had drifted" is provenance. It is worth recording — in
-  `CHANGELOG.md`, whose reader is a human deciding whether to trust the
-  design. It changes no agent's behaviour, and every agent pays for it on every
-  dispatch.
+  and two had drifted" is provenance. It is worth recording — in the commit
+  message that ships the rule, whose reader is a human deciding whether to trust
+  the design. It changes no agent's behaviour, and every agent pays for it on
+  every dispatch.
 - **Prefer a table to a paragraph** wherever the content is a mapping. Tables
   are shorter, and they make an omission visible as an empty cell.
 - **One fact per bullet, under 200 characters.** This is the rule for an

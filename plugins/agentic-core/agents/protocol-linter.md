@@ -54,7 +54,7 @@ route map, not the rule text.
 | 5 | Index block | a pack or profile with no `## Index`; a section unfindable by the name a lane would search for; the same fact in two sections |
 | 6 | Always-read vs conditional | a section marked conditional whose condition the lane **cannot evaluate before reading it** — gotchas, reuse inventories, unit and sign conventions, guardrails |
 | 7 | Tool premises | a command in a pack the owning lane cannot run — open the agent's `tools:` line and check, do not assume |
-| 8 | Written for a model | provenance and change history that belongs in `CHANGELOG.md`; a paragraph where a table is the shape; a bullet carrying more than one fact |
+| 8 | Written for a model | provenance and change history that belongs in the commit message; a paragraph where a table is the shape; a bullet carrying more than one fact |
 | 9 | Instructions agree | two instructions one lane reads that direct different actions in the same situation; a rule split from its exception; a carve-out broader than the section granting it |
 
 Rule 6 is the one that is easy to get wrong in the cheap direction, and rule 7

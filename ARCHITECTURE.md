@@ -6,7 +6,7 @@ drives. Five projects are bound: `portfolio`, `budget`, `impact`,
 is the authority on the version. Examples below use `portfolio`.
 
 **This file is the current design and the reasoning behind it.** How each rule
-was discovered is in [`CHANGELOG.md`](./CHANGELOG.md). Installation and the
+was discovered is in `git log`. Installation and the
 directory tree are in [`README.md`](./README.md). What is wrong or missing is
 in [`TECH-DEBT.md`](./TECH-DEBT.md); what comes next is in
 [`ROADMAP.md`](./ROADMAP.md).

@@ -59,8 +59,10 @@ once by reading is caught forever by a rule.
 ## Fixtures — Strategy Tester exports
 
 `fixtures/<slug>-<symbol>-<date>.csv`, exported from TradingView's Strategy
-Tester "List of Trades" tab. One already exists, from `strategy13_trend_carry`
-on AMEX:VTI.
+Tester "List of Trades" tab. No `fixtures/` directory exists yet: the one export
+in the repo, from `strategy13_trend_carry` on AMEX:VTI, sits at the repo root
+under TradingView's own filename
+(`Trend_+_Carry,_Risk-Regime_Sized_(Strategy_13)_AMEX_VTI_2026-08-24_55c9e.csv`).
 
 Its columns: `Trade number, Type, Date and time, Signal, Price USD, Size (qty),
 Size (value), Net PnL USD, Return %, Commission USD, Favorable excursion USD/%,
@@ -96,8 +98,11 @@ and it is often the most valuable artifact a run produces.
 When your order edits the checker:
 
 ```bash
-python -m pytest <agenticRoot>/scripts/test_pine_check.py -q
+python <agenticRoot>/scripts/test_pine_check.py
 ```
+
+It is a dependency-free script, not a pytest module — run it directly; it prints
+`N/M passed` and exits non-zero on any failure.
 
 - **Add the case that would have caught the bug**, and add it before the fix, so
   you have seen it fail.
@@ -116,7 +121,7 @@ python -m pytest <agenticRoot>/scripts/test_pine_check.py -q
 - Every fixture you called for names the symbol, timeframe, date range and
   settings needed to reproduce it — or you did not call for it.
 - A worked example, where you wrote one, includes its boundary rows.
-- `pytest` green where you touched the checker, with a case that fails without
+- The checker suite green where you touched the checker, with a case that fails without
   your fix.
 - Where the order asked for something this project cannot do, you said so in
   `risks` and set `PARTIAL` rather than delivering a shape that looks like the

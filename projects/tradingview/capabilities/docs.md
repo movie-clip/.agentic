@@ -41,9 +41,11 @@ to notice it drifted. You do not touch anything below `//@version=6`.
 ## Never weaken an admission
 
 `project.md` § "The script header contract" requires each header to say **what
-was not verified**. The existing three do this well and specifically:
-reconstructed CFTC tickers, a stripped position-sizing formula, an original
-construction with no external authority.
+was not verified**. The existing headers do this well and specifically: a
+stripped position-sizing formula, an original construction with no external
+authority, an estimate built from lower-timeframe closes rather than ticks —
+and, in the COT script, a reconstructed-ticker warning replaced by the date and
+method of confirmation, which is the shape the rule below asks for.
 
 The failure mode is quiet erosion. A run improves a script, the header is
 rewritten to describe the improvement, and the warning goes with it — nobody
@@ -62,7 +64,10 @@ So:
 
 ## `docs/<slug>.md` — the shape
 
-One file per script, same slug. Sections, in order:
+One file per script, named for the script's slug with underscores turned into
+hyphens (`volume_profile.pine` → `docs/volume-profile.md`); the existing docs
+use this form. `docs/testing-methodology.md` is the one doc that is not
+per-script. Sections, in order:
 
 1. **What it computes** — the paragraph from the header, expanded.
 2. **Inputs** — a table: name, type, default, what it controls, and whether its

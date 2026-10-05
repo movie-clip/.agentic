@@ -55,8 +55,9 @@ do not drop the flag. Fix it or report it in `risks` and set `PARTIAL`.
 ## Layout and naming
 
 Flat. One script per file at the repo root, `<slug>.pine`, lowercase with
-underscores. The slug matches its doc at `docs/<slug>.md` and, where one exists,
-its fixture at `fixtures/<slug>-*.csv`.
+underscores. Its doc is `docs/<slug>.md` with the underscores turned into
+hyphens (`volume_profile.pine` → `docs/volume-profile.md`), and its fixture,
+where one exists, is `fixtures/<slug>-*.csv`.
 
 The `indicator()` / `strategy()` title is the name the user sees in TradingView
 and does **not** have to match the slug — it is prose, and the existing files
@@ -113,15 +114,16 @@ Consistency with what is there beats any convention this file could invent.
 ## Symbols
 
 Guardrail 3, and the place this repo has already been bitten —
-`mm_cot_long_short_index.pine`'s header says its CFTC tickers were reconstructed
-from search results and never confirmed.
+`mm_cot_long_short_index.pine` shipped with CFTC tickers reconstructed from
+search results, and carried that warning in its header until a later run
+confirmed them against TradingView's own symbol search (2026-09-17).
 
 - **A symbol you did not verify is an `input.symbol()`**, with the reconstructed
   value as the default, so the user can correct it without editing code.
 - **Handle non-resolution explicitly.** A symbol that does not resolve returns
   `na`; render that as a visible `n/a` in the table or plot, never as 0, never
-  as the last good value. The existing COT script does this and it is why its
-  unverified tickers are survivable.
+  as the last good value. The COT script does this, and it is why its tickers
+  were survivable while they were still unverified.
 - **Never pattern-match a new ticker from an existing one.** CFTC codes, Cboe
   index tickers and exchange prefixes do not compose the way they appear to.
   If your order needs a symbol nobody confirmed, that is a `risks` bullet and a
@@ -138,6 +140,8 @@ from search results and never confirmed.
 - **History reference on a series that did not exist yet** returns `na`, and
   arithmetic with `na` is `na` — one missing bar poisons the rest of an
   expression. `nz()` is the tool, but see guardrail 5 before reaching for it.
+- **`request.security_lower_tf()` takes no `lookahead` argument.** Do not invent
+  one to satisfy a checker; `pine_check.py` does not ask for it.
 - **`max_bars_back`.** A series referenced further back than Pine inferred throws
   at runtime, not at compile. If you index a series by a variable amount, set
   `max_bars_back` on the declaration.

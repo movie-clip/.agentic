@@ -72,7 +72,8 @@ LEGACY_IFF = re.compile(r"(?<![.\w])iff\s*\(")
 
 DECL = re.compile(rf"^{H}*(indicator|strategy|library){H}*\(", re.M)
 VERSION = re.compile(rf"^{H}*//@version{H}*={H}*(\d+){H}*$", re.M)
-SECURITY_CALL = re.compile(r"request\.security(?:_lower_tf)?\s*\(")
+# Not `_lower_tf`: that call takes no `lookahead` argument, so P007/P008 cannot apply.
+SECURITY_CALL = re.compile(r"request\.security\s*\(")
 PLOT_CALL = re.compile(rf"^{H}*plot(?:candle|bar|char|shape|arrow)?{H}*\(", re.M)
 
 # TradingView's published ceiling. Exceeding it is a compile error whose message
@@ -185,7 +186,7 @@ def check(path: Path, expect_version: int = DEFAULT_VERSION) -> list[tuple[int, 
             "study() is the v4 declaration - v5+ uses indicator()")
 
     # --- repaint -----------------------------------------------------------
-    # Guardrail 2. `lookahead_on` reads bars that had not closed when the signal
+    # Guardrail 1. `lookahead_on` reads bars that had not closed when the signal
     # was drawn, so the backtest sees the future and the live chart does not.
     # Silent, and the most expensive defect in this repo's subject matter.
     for m in SECURITY_CALL.finditer(code):

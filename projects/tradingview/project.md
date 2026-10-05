@@ -161,8 +161,9 @@ Every `.pine` file opens with a comment block, before `//@version=6`, carrying:
   Named, in the header, where the next reader cannot miss them.
 
 This is guardrails 2 and 3 made visible, and the repo already does it well: read
-`mm_cot_long_short_index.pine` and `systemic_stress_dashboard.pine` before
-writing a new header. **Weakening an existing header's admissions is a
+`systemic_stress_dashboard.pine` and `volume_profile.pine` before writing a new
+header, and `mm_cot_long_short_index.pine` for what replacing a resolved warning
+with its evidence looks like. **Weakening an existing header's admissions is a
 regression**, even when the code around it improved. If you verified something
 the header warns about, replace the warning with what you verified and how —
 never just delete it.
@@ -174,7 +175,8 @@ never just delete it.
   advisories blocking; a lane that cannot satisfy one reports it in `risks`
   rather than dropping the flag.
 - **The checker has its own suite.** Any order that edits `pine_check.py` also
-  runs `python -m pytest <agenticRoot>/scripts/test_pine_check.py -q`, and adds
+  runs `python <agenticRoot>/scripts/test_pine_check.py` (a dependency-free
+  script, not a pytest module — it exits non-zero on any failure), and adds
   the case that would have caught the bug. A checker nobody checks is a checker
   whose findings are believed without evidence.
 - **Compile check in TradingView** is the acceptance command, run in the main

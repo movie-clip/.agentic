@@ -51,9 +51,10 @@ There is no roadmap generator, no epic tree, no story index. The backlog is:
 - **`docs/backlog.md`**, if it exists — a flat list of wanted scripts and known
   gaps. If your order needs it and it does not exist, say so in `handoff`; it is
   a reasonable thing for a close-out docs order to create.
-- **The headers' own admissions.** `mm_cot_long_short_index.pine` says its
-  tickers are unverified; that is an open item whether or not anything lists it.
-  Read the three headers before concluding nothing covers a request.
+- **The headers' own admissions.** `strategy13_trend_carry.pine` says its
+  position sizing is stripped down from the book; that is an open item whether
+  or not anything lists it. Read every header before concluding nothing covers
+  a request.
 
 You write briefs. You do not create or edit files outside your artifact.
 
@@ -64,10 +65,14 @@ You write briefs. You do not create or edit files outside your artifact.
 | `mm_cot_long_short_index.pine` | positioning / sentiment, from CFTC COT data. Futures-oriented, so its overlap with an ETF request is usually indirect |
 | `strategy13_trend_carry.pine` | trend following with risk-regime position sizing, adapted from Carver. A single-instrument adaptation with the book's sizing stripped — a request to "size positions properly" lands **here**, not in a new script |
 | `systemic_stress_dashboard.pine` | market-wide risk regime from VIX, implied correlation and a credit proxy. A request about "when is the market dangerous" is probably an extension of this |
+| `volume_profile.pine` | volume-by-price over a rolling window of confirmed bars, from lower-timeframe closes: where volume traded and the Point of Control. It explicitly says nothing about buying vs selling pressure or timing |
 
-**Nothing yet occupies the volume territory**, which is the trader's stated main
-interest. A volume request is genuinely new work; do not force it into one of
-these three.
+**The volume territory is only partly occupied.** `volume_profile.pine` answers
+*at which prices* volume traded. The trader's stated question — *when* volume
+says to open or close — is timing, and the script's header puts that
+(VSA / Wyckoff territory) explicitly out of its scope. A timing request
+is new work or needs research first; a "where is support/resistance by volume"
+request fits the existing script.
 
 ## The five verdicts
 

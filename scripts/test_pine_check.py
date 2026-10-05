@@ -112,8 +112,10 @@ _f = run(V6 + IND + _sec + ")\n")
 check("security with no explicit lookahead advises", codes(_f) == ["P008"], codes(_f))
 check("and it advises rather than blocks", sev_of(_f, "P008") == pc.SHOULD_FIX)
 
-check("request.security_lower_tf is checked too",
-      "P008" in codes(run(V6 + IND + 'x = request.security_lower_tf(t, "1", close)\n')))
+# request.security_lower_tf() has no `lookahead` parameter, so P008's fix cannot
+# be applied to it. Flagging it made volume_profile.pine unpassable under --strict.
+check("request.security_lower_tf is not asked for a lookahead it cannot take",
+      "P008" not in codes(run(V6 + IND + 'x = request.security_lower_tf(t, "1", close)\n')))
 
 check("bare v4 security() blocks",
       "P009" in codes(run(V6 + IND + 'x = security(syminfo.tickerid, "D", close)\n')))

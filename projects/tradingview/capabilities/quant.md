@@ -71,9 +71,10 @@ Read the header before the code; each states what it is and what it is not.
 
 | Script | What it is | The claim to check |
 |---|---|---|
-| `mm_cot_long_short_index.pine` | Managed Money positioning from the CFTC Disaggregated COT report | **its own header says the tickers were reconstructed from search results, not confirmed.** Guardrail 3 is openly unmet here, and it is documented rather than hidden. Any order touching it either verifies the symbols or preserves the warning |
+| `mm_cot_long_short_index.pine` | a single net (long − short) Managed Money COT Index on 0..100, from the CFTC Disaggregated COT report | the CFTC tickers were once reconstructed from search results; the header now records them as **confirmed against TradingView's live symbol search on 2026-09-17**. Any order touching it keeps that evidence in the header, and a new symbol starts unverified again |
 | `strategy13_trend_carry.pine` | Carver, *Advanced Futures Trading Strategies*, Strategy 13 | a **single-instrument adaptation** with IDM, instrument weight and FX all forced to 1. That is a real departure from the book's sizing, disclosed in the header. Carry needs a genuine futures curve and is optional |
 | `systemic_stress_dashboard.pine` | VIX / COR1M / credit percentiles into a composite stress reading | an **original approximation**, not a reproduction of any published indicator. It has no external authority and the header says so — so the anchor for auditing it is internal consistency plus the definition of a percentile rank |
+| `volume_profile.pine` | volume-by-price histogram and Point of Control over the last N confirmed bars | an **original construction** built from lower-timeframe closes via `request.security_lower_tf()` ("close-binning"), never tick data, and not expected to match TradingView's native Volume Profile. The anchor is a hand-binned worked example; parity with the native tool is explicitly not the test |
 
 **These headers are the repo's best habit.** An order that improves one of these
 scripts and quietly drops its admission has made the repo worse. Say so.

@@ -235,6 +235,19 @@ One line, always current. When the run closes it becomes `next: none — CLOSED`
 The cost is a line per update; the alternative is re-deriving the plan from the
 artifacts, which is the failure the ledger exists to prevent.
 
+### Every unfinished run is shown to the human at intake
+
+A ledger only helps if someone reads it again. At intake, list every `run.md`
+in the project's `runs/` whose `status:` is not `CLOSED`, whatever request it
+was opened for, and show each one to the human. Then do what they say:
+
+- **resume it:** carry on from its `## Phases`, `## Artifacts` and `next:`;
+- **drop it:** the human deletes the run dir, and git history keeps it. Cite a
+  dropped run by id afterwards, as `runs/README.md` says for pruned runs;
+- **leave it:** say so, and continue with the new request.
+
+A run left unfinished and never mentioned again is the failure to avoid.
+
 ### `Open` holds what is still open
 
 **A row leaves `Open` when it is absorbed.** Move it to `## Closed` with the
@@ -454,10 +467,17 @@ The route is one shape for all four of them:
    relay rule's own failure case (§ 5).
 2. **Dispatch the lane that owns the file**, scope fenced to that finding, with
    the CR path in `inputs`. Not the lane that raised it, and not a lane that
-   merely touches the area.
+   merely touches the area. If the agent that did the original work can still
+   be resumed (`SendMessage` to its id), prefer that to a cold dispatch: it
+   keeps the context the fix needs and does not re-bind. It is still a new slot
+   with its own `report_to`, Artifacts row and head.
 3. **Write the `## Rounds` row before dispatching, not after** — the count is
    the cap, and a count written afterwards is a count that reflects what
-   happened rather than what was allowed.
+   happened rather than what was allowed. A fix that arrives through a re-plan
+   instead of a CR is still a round for the finding it fixes; otherwise the cap
+   never applies. **A third round on the same finding is not dispatched.** It
+   means the request is unclear or the design is wrong: re-plan, and take it to
+   the human.
 4. **Re-run that gate.** That one. The others judged work nothing has touched,
    and their verdicts stand.
 
@@ -614,7 +634,11 @@ catch. The diverging character tells you which one you have. Nothing else does.
 ## 5. The relay rule: paths, not prose
 
 You carry the producer's brief, the tech lead's plan and every change request
-between lanes, because subagents cannot spawn subagents. If you carry them as
+between lanes, because fan-out here is one level deep by design: no lane holds
+the `Agent` tool, so coordination stays with you, where the ledger is. (Claude
+Code itself now lets subagents nest; the network declines that, because
+coordinating through a lane that cannot see the ledger is the failure the
+ledger exists to prevent.) If you carry them as
 summarised text, the specialist works from your paraphrase rather than the
 specialist judgment that produced it — and under context pressure, summarising
 is exactly what happens.
@@ -708,6 +732,12 @@ it hurts.
 ---
 
 ## 7. Never do a lane's work yourself
+
+**What the main session writes.** Only the run dir: `run.md`, `decisions.md`,
+`pack-corrections.md`, `cr/CR-<n>.md`, the `<nn>-head.txt` files, and any
+acceptance evidence the project's `phases.md` assigns to the main session.
+Every other edit to the bound repo or the network is a work order. A
+`git rm` or `git mv` is the human's to run (core § 3), so hand it to them.
 
 Doing it always looks cheaper in the moment, and the result is frequently good,
 which is what makes it dangerous. A run that answers its own request in the main

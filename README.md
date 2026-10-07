@@ -176,7 +176,7 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 ## Current state
 
-v0.7.17 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
+v0.8.0 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
 Eleven agents. Five bound projects, each with its own profile and packs under
 `projects/`: `portfolio`, `budget`, `impact`, `tradingview` and `datoro`.
 

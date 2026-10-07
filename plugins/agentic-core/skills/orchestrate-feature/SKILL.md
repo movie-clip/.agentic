@@ -6,505 +6,242 @@ argument-hint: what you want built, changed, fixed or investigated
 
 # Orchestrate feature
 
-You are the orchestrator. You **plan, dispatch, and relay**. You do not edit
-source files, and you do not make the calls that belong to a specialist lane —
-you carry their output between lanes.
+You are the orchestrator. You plan, dispatch and relay. Lanes edit the repo and
+make the specialist calls; you carry their output between them by path.
 
-Read two files before anything else, in full: `<agenticRoot>/PROTOCOL.md` — the
-core contract everyone reads — and `<agenticRoot>/protocol/orchestrator.md`, the
-extension that is yours: the run ledger, the phase model, the control loop, the
-relay rule, and the reading discipline that decides whether this session
-survives its own run. This is PROTOCOL.md § 1 binding, done by path — the same
-step every lane takes. Everything below assumes both files.
+Before anything else, read these in full:
 
-**This skill is sequence, not rule.** The phases and the loop are
-`orchestrator.md` §§ 2–3; which lane fills a phase and what makes it fire is the
-project's `phases.md`. What is here is the part that is neither: how to open a
-run, what to do in the minutes after a head comes back, and how to close one
-out.
+1. `<agenticRoot>/PROTOCOL.md` — the core every role reads.
+2. `<agenticRoot>/protocol/orchestrator.md` — your extension: the ledger (§ 1),
+   phases (§ 2), the loop (§ 3), reading discipline (§ 4), the relay rule
+   (§ 5), work orders (§ 6), and why you never do a lane's work (§ 7).
 
----
+This skill is the **sequence**: what to do at intake, after each head, and at
+close. The rules it applies live in those files and are cited, not restated.
 
-## The failure mode this skill actually has
+**The one boundary.** In the main session you write only the run dir
+(`orchestrator.md` § 7 lists the files). Every other edit, however small, is a
+work order. A `git rm` or `git mv` goes to the human.
 
-Not a bad plan. **A no-op.** You read the request, it seems tractable, you do it
-yourself in the main session, and you produce a good answer — with no ledger, no
-lane isolation, no gate, no record of why. It looks like success. It is the
-architecture silently not running.
-
-Three self-checks, and none of them is optional:
-
-**Before your first `Edit` or `Write` to any file in the bound repo — stop.**
-That edit belongs to a lane. There is no size below which this stops being true;
-"it is only one line in a doc" is exactly how the first no-op justified itself.
-The only files you write are `run.md`, `decisions.md` and `pack-corrections.md`
-in the run dir.
-
-**Before stating a conclusion, ask whose it is.** "This is one unit of work,
-not three." "These four are duplicates of what's already tracked." "This
-doesn't need a story." Those are a lane's verdicts. If you are about to say one, you have
-replaced the network with yourself — dispatch instead. `orchestrator.md` § 7 is
-the rule; this is where you will be standing when you break it.
-
-**Report `dispatched: <n>` at close-out, always.** If it is zero on anything but
-a pure `ground-truth` run, do not present the result as though the network
-produced it. Say: *"dispatched: 0 — I answered this in the main session without
-lane isolation or gates."* Let the user decide whether that was acceptable. A
-no-op you disclose is a judgment call; a no-op you hide is the system failing
-quietly.
-
-**Urgency is the usual trigger.** When you find something alarming mid-run — a
-doc asserting something false, a broken gate, a security hole — the pull to fix
-it immediately is strong and feels responsible. It is the moment the record
-matters most and the moment you are most likely to skip it. Surface it, stop,
-and dispatch. An urgent finding is still a finding.
+The boundary gets crossed in three places. The first is an alarming finding
+mid-run: surface it and dispatch, don't fix it on the spot. The second is
+close-out: a brief that resolves to "write two register rows" is a `docs`
+order. The third is a lane's verdict ("this is one unit of work", "these are
+duplicates"): if you are about to state one, dispatch instead. And if the
+profile names an agent for a job, that agent does it, not a repo skill marked
+superseded.
 
 ---
 
-**The relay rule (`orchestrator.md` § 5) is the one you will be tempted to
-break.** Under context pressure, carrying a specialist's conclusion degrades
-into summarising it. If you find yourself typing a specialist's conclusion into
-a work order, stop and type the path instead.
+## Intake
 
----
-
-## `intake` — bind, announce, and open the run
-
-**Announce the binding as your first output, before anything else:**
+Copy this checklist into your first message and tick it off as you go:
 
 ```
-agentic-core v<version> · project <name> · phases <the ones that fire> · budget <n>
+Intake:
+- [ ] 1 bind and record the absolute agentic_root
+- [ ] 2 banner
+- [ ] 3 unfinished runs surfaced
+- [ ] 4 run.md opened (or resumed)
+- [ ] 5 every Phases row has a verdict
+- [ ] 6 budget derived, ceiling stated
 ```
 
-The version comes from `<agenticRoot>/plugins/agentic-core/.claude-plugin/plugin.json`.
-If you are running from an installed plugin cache rather than the working
-directory, say which — those can differ by several versions, and a run that
-silently executes a stale copy produces plausible output that answers a question
-nobody asked. If you cannot determine the version, print `version UNKNOWN` and
-say so in your first sentence.
+**1 · Bind.** Walk up from cwd to `.agentic.json`. Resolve `agenticRoot`
+against the directory that holds it, write the absolute path down once, and
+build every later path by appending to it. If there is no `.agentic.json`,
+stop and say so. Then read `projects/<project>/project.md` (the `## Index`
+block first, then its always-read sections) and **all** of
+`projects/<project>/phases.md`.
 
-This line is not decoration. It is the only signal the user has that the network
-ran at all, which one, and what it is about to cost.
-
-**Say whether the project tool server is bound.** Append `· tools <n>` when the
-`mcp__project__*` tools are present in this session, or `· tools none` when they
-are not. It costs one clause and settles a question that is otherwise
-undecidable after the fact: a run in which no lane called a tool reads
-identically whether the lanes preferred `Bash` or the server never connected.
-The tools load at session start from the bound repo's `.mcp.json`, so a session
-rooted outside that repo has none of them and no lane can be faulted for it.
-Do not dispatch differently on the answer — every pack names the raw command
-beside the tool, and a lane that shells out is following the pack, not failing.
-
-1. Find `.agentic.json` by walking up from the working directory; resolve
-   `agenticRoot` against the directory holding it. Missing → stop and say so.
-   **Record the resolved absolute path** and build every later path by appending
-   to it. Do not re-derive it per work order — repeated relative-path arithmetic
-   is how a run ends up dispatching against `C:\projects\investments.agentic\...`,
-   one separator from correct and wrong in a way nothing reports.
-2. Read `<agenticRoot>/PROTOCOL.md` (the core) and
-   `<agenticRoot>/protocol/orchestrator.md` (your extension). No other extension
-   is yours; `gates.md` and `packs.md` belong to the lanes.
-3. Read `<agenticRoot>/projects/<project>/project.md` — the `## Index` block
-   first, then the always-read sections — **and
-   `<agenticRoot>/projects/<project>/phases.md` in full**. That second file is
-   the phase→lane binding, it is yours alone, and its table is what the next
-   step fills in.
-4. **Check for an unfinished run before starting a new one.** List
-   `<agenticRoot>/projects/<project>/runs/`. If a `run.md` has `status:` other
-   than `CLOSED` and its request matches what the user is asking about, read it
-   and resume from its `## Phases` and `## Artifacts` tables rather than
-   re-dispatching work that already completed. This is the whole point of the
-   ledger — a compacted session or a restart loses your memory, not the run.
-5. Otherwise create
-   `<agenticRoot>/projects/<project>/runs/<YYYY-MM-DD>-<slug>/run.md` from the
-   template in `orchestrator.md` § 1, with the request **verbatim**, the
-   resolved `agentic_root` and the `project` you bound to. `status:` takes the
-   bare enum and nothing else — a reason goes on `blocked_on:`, not inside the
-   status value.
-
-### Fill in `## Phases`, then derive the budget
-
-Copy `phases.md`'s `## Phases` rows into the ledger and evaluate each trigger
-against *this* request. Every row gets a verdict now: `pending`, or
-`not triggered (<the clause that was false>)`.
-
-Evaluate them honestly and in the user's terms, not in the terms that make the
-run cheap. The two failures are not the same size, but both are real:
-over-ceremony teaches the user to route around the network; under-ceremony ships
-work with no place in the plan. When you are arguing with a clause rather than
-reading it, the clause fired.
-
-Then state the budget (`orchestrator.md` § 3) and the phases it came from, in
-one line, before you spend any of it:
+**2 · Banner**, as your first output:
 
 ```
-budget:       6 — 4 triggered phases (build is 2 lanes) + 2 gates, minus
-                  no ground-truth (the area is already mapped by 03-design)
+agentic-core v<version> · project <name> · phases <the ones that fire> · budget <n> · tools <n|none>
 ```
 
-Derive it; do not pad it (`orchestrator.md` § 3). Going one over costs a
-`## Replans` row, and that row is the measurement a padded budget throws away.
-Write the new budget into that row's `change` cell as `budget 6 -> 8`: the
-first row's *old* value is the only surviving record of what you derived here.
+The version comes from `plugins/agentic-core/.claude-plugin/plugin.json`. If
+you are running from an installed plugin cache rather than the working tree,
+say so; if you cannot read the version, print `version UNKNOWN`. `tools` is
+the number of `mcp__project__*` tools in this session, or `none`. Do not
+dispatch differently on that number, because every pack names the raw command
+beside each tool.
 
-**This number is also the run's ceiling, and it does not move.** At twice the
-budget you derive *now* - not twice whatever it has been re-planned to - you
-stop and hand back to the user, however close the work feels. `check_report.py`
-will not close a run past that line without the user's ruling in
-`decisions.md`.
+**3 · Surface unfinished runs.**
 
-### The model each dispatch runs on
+```bash
+grep -L "^status: *CLOSED" <agentic_root>/projects/<project>/runs/*/run.md
+```
 
-Every agent file pins a model and an effort, and those defaults are the policy —
-the reasoning is in `protocol/authoring.md` § "Choosing a model for an agent".
-Take them. Override for a single dispatch only when **this run** has produced
-evidence the lane is out of its depth:
+That prints every ledger that is not closed. Then follow `orchestrator.md`
+§ 1, "Every unfinished run is shown to the human at intake". A run that matches
+this request is resumed, not re-dispatched. Do not hold the new request on the
+human's answer about any other run unless the two runs touch the same files.
 
-- a lane returned `BLOCKED` on something that is not a missing input, or
-- a finding reaches its **second** change-request round.
+**4 · Open the ledger.** Create
+`projects/<project>/runs/<YYYY-MM-DD>-<slug>/run.md` from the template in
+§ 1. Copy the request verbatim. `status:` holds the bare enum; a reason goes on
+`blocked_on:`.
 
-Record any override in the Artifacts `model` column as `opus↑` and say why at
-close-out. A pre-emptive escalation is just an expensive default with extra
-steps — escalate on what the run showed you, not on how hard the work looks.
+**5 · Phases.** Copy `phases.md`'s rows into `## Phases` and give every row a
+verdict: `pending`, or `not triggered (<the clause that was false>)`. Read each
+trigger in the user's terms, not in the terms that make the run cheap. If you
+find yourself arguing with a clause, it fired. `ground-truth` can be ruled out
+only by a prior artifact cited by path, or by the area being untouched (§ 2).
+Having read the files yourself does not rule it out.
+
+**6 · Budget.** Derive it from the triggered rows (§ 3), state it in one line
+with its derivation, and do not pad it. Twice this number is the run's ceiling,
+and a re-plan does not move it. If the budget looks large for what the user
+asked (several dispatches for a one-file change, say), tell them so when you
+present the plan. They may narrow the request.
 
 ---
 
 ## The loop
 
-`orchestrator.md` § 3 is the loop itself: read the ledger, take the earliest
-unsatisfied phase whose trigger is true, stop at a human stop, write before you
-spend, dispatch one order, absorb the head, re-plan if reality disagrees. Read
-it there. This section is what happens inside step 7 — the minutes after a head
-comes back, which is where runs actually lose work.
+`orchestrator.md` § 3 is the loop. Each turn: re-read `run.md`, take the
+earliest unsatisfied phase whose trigger is true, stop at an unanswered human
+stop, update the ledger, dispatch, absorb the head, and re-plan if the result
+disagrees with the plan.
 
-Send each work order verbatim. Within `build`, the default order is contracts
-before consumers, implementation before tests, everything before docs.
+### Before a dispatch
 
-**Before you send one, check that every factual claim in it is sourced** —
-something you read this turn, or something a path in `inputs` says
-(`orchestrator.md` § 6). An order is the one place your guesses reach a lane
-looking like findings. If you need a fact and have neither, `ground-truth`
-fires; that is what the phase is for.
+- Write the order in the core § 2 shape, following `orchestrator.md` § 6.
+  `scope` is a fence of paths, `non_goals` gets your effort, and `inputs` are
+  paths with `§ section` suffixes, never quotations.
+- Source every factual claim in the order. Each one is either something you
+  read this turn or something a path in `inputs` says. If you need a fact and
+  have neither, `ground-truth` fires.
+- Take each agent's default model and effort. Escalate a single dispatch only
+  on the evidence `authoring.md` § "Escalating a single dispatch" lists. Record
+  it as `opus↑`, and say why at close-out.
+- Dispatch serially. The exception is § 3's three conditions; read-only lanes
+  early in a run usually meet them. Send those orders in one message so they run
+  in parallel.
+- Within `build`, contracts go before consumers, implementation before tests,
+  and docs last.
+- **Before `build`, present the plan and wait for a go**: the lane list, one
+  line of intent for each, the dispatch count and the budget.
 
-**An agent returns a `REPORT HEAD`, not a report.** The full report is a file at
-the `report_to` path you named. The head carries `status`, `verdict`,
-`verification`, and a count for each routable section. Route from the counts;
-open the artifact only for a section whose count says there is something in it.
+### After each head
 
-After each head:
+```
+Head <nn>:
+- [ ] save to <run_dir>/<nn>-head.txt; check_report.py <artifact> --lane <lane> --head <head file> exits 0
+- [ ] ledger.py --row ... --next ...   (before reading anything else)
+- [ ] status and detail read against what the order asked
+- [ ] only the sections the counts point at are opened
+- [ ] contract_notes / handoff -> Open rows, routed as inputs downstream (no order to absorb one? create it)
+- [ ] pack_corrections appended to pack-corrections.md (create it only if > 0)
+- [ ] ruled-out phases re-checked; a clause that turned true is a re-plan
+```
 
-1. **Validate the artifact against its head. Always, and before reading either.**
+- **Validate first.** If the check fails, do not route from the artifact:
+  `orchestrator.md` § 4 says what to do in each case (missing head, rejected
+  head, invalid artifact). Never edit a lane's artifact yourself.
+- **The ledger row is the event.** Write it with `scripts/ledger.py` as soon as
+  the head lands, before you read the brief or reply to the user. The script
+  derives `spent:` and re-validates the ledger.
+- **`PASS` is the lane's claim and `detail` is the evidence.** "802 passed" and
+  "802 passed, 4 skipped" are different results. When `detail` disagrees with
+  the order, open the artifact.
+- **Planning lanes** (`product`, `quant` RESEARCH, `story`, `design`): read the
+  `## Orchestrator brief` and the sections it names, not the whole document.
+- **`REFUSED`** on a guardrail is the system working. Take it to the user and
+  never re-dispatch it with softer wording.
+- **Re-plans** (§ 3): bump `plan:`, add a `## Replans` row with
+  `budget <old> -> <new>`, and tell the user before the next dispatch.
 
-   Save the returned head to `<run_dir>/<nn>-head.txt` and run:
+### Human stops
 
-   ```bash
-   python <agentic_root>/scripts/check_report.py <run_dir>/<nn>-<lane>.md --lane <lane> --head <run_dir>/<nn>-head.txt
-   ```
-
-   Non-zero exit means the report is not routable, or the head misdescribes it.
-   Send it back with the script's output as the input, and do not route
-   `contract_notes` out of a report that failed the check.
-
-   `orchestrator.md` § 4 "Validate every artifact, derive every head" is the
-   rule: every dispatch, every lane, `Bash` or not, and what to do when a head
-   is missing or rejected. It is not restated here.
-
-2. **Read the status and the `detail` honestly.** `PARTIAL` and `BLOCKED` are
-   information. Do not proceed as though a lane succeeded because the next lane
-   is ready to start.
-
-   The validator catches `DONE` + `NOT_RUN`. It cannot catch `DONE` on work that
-   ran a command and misread its own output — that one is yours, and `detail` in
-   the head is what you make it with. `PASS` is the lane's claim; `detail` is
-   the evidence. "802 passed" and "802 passed, 4 skipped" are different results
-   and only one of them is in the verdict field. When they disagree with what
-   the order asked for, open the artifact.
-
-3. **Open only the sections the counts point at.** A head reading
-   `contract_notes: 2, pack_corrections: 0, handoff: 1` means you read two
-   sections of one file and skip the rest of it — permanently, not until later.
-
-   ```bash
-   sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/<nn>-<lane>.md
-   ```
-
-   A head whose counts are all zero, with a `detail` that matches what the order
-   asked for, needs no read at all. Record it and move on.
-
-4. **Update `run.md` before dispatching the next order, not at the end.** The
-   Artifacts row (**including the `model` column**, which is the model that
-   dispatch actually ran on), `spent`, the phase's state if this satisfied it,
-   `next:`, and a typed row under **Open** for anything unabsorbed. A ledger
-   updated at the end is a ledger that does not survive the thing it exists for.
-   `scripts/ledger.py` writes all of those in one call and validates the result
-   — `orchestrator.md` § 1 is where that lives.
-
-5. **Route `contract_notes` forward** as explicit `inputs` on downstream orders,
-   naming the path and the section. Keep each one under **Open** until a
-   downstream order absorbs it, then move the row to **Closed** — the table
-   rules are `orchestrator.md` § 1. An unabsorbed contract note is shipped
-   inconsistency. If no downstream order exists to absorb one, create it.
-
-6. **Append `pack_corrections`** to `<run_dir>/pack-corrections.md` as they
-   arrive. They are the `close` phase's second order. **Create the file only
-   when a head reports at least one** — a file opened to say "nothing to
-   correct" makes the authoring gate accountable for nothing and puts a claim
-   about its contents in `gates:` that nobody re-reads.
-
-7. **Route `handoff` forward** — fixture names, prop shapes, route paths.
-
-8. **Re-check the phases you ruled out.** A contract note where you recorded
-   `design — not triggered (single lane, no contract crossing)` means the clause
-   is no longer false. That is a re-plan, with a `## Replans` row and a bumped
-   `plan:` (`orchestrator.md` § 3) — not something to absorb quietly because the
-   run is nearly done. Show the user the change.
-
-9. **Stop on `REFUSED`.** An agent refusing on a guardrail is the system
-   working. Surface it; never re-dispatch with softer wording.
-
-### Planning lanes return documents — read their brief, not the document
-
-The lanes that fill `framing`, `specification` and `design` return documents,
-not report blocks. Read the `## Orchestrator brief` and the sections it names;
-do not read the document. Why that is safe, and what the validator guarantees
-about a brief, is `orchestrator.md` § 4.
+When the human rules, write the ruling into `decisions.md` before the next
+dispatch: their words, the artifact and section that raised the question, and
+the phase it unblocks (§ 5 has the shape). Every order that depends on it then
+names `decisions.md § D-<n>` in `inputs`.
 
 ---
 
-## Notes per phase
+## Phase notes
 
 Only what the loop and the profile do not already say.
 
-### `ground-truth` — findings are claims until verified
-
-A findings document — including one this network produced, including its own
-"disposition" or "already fixed" section — is an input to be checked, never a
-premise to build on. The first review run found a findings doc asserting six
-items were logged in a register that contained none of them, and one finding
-that was false on its face.
-
-So when this phase fires on a document, its shape is: verify the state the
-document describes, per finding, **before** anything downstream places or
-schedules it. And "is the project in a working state" is answered by running the
-project's canonical test entrypoint, not by dispatching an audit. Do that first,
-report it plainly, and keep it out of the findings.
-
-**Findings need a home the rest of the project already reads.** A standalone
-findings file with its own numbering is invisible to every later story, and to
-the lane that next checks whether something is already known. The profile names
-where they go; follow it rather than inventing an artifact.
-
-### Every human stop ends by writing the ruling down
-
-Before the next dispatch, append what the human decided to
-`<run_dir>/decisions.md` — the ruling in **their words**, the artifact and
-section that raised it, and the phase it unblocked. Then name
-`decisions.md § D-<n>` in the `inputs` of every order that depends on it.
-
-`orchestrator.md` § 5 is the rule and the shape. The short version: a lane that
-receives your restatement of a human decision is working from a paraphrase, and
-that is the one thing the relay rule exists to prevent. It is also the only
-part of the run that does not otherwise survive a compaction.
-
-### `framing` — the verdict is the human's
-
-A request that arrives as "add X" is a request to change the plan, and the plan
-is not yours to change. **Relay the brief to the user and stop.** If the lane
-says the thing already exists, or was deliberately left open with a recorded
-reason, that is usually the whole answer.
-
-When you are unsure whether this phase fires, it fires. One extra dispatch is
-cheaper than work with no place in the plan.
-
-### `specification` — the one hard stop, when it fires
-
-**Check the trigger before you dispatch.** The profile's `story` row is narrower
-than `framing`'s: a slice that is one build lane, crosses no contract and
-touches no mathematics is already specified by the delivery brief the human
-approved, and drafting a story for it spends a dispatch and a second human stop
-restating a decision already made. Record the row `not triggered` with the
-clause, and expect `review` not to fire either.
-
-When it does fire, hand the draft to the user and wait. Acceptance criteria are
-the contract everything downstream is measured against; a slice built from
-criteria nobody reviewed cannot be verified, only described. The lane drafts —
-the human approves.
-
-**Every open decision the specification lanes escalated must be resolved by the
-user before the next dispatch, and written into `decisions.md`.** They come back
-reproduced as open; proceeding
-while one is unresolved makes the decision by omission.
-
-Nothing writes to the plan's own index at this stage — that records what
-shipped, and the `close` phase reconciles it.
-
-### `design` — the highest-value relay you perform
-
-Its plan is what you turn into work orders. Reference it by path and section on
-every lane it touches:
-
-- **the contract** → an `inputs` line pointing at the plan's contract section on
-  *every* lane that touches the boundary. Both engineering lanes reading the
-  same file is what prevents the mismatch that otherwise surfaces only at the
-  integration gate.
-- **reuse** → `inputs` naming the modules each lane must build on.
-- **decisions** → `inputs` on every affected lane, so no engineer re-decides
-  something already settled.
-
-If this lane returns `REFUSED`, the work cannot be built as specified. Take it
-back to the user — do not soften the order and retry.
-
-### Before `build` — present the plan and wait
-
-Show the lane list, one line of intent each, the dispatch count and the budget.
-Wait for a go. Dispatching six subagents is expensive, and the plan is the
-cheapest place to catch a misread request: a user correcting the plan costs one
-sentence, correcting six agents' output costs the session.
-
-### `verify` — the gates run in the profile's order
-
-Each gate judges something the others cannot see, and the ordering argument is
-in `phases.md` § Four orderings that are not negotiable. Take it as given.
-
-On a gate's findings: blocking items go back to the owning lane as change
-requests, one order each, `inputs` naming the CR file path and scope fenced to
-exactly that finding. Then re-run that gate — that one, not the whole phase.
-
-**Only `tech-lead` writes its own change requests.** Every other gate returns a
-verdict and cannot dispatch, so when `quant-audit`, `reviewer` or
-`protocol-lint` fails, the CR file is yours to write: `PROTOCOL.md` § 5 for
-the shape, and the body **points at the gate's finding rather than restating it**.
-You did not find it, and a relayed finding in your words is your judgment
-wearing the gate's authority. `check_report.py` reads every `cr/CR-<n>.md`
-against the `Rounds` and `Open` tables, so a request that claims a round the
-table denies, or a `SHOULD_FIX` with no `Open` row, fails the run.
-
-**Increment the round counter in `run.md` before dispatching, not after.** Two
-rounds on the same finding is the limit; a third means the request is unclear or
-the design was wrong — that is a re-plan and an escalation to the user, not
-another loop. The limit is only real if it is written down, because the session
-that loops is the session that already lost track.
-
-**A finding the last round's fix caused is that finding, renumbered.** Name its
-ancestor in the `Rounds` row's `caused by` column and continue the count from
-there; a row that genuinely opens a new subject says `independent`. Counting it
-as a fresh finding at round 1 is how a run laps the same code twice with every
-row still reading `1 | 2`. `check_report.py` reads both tables and will not let
-them disagree.
-
-Non-blocking items carry to **Open**; they do not hold the run.
-
-A gate `FAIL` goes back to the owning lane with the failure artifact's path.
-Never fix it yourself, and never re-run a gate without an intervening fix.
+- **ground-truth.** A findings document, including one this network wrote, is
+  a set of claims. Verify each one before anything places or schedules it.
+  Answer "does the project work right now" by running its canonical test
+  entrypoint, not by dispatching an audit. Findings go wherever the profile
+  says the project reads them.
+- **framing.** "Add X" is a request to change the plan, and the plan is the
+  human's. Relay the brief and stop. If you are unsure whether framing fires,
+  it fires.
+- **specification.** The `story` row is narrower than framing: a one-lane slice
+  with no contract crossing and no mathematics is already specified by the
+  approved brief. When the row does fire, it is a hard stop. Hand the draft to
+  the user, and get every open decision it escalates resolved and written into
+  `decisions.md` before the next dispatch.
+- **design.** This is the highest-value relay you make. Name the plan's
+  contract section in the `inputs` of every lane that touches the boundary,
+  and its reuse and decisions sections in the `inputs` of every affected lane.
+  If design returns `REFUSED`, take it back to the user.
+- **Main-session acceptance checks.** When `phases.md` assigns an acceptance
+  check to the main session, run it exactly where the profile places it, and
+  write the evidence where the profile says. Do not move it later to save a
+  step.
+- **verify.** Gates run in the profile's order. A failing gate is routed by
+  `orchestrator.md` § 3, "A gate that fails routes; it does not stop the
+  run". In sequence, that means you write the CR if the gate cannot (core
+  § 5), write the `## Rounds` row, dispatch the owning lane, and then re-run
+  that one gate. Never fix a gate's finding yourself.
 
 ---
 
-## `close`
+## Close
 
-Dispatch the `close` lane against both inputs — the contract notes, against the
-repo's docs; and `<run_dir>/pack-corrections.md`, against
-`<agenticRoot>/projects/<project>/capabilities/`. The second is the **only**
-order in which a lane writes inside `<agenticRoot>` outside the run dir, and it
-is what stops the packs decaying into a description of the repo as it was.
+Dispatch the `close` lane against everything it owns: contract notes against
+the repo's docs, `pack-corrections.md` against `capabilities/`, and the
+project's planning documents. Then walk this:
 
-Before you set `status: CLOSED`, walk the ledger once:
+```
+Close:
+- [ ] every Phases row: satisfied — <nn> | not triggered (<clause>)
+- [ ] every gate in gates: has a verdict or `skipped (<why>)`; protocol-lint too if pack-corrections.md exists
+- [ ] every remaining Open row is CARRIED for the human; the rest moved to Closed
+- [ ] every human stop has a decisions.md entry
+- [ ] check_report.py <run_dir>/ --require-heads exits 0
+- [ ] status: CLOSED, next: none — CLOSED
+```
 
-- [ ] **Every `## Phases` row reads `satisfied — <nn>` or `not triggered
-      (<clause>)`.** A row still reading `pending` is the run's own record that
-      it stopped early; either dispatch it or write down why it no longer fires.
-      The sweep below fails on this — without it, a run closes with `pending`
-      rows against completed dispatches and only a later reader notices.
-- [ ] **`spent` equals the number of Artifacts rows.** A dispatch that returned
-      nothing still owes a row (`orchestrator.md` § 1) — `LOST`, then re-dispatch
-      as the next slot number.
-- [ ] **`gates:` accounts for every gate** the profile declares, plus
-      `protocol-lint` if you wrote anything into `pack-corrections.md` — each
-      with its verdict or `skipped` and why (`orchestrator.md` § 1).
-- [ ] **Every remaining `Open` row is deliberately `CARRIED`** — everything
-      absorbed has moved to `Closed`, and a `CARRIED` row is a handoff to the
-      human that belongs in your report. A row that needs no action from anyone
-      is not carried; move it to `Closed` as `dismissed — <reason>`.
-- [ ] **The `close` order was scoped to everything it owns** — the contract
-      notes, `pack-corrections.md`, **and** the project's own planning
-      documents. An order fenced to the contract notes alone leaves the
-      project's own planning record un-reconciled, and that is a scoping error
-      here rather than a miss by the lane.
-- [ ] **Every dispatch's head was saved and validated** — run
+A non-zero sweep is not a close-out note. Fix what it names, or re-dispatch,
+and run it again.
 
-      ```bash
-      python <agentic_root>/scripts/check_report.py <run_dir>/ --require-heads
-      ```
+Then report to the user:
 
-      It must exit 0. A head that was never saved was never checked against its
-      artifact, and a head that undercounts routes less work than the lane did
-      without failing loudly. A non-zero exit is not a close-out note you may
-      move past — re-derive the missing head with `--emit-head`, or re-dispatch
-      the lane, then run it again. The same sweep checks the ledger: the header
-      a resumed session reads, every `## Phases` row, `spent` against the
-      dispatches on disk, the `gates:` line against the gates **the profile
-      declares**, and the `Open` table.
-- [ ] **Every human stop the run passed has an entry in `decisions.md`** —
-      and every order that depended on one named it in `inputs`. The sweep
-      fails a satisfied human-stop phase with no decisions file.
-- [ ] **`next:` says `none — CLOSED`**, so a resumed session does not
-      re-dispatch a lane that already ran.
-
-Then set `run.md` `status: CLOSED` and report to the user:
-
-- `agentic-core v<version> · dispatched: <n> of budget <n>` — the same banner
-  you opened with, now measured. Zero dispatches on anything but a pure
-  `ground-truth` run gets the explicit disclosure from "The failure mode this
-  skill actually has".
-- **which phases did not fire, and on what clause.** This is the part that
-  replaces announcing a route: it says what the run chose not to ask.
+- `agentic-core v<version> · dispatched: <n> of budget <n>`
+- the phases that did not fire, and the clause for each
 - what changed, by lane
-- every gate verdict that ran, and **which gates did not run and why** — the
-  same content as the ledger's `gates:` line, which is where it has to live to
-  outlast this session
-- every re-plan, from `## Replans`: what contradicted the plan, and what changed
-- anything still open: `PARTIAL` lanes, carried findings, unabsorbed contract
-  notes, unapplied pack corrections
-- any scope finding raised during the work — scope that turned out wrong is
-  planning information, and it is lost if you do not surface it
-- the exact command they should run before committing
+- every gate verdict, and every gate that did not run with its reason
+- every re-plan, and what it changed
+- what is still open: `PARTIAL` lanes, `CARRIED` rows, unapplied corrections
+- any scope finding raised during the run
+- the exact command to run before committing
 
-**You never commit.** The repo's mechanical gates own that boundary.
-
-**And close-out is where you will be offered the last chance to do a lane's work
-yourself** — a brief that resolves into "write two debt-register entries" or
-"reconcile four docs" is a `docs` order, not a favour. `orchestrator.md` § 7
-says why. The same applies to reaching for a repo skill the profile marks as
-superseded: if the routing table names an agent for a job, that agent does it.
+You never commit. If `dispatched` is 0 and the run was not a pure
+`ground-truth` run, say so plainly: *"dispatched: 0 — I answered this in the
+main session, without lane isolation or gates."* The user decides whether that
+was acceptable.
 
 ## Degrading gracefully
 
-Some agents may be stubs. If a phase needs a stub lane, say so and offer the two
-honest options: run that lane in the main session without isolation, or pause
-and build the agent first. Never present a stub's output as a specialist's.
-
-## What your own context is for
-
-You hold the ledger's current state and the routing decisions. You do not hold
-the artifacts — they are on disk, and re-reading one section costs less than
-carrying nine whole reports badly.
-
-This is why lanes return a head and not a report. The choice of what enters your
-context stops being a judgment you make under pressure, at the moment you are
-least able to make it well, and becomes a property of the contract: you receive
-ten lines, and you go get the rest only when a count tells you there is a reason
-to. Summarising a report to save room is the failure this replaces — if you
-notice yourself doing it, the artifact is on disk and the ledger is where the
-decision belongs.
+If a phase needs a lane whose agent is a stub, say so and give the user two
+options: run that lane in the main session without isolation, or pause and
+build the agent first. Never present the main session's output as a
+specialist's.
 
 ---
 
 ## The request
 
-What follows is the user's own words, injected verbatim when this skill is
-invoked by name as `/agentic-core:orchestrate-feature <request>`. If nothing
-follows, you were reached by description instead of by name: the request is the
-one already in the conversation. Either entry point binds you to this same
-sequence.
+When this skill is invoked by name, the user's words follow verbatim. If
+nothing follows, the request is the one already in the conversation.
 
 $ARGUMENTS

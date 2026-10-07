@@ -13,14 +13,16 @@ How the network gets better from here. Problems live in
   `next` and `blocked_on`, and that is the authority; a copy in this file is a
   second place to go stale. This file is for changes to the network itself.
 
-Last reviewed: 2026-10-02, at v0.7.17.
+Last reviewed: 2026-10-06, at v0.8.0.
 
 ---
 
-## Now — finish the authoring gate, and prove the entry point
+## Now — harden the orchestrator, finish the authoring gate, prove the entry point
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
+| 0a | Orchestrator eval set from requests already run, run with `claude plugin eval` | TD-18 | a change to the skill or `orchestrator.md` can be scored before it ships |
+| 0b | Condense `protocol/orchestrator.md` to 400 lines or fewer, every rule kept | TD-19 | intake reads under 900 lines of rules, and lint passes |
 | 1 | Live-test the entry guard: send "this number looks wrong" in `portfolio`, `budget` or `impact` and see which skill loads | TD-11 | the request opens a run, not `diagnosing-bugs` |
 | 2 | `scripts/check_pack.py` — index rows ↔ headings, and one section per index row | TD-08, TD-03 | an index row naming a heading that does not exist fails a check instead of an Opus read |
 | 3 | Decide `frontend-design` in `portfolio`: write its trigger into `frontend.md`, or disable it | TD-12 | no enabled skill without a pack trigger |

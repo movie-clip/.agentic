@@ -300,8 +300,13 @@ its own request has no scope fence, no pack, no gate, no artifact and no ledger
 entry — and it teaches, by succeeding, that the network is ceremony.
 `dispatched: 0` is a disclosure, not a result.
 
-**The orchestrator stays in the main session.** Subagents cannot spawn
-subagents, so fan-out is one level deep, driven from the top. The producer
+**The orchestrator stays in the main session.** Fan-out is one level deep,
+driven from the top, by choice: Claude Code lets subagents nest, but no lane
+holds the `Agent` tool, because coordinating through a lane that cannot see the
+ledger is the failure the ledger exists to prevent. Anthropic's own
+multi-agent write-up says the same of coding work: few of its tasks
+parallelise cleanly, and agents are not yet good at delegating to each other in
+real time. The producer
 cannot commission a story and the tech lead cannot dispatch an engineer — they
 emit briefs, plans and change requests, and the orchestrator carries them. A
 paraphrased change request is the orchestrator's judgment wearing the tech

@@ -17,7 +17,7 @@ The phase→lane binding for this project. Read this at intake, alongside
 - **What the gates run** — the command each `verify` row owes.
 - **The short run** — what most work in this repo actually looks like.
 - **Where the compile check sits** — the one phase-shaped thing that is not a
-  phase.
+  phase, and why it runs before the gates.
 
 ## Phases
 
@@ -121,12 +121,19 @@ that is a re-plan (`orchestrator.md` § 3), with a `## Replans` row and a bumped
 
 It is not a phase, and it has no lane, because **no agent in the roster holds
 browser tools**. It is this project's acceptance command, run in the main
-session against TradingView's editor, and it is the last thing that happens
-before close.
+session against TradingView's editor. It runs **after each build dispatch that
+changes a `.pine` file and before that change's `verify` gates**, and once more
+before close if anything changed after it last ran.
+
+Why it runs early: the gates read the source, and the compile check is the
+only thing that loads the script. Gates that rule before it has run are judging
+code nobody has loaded, and when the compile check then contradicts them the
+run pays for a re-plan and for the gates a second time.
 
 The orchestrator drives it, writes what the error panel and the Strategy Tester
-actually said to `<run_dir>/compile.md`, and names that file in the `close`
-order's `inputs`. **This is the one thing the orchestrator does that looks like
+actually said to `<run_dir>/compile.md`, and names that file in the `inputs`
+of the `quant-audit`, `integration`, `review` (when it fires) and `close`
+orders. **This is the one thing the orchestrator does that looks like
 lane work and is not** — it is the boundary check, the same role the human's
 `run_all_tests.py` run plays in `portfolio`, and the reason it is written down
 here is so that doing it never gets mistaken for licence to do anything else in

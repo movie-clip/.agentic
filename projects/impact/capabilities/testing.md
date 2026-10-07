@@ -75,8 +75,8 @@ case (`AGENTS.md` § Single-Test Guidance). Most new coverage in this repo is
 
 | Assembly | References (Athena) |
 |---|---|
-| `Impact.EditModeTests` | sceneslice (Runtime, Editor), shared (Runtime, Components), contentmanagement, core |
-| `Impact.PlayModeTests` | shared (Runtime, Components), contentmanagement |
+| `Impact.EditModeTests` | sceneslice (Runtime, Editor), shared (Runtime, Components), contentmanagement, core, Unity.Transforms |
+| `Impact.PlayModeTests` | shared (Runtime, Components), contentmanagement, Unity.Transforms |
 
 - No test assembly references `athena.charactercontroller`, `athena.gameplay`
   or `athena.ai`. Today only the compile covers them.

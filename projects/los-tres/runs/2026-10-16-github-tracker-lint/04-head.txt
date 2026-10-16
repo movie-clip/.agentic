@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-16-github-tracker-lint/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-16-github-tracker-lint\04-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          parser PASS; projects/los-tres/project.md judged in full, rules 1-9; 0 BLOCKING, 0 SHOULD_FIX; anchor: authoring.md + phases.md § Git and the tracker, orchestrator.md § 7, agent tools: lines; 1 UNVERI
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+skill_calls:     0
+risks:           3
+headline:        PASS: projects/los-tres/project.md meets authoring.md; its commit and tool-server lines agree with phases.md and orchestrator.md § 7

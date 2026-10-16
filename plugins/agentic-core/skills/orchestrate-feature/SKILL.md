@@ -20,8 +20,8 @@ This skill is the **sequence**: what to do at intake, after each head, and at
 close. The rules it applies live in those files and are cited, not restated.
 
 **The one boundary.** In the main session you write only the run dir
-(`orchestrator.md` § 7 lists the files). Every other edit, however small, is a
-work order. A `git rm` or `git mv` goes to the human.
+(`orchestrator.md` § 7 lists the files, and the git and tracker writes a
+project may grant). Every other edit, however small, is a work order. A `git rm` or `git mv` goes to the human.
 
 The boundary gets crossed in three places. The first is an alarming finding
 mid-run: surface it and dispatch, don't fix it on the spot. The second is
@@ -223,9 +223,11 @@ Then report to the user:
 - every re-plan, and what it changed
 - what is still open: `PARTIAL` lanes, `CARRIED` rows, unapplied corrections
 - any scope finding raised during the run
-- the exact command to run before committing
+- the exact command to run before committing, or, where the project grants
+  git writes, the pull request URL
 
-You never commit. If `dispatched` is 0 and the run was not a pure
+You never commit or merge, except the git writes `orchestrator.md` § 7 lets a
+project's `phases.md` grant. If `dispatched` is 0 and the run was not a pure
 `ground-truth` run, say so plainly: *"dispatched: 0 — I answered this in the
 main session, without lane isolation or gates."* The user decides whether that
 was acceptable.

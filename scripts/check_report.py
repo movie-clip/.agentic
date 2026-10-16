@@ -774,6 +774,16 @@ def _verify_lanes(profile: str) -> tuple[str, ...]:
     return tuple(lanes)
 
 
+def _lane_names(cell: str) -> set[str]:
+    """The lanes a Phases `lane` cell names, one per comma-separated entry.
+
+    A build row names several lanes in one cell, and the ledger copies a subset
+    of them in its own order. Matching the cell as one string would miss every
+    copy that is not verbatim.
+    """
+    return {part.strip().lower() for part in cell.split(",") if part.strip()}
+
+
 def _stop_lanes(profile: str) -> set[str]:
     """Lanes whose phase carries a human stop, from the profile's last column."""
     stops = set()
@@ -781,7 +791,7 @@ def _stop_lanes(profile: str) -> set[str]:
         if len(row) < 5:
             continue
         if "yes" in row[4].strip().lower():
-            stops.add(row[2].strip().lower())
+            stops |= _lane_names(row[2])
     return stops
 
 
@@ -959,9 +969,9 @@ def check_decisions(ledger: Path) -> list[str]:
     for row in _ledger_table(text, "Phases"):
         if len(row) < 4:
             continue
-        lane = row[1].strip().lower()
-        if lane in stops and _SATISFIED.match(row[3].strip()):
-            passed.append(lane)
+        lanes = _lane_names(row[1]) & stops
+        if lanes and _SATISFIED.match(row[3].strip()):
+            passed.extend(lanes)
     if not passed:
         return []
     decisions = ledger.parent / "decisions.md"

@@ -739,6 +739,17 @@ acceptance evidence the project's `phases.md` assigns to the main session.
 Every other edit to the bound repo or the network is a work order. A
 `git rm` or `git mv` is the human's to run (core § 3), so hand it to them.
 
+**Git and tracker writes, where a project grants them.** By default you make
+none. A project's `phases.md` may grant you writes of these kinds: create the
+run's branch, commit to it and push it; open, update and comment on its pull
+request; create, edit, label, link, comment on and move issues on its tracker.
+The list in that `phases.md` is the limit: you make only the writes it names,
+at the points it names. Where it grants tracker writes, the run dir also holds
+`tracker.md`, which records the run's issue, branch and pull request. Those
+writes record the lanes' work; they never replace a lane's edit. No grant
+covers merging, pushing to the default branch, force-pushing, or `git rm` and
+`git mv`.
+
 Doing it always looks cheaper in the moment, and the result is frequently good,
 which is what makes it dangerous. A run that answers its own request in the main
 session has no scope fence, no capability pack, no gate, no artifact and no

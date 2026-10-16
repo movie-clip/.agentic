@@ -1039,6 +1039,7 @@ check("both files reach the profile reader",
 check("and a human stop declared in phases.md is still found",
       cr._stop_lanes(_sjoined) == {"product"}, str(cr._stop_lanes(_sjoined)))
 
+
 # The split is optional: a project that keeps everything in project.md is
 # unchanged, which is what lets one project split without forcing the others.
 _uroot = Path(tempfile.mkdtemp())
@@ -1157,6 +1158,33 @@ _r = subprocess.run(
     capture_output=True, text=True)
 check("and a bare directory sweep admits it did not check the ledger",
       "run.md not checked" in _r.stdout, _r.stdout[:300])
+
+# A stop on a row that names several lanes binds each of them, so a ledger that
+# copies a subset of the cell, in any order, still owes its decisions.md entry.
+_MULTI_PROFILE = _STOP_PROFILE.replace(
+    "| build | 1..n | frontend | anything that edits the repo | — |",
+    "| build | 1..n | backend, frontend, test, docs | anything that edits the repo | **yes, if** not Ready |")
+_SUBSET_TABLE = """
+## Phases
+| phase | lane | fires when | state |
+|---|---|---|---|
+| build | frontend, backend | anything that edits the repo | satisfied — 02 |
+"""
+check("the multi-lane fixture replaced the build row",
+      "backend, frontend, test, docs" in _MULTI_PROFILE)
+check("a multi-lane stop cell yields each of its lanes",
+      {"backend", "frontend", "test", "docs"} <= cr._stop_lanes(_MULTI_PROFILE),
+      str(cr._stop_lanes(_MULTI_PROFILE)))
+check("a single-lane cell is unchanged",
+      cr._lane_names("product") == {"product"}, str(cr._lane_names("product")))
+check("a ledger copying a subset of a multi-lane stop cell still owes decisions.md",
+      any("no decisions.md" in x
+          for x in _decisions(table=_SUBSET_TABLE, profile=_MULTI_PROFILE)),
+      str(_decisions(table=_SUBSET_TABLE, profile=_MULTI_PROFILE)))
+check("and a decisions.md entry satisfies it",
+      _decisions(table=_SUBSET_TABLE, profile=_MULTI_PROFILE,
+                 decisions="# Decisions\n\n## D-1 · build\nruling: go\n") == [])
+
 
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

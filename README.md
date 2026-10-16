@@ -159,7 +159,8 @@ What happens:
 8. **Tech lead (integration)** gates the engineering; change requests are
    relayed verbatim to the owning lane.
 9. **Reviewer** gates acceptance against the story.
-10. You run the suite and commit. No agent commits.
+10. You run the suite and commit. No agent commits, unless a project's
+    `phases.md` grants the orchestrator git writes; no agent merges.
 
 ## What is deliberately not automated
 

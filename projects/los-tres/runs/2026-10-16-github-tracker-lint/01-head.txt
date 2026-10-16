@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-16-github-tracker-lint/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-16-github-tracker-lint\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          parser PASS; 5 BLOCKING (rule 1 x1, rule 9 x4, one also rule 2), 1 SHOULD_FIX (rule 8); anchor: authoring.md + orchestrator.md, producer.md, tech-lead.md, story-author.md, gates.md, check_report.py, l
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         6
+skill_calls:     0
+risks:           7
+headline:        FAIL: GitHub-tracker edits leave the orchestrator conflicting instructions on git/tracker writes, build human stop, branch scope and lane git use; ledger shape extended in a pack

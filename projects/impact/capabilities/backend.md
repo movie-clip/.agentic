@@ -149,3 +149,7 @@ Adapted to this lane and to Unity:
 - `contract_notes` names any changed component/singleton shape another
   package reads, so `design`/`integration` can catch drift instead of a
   runtime NRE catching it later.
+- From Git Bash, run the test script as
+  `powershell -ExecutionPolicy Bypass -File ./Tools/Run-UnityTests.ps1 ...`
+  with forward slashes. `.\Tools\...` loses its backslashes there and the
+  script is not found (exit 127 or 1).

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/08
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\08-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          dotnet build 0 errors (36 warnings, all MSB3277 reference conflicts). EditMode total=45 passed=45 failed=0. PlayMode total=8 passed=8 failed=0. Run by me from XML in the scratchpad. Anchor: red-run as
+changed:         0
+contract_notes:  3
+pack_corrections: 0
+handoff:         4
+skill_calls:     1
+risks:           4
+headline:        S1 passes integration: build clean, EditMode 45/45 and PlayMode 8/8, diff matches the 05 plan. One SHOULD_FIX (CR-1): the Animator-less warning logs every frame.

@@ -134,19 +134,21 @@ or its absence, in `skill_calls:`.
 
 ## Project tool server — prefer it over the raw command
 
-On an INTEGRATION order, three `mcp__project__*` tools do the running for you:
+On an INTEGRATION order, two `mcp__project__*` tools do the running for you:
 
 - `run_tests(scope="full")` — the whole gate. Deliberately does **not** skip the
   golden freshness check, unlike the narrow scopes.
 - `check_gates()` — dead-code, `tsc`, goldens drift and commit-gate freshness in
   one call, so you can report which gate would block rather than that something
   did.
-- `reset_goldens()` — discards `dashboardGoldens.ts` drift when the slice did not
-  change dashboard output.
 
 Each returns a parsed verdict rather than raw output, which matters here: an
 integration report cites what failed, and a four-hundred-line dump is not a
 citation. The raw commands still work and are still correct.
+
+`dashboardGoldens.ts` drift is a finding, not something you reset: you hold no
+`reset_goldens`, so a gate cannot discard the output it is judging. Route it to
+`frontend` or `test`, which hold the reset.
 
 ## Technique skills (mattpocock-skills)
 

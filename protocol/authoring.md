@@ -355,12 +355,13 @@ about to write has a tool to stand on:
 - `quantitative-researcher` holds the three probing tools, because AUDIT
   recomputes independently and must be able to call the engine it is judging
   rather than read the code and infer.
-- `frontend-engineer` and `tech-lead` hold `run_tests`, `check_gates` and
-  `reset_goldens`, and deliberately **not** `probe_engine` or `build_snapshot`:
-  neither lane writes engine code, so a probe either lane needs is a backend
-  report it should be reading instead.
-- `reviewer` holds `run_tests` and `check_gates` and no mutating tool, because a
-  gate that verifies must not also change the tree it is verifying.
+- `frontend-engineer` holds `run_tests`, `check_gates` and `reset_goldens`,
+  and deliberately **not** `probe_engine` or `build_snapshot`: it writes no
+  engine code, so a probe it needs is a backend report it should be reading
+  instead.
+- `reviewer` and `tech-lead` hold `run_tests` and `check_gates` and no mutating
+  tool, because a gate that verifies must not also change the tree it is
+  verifying. Goldens drift the integration gate finds goes to a build lane.
 
 ## Adding a project
 

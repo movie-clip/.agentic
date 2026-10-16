@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/05
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\05-technical-plan.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          read-only design pass, order verification was NONE
+changed:         0
+contract_notes:  5
+pack_corrections: 0
+handoff:         6
+skill_calls:     1
+risks:           8
+headline:        S1 plan: bridge owns the animation link and relinks on instance change, new cleanup system ends ghost shells, default prefab never overwritten; tests first.

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/10
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\10-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          dotnet build 0 errors (17 warnings incremental, 36 with --no-incremental, all MSB3277). EditMode total=45 passed=45 failed=0. PlayMode total=8 passed=8 failed=0. Read from fresh result XML (12:46:53 a
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     1
+risks:           2
+headline:        CR-1 satisfied with no S1 regression: warn-once per instance, bounded and trimmed, touches only the bridge file; builds clean, EditMode 45/45, PlayMode 8/8. No CR-2.

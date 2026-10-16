@@ -177,8 +177,9 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 ## Current state
 
 v0.8.0 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
-Eleven agents. Five bound projects, each with its own profile and packs under
-`projects/`: `portfolio`, `budget`, `impact`, `tradingview` and `datoro`.
+Eleven agents. Six bound projects, each with its own profile and packs under
+`projects/`: `portfolio`, `budget`, `impact`, `tradingview`, `datoro` and
+`los-tres`.
 
 - **What is wrong or missing:** [`TECH-DEBT.md`](./TECH-DEBT.md), including the
   enforcement map — which rules a script backs and which rest on trust.

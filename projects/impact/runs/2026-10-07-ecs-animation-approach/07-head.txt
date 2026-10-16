@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/07
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\07-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          dotnet build 0 errors. EditMode total=45 passed=45 failed=0; PlayMode total=8 passed=8 failed=0. E1 E2 E2b E3 E4 control P1-P5 green, all pre-existing tests green.
+changed:         6
+contract_notes:  5
+pack_corrections: 0
+handoff:         5
+skill_calls:     1
+risks:           4
+headline:        S1 backend fix is in, and EditMode (45/45) and PlayMode (8/8) Core suites pass, including all ten tests that were red.

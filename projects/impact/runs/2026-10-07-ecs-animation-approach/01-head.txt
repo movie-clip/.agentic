@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/01
+artifact:    C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\01-recon.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only recon, order verification was NONE
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     5
+skill_calls: 0
+risks:       6
+headline:    Animation is a hand-rolled ECS-state-to-Mecanim MonoBehaviour pull in athena.shared; the skin swap never re-links the Animator, and the animation docs and tests have gaps.

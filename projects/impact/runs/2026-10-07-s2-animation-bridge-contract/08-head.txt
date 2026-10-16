@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-s2-animation-bridge-contract/08
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-s2-animation-bridge-contract\08-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          dotnet build 0 errors. EditMode -CoreOnly total=164 passed=164 failed=0. PlayMode -CoreOnly total=27 passed=27 failed=0.
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+skill_calls:     1
+risks:           4
+headline:        tdd called: coupled MoveSpeed tests confirmed unchanged; one CR-2 snap-frame regression test added; both -CoreOnly runs green.

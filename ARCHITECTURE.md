@@ -1,8 +1,8 @@
 # `.agentic` — agent network architecture
 
 Lives at `C:\projects\investments\.agentic`, one level above the repos it
-drives. Five projects are bound: `portfolio`, `budget`, `impact`,
-`tradingview` and `datoro`. `plugins/agentic-core/.claude-plugin/plugin.json`
+drives. Six projects are bound: `portfolio`, `budget`, `impact`,
+`tradingview`, `datoro` and `los-tres`. `plugins/agentic-core/.claude-plugin/plugin.json`
 is the authority on the version. Examples below use `portfolio`.
 
 **This file is the current design and the reasoning behind it.** How each rule
@@ -214,7 +214,8 @@ for the lanes that have it, and that is a real gap, not a rounding error.
 
 **Six of the eleven agents reach the bound repo's `project` MCP server** — `run_tests`,
 `probe_engine`, `build_snapshot`, `check_gates`, `reset_goldens` — granted
-narrowly, with `reviewer` getting nothing that mutates. It exists because lanes
+narrowly, with the verifying gates (`reviewer`, `tech-lead`) getting nothing
+that mutates. It exists because lanes
 were otherwise hand-writing throwaway probe scripts to answer "what does this
 route actually return?". Each agent file's `tools:` line is the authority on its
 own grants.

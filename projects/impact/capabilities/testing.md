@@ -31,6 +31,24 @@ for this lane**
 - Check the script's `-UnityPath` default against
   `Impact/ProjectSettings/ProjectVersion.txt` before assuming a wrong-Editor
   run is a test bug.
+- **`Run-UnityTests.ps1` waits for Unity and returns its exit code.** The
+  script pipes `Unity.exe` through `Out-Default` (`Run-UnityTests.ps1:71-79`),
+  because Unity.exe is a GUI program and PowerShell only waits for it, and
+  only sets `$LASTEXITCODE`, when its output is piped.
+- **In PowerShell, do not call `Unity.exe` without a pipe.** It returns at
+  once and `$LASTEXITCODE` is not set.
+- **For test runs, `Run-UnityTests.ps1` wins over the raw `Unity.exe`
+  `-runTests` lines in `AGENTS.md`.** Use the script; a raw call needs the
+  same pipe.
+- **The `TestResults-*.xml` files are tracked in git** and show as modified
+  after every run.
+- **The NUnit in this project has no `Is.AnyOf`.** Use
+  `Assert.That(new[] { a, b }, Does.Contain(x))`.
+- **A test compile error shows as "Scripts have compiler errors"**, exit 1
+  after about 12 s. Grep the log for `error CS`.
+- **`dotnet build Impact.sln` cannot see new test files until a Unity run has
+  regenerated the csproj**, so the first Unity batchmode run is the real
+  compile for new test files.
 
 ## Running the suite
 
@@ -84,6 +102,9 @@ case (`AGENTS.md` § Single-Test Guidance). Most new coverage in this repo is
   `.asmdef`. Adding it is yours, but say so in `changed`.
 - Test code follows the same direction rule as runtime code (`project.md`
   guardrail 2).
+- `TimeData` is in namespace `Unity.Core` inside the `Unity.Entities`
+  assembly, so no extra reference is needed. Use
+  `World.SetTime(new TimeData(elapsed, dt))` before `SystemHandle.Update`.
 
 ## Technique skills (mattpocock-skills)
 

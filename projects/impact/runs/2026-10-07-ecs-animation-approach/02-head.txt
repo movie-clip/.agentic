@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/02
+artifact:    C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\02-recon.md
+status:      DONE
+verdict:     NONE
+verification: NOT_RUN
+detail:      read-only recon, order verification NONE
+changed:     0
+contract_notes: 0
+pack_corrections: 0
+handoff:     5
+skill_calls: 0
+risks:       6
+headline:    All Synty character and animation assets are Humanoid and retarget through one controller, AC_Polygon_Masculine; the Samurai prefabs have a dangling controller GUID, and the setup doc is out of date.

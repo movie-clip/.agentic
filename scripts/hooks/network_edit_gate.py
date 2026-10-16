@@ -139,7 +139,7 @@ def main() -> None:
     for row in rows:
         print(f"  {row}", file=sys.stderr)
     print("Dispatch `protocol-linter` over them from a BOUND REPO session - "
-          "portfolio, budget, impact, tradingview or datoro. Not from here: "
+          "portfolio, budget, impact, tradingview, datoro or los-tres. Not from here: "
           "`.agentic` carries no `.agentic.json`, so the linter's bind step "
           "reports BLOCKED. Or say plainly that this edit is shipping ungated "
           "and why. When the subject is `authoring.md` or `protocol-linter.md` "

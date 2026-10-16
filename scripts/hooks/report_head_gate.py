@@ -22,12 +22,13 @@ rather than a hardcoded list, so adding a lane does not silently exempt it.
 Every other subagent -- Explore, general-purpose, anything the human runs
 directly -- exits 0 untouched.
 
-Bounded twice over. `stop_hook_active` is checked first: Claude Code sets it once
-a stop hook has already blocked this turn, and a hook that ignores it loops until
-the platform's hard cap overrides it. Two blocks per subagent is the fallback
-behind that flag, for when it does not propagate. Then it allows the stop and
-says so. A hook that can refuse forever is a hook that can hang a run, and the
-close-out sweep
+Bounded by a per-subagent counter: two holds, then it allows the stop and says
+so. `stop_hook_active` -- set once a stop hook has already blocked this turn --
+bounds only the case the counter cannot, a payload with no `agent_id`. It never
+skips the check itself: it is set on exactly the attempt that follows a hold,
+so releasing on sight of it let every corrected head through unchecked and
+unsaved, and made the second hold unreachable. A hook that can refuse forever
+is a hook that can hang a run, and the close-out sweep
 (`check_report.py <run_dir>/ --require-heads`) is still there to catch what got
 through -- a missing head file fails it, and so does an artifact whose block
 is not on its first line.
@@ -106,9 +107,9 @@ def _head_block(message: str) -> str | None:
     return head[:-3].rstrip() if head.endswith("```") else head
 
 
-def _hold(agent_id: str, lines: list[str]) -> None:
+def _hold(agent_id: str, retry: bool, lines: list[str]) -> None:
     """Refuse the stop, unless this subagent has already been held twice."""
-    if _blocks_so_far(agent_id) >= MAX_BLOCKS:
+    if (retry and not agent_id) or _blocks_so_far(agent_id) >= MAX_BLOCKS:
         print("REPORT HEAD still invalid after two attempts - letting this "
               "lane stop. The close-out sweep will fail on it.", file=sys.stderr)
         sys.exit(0)
@@ -126,11 +127,9 @@ def main() -> None:
     except (json.JSONDecodeError, UnicodeDecodeError):
         sys.exit(0)
 
-    # Set once a stop hook has already blocked this turn. Honouring it is the
-    # documented way not to loop; the counter below is the fallback for when it
-    # does not arrive.
-    if payload.get("stop_hook_active"):
-        sys.exit(0)
+    # Set once a stop hook has already blocked this turn. It bounds holds only
+    # where the counter cannot (no agent_id) - see the module docstring.
+    retry = bool(payload.get("stop_hook_active"))
 
     # Plugin-scoped types arrive as `agentic-core:scout`; bare ones as `scout`.
     lane = (payload.get("agent_type") or "").split(":")[-1]
@@ -140,7 +139,7 @@ def main() -> None:
     agent_id = payload.get("agent_id") or ""
     head = _head_block(payload.get("last_assistant_message") or "")
     if head is None:
-        _hold(agent_id, [
+        _hold(agent_id, retry, [
             "NO REPORT HEAD - PROTOCOL.md section 4 requires your final message "
             "to be the REPORT HEAD block and nothing after it. The orchestrator "
             "routes from the head; without one your work is invisible to it.",
@@ -150,12 +149,12 @@ def main() -> None:
 
     raw = cr._scalar(head, "artifact")
     if not raw:
-        _hold(agent_id, ["REPORT HEAD has no 'artifact:' line - it must carry "
+        _hold(agent_id, retry, ["REPORT HEAD has no 'artifact:' line - it must carry "
                          "the absolute path you wrote the report to."])
 
     artifact = Path(raw)
     if not artifact.is_file():
-        _hold(agent_id, [
+        _hold(agent_id, retry, [
             f"REPORT HEAD names artifact {raw!r}, which does not exist. Write "
             "the full report to your order's report_to path first; the head is "
             "a summary of it, not a replacement for it."])
@@ -164,7 +163,7 @@ def main() -> None:
     # scout it held in run 2026-09-27-sort-potential-rules-by-frequency re-read
     # the file, found it present, and resent the same head twice.
     if not cr._is_report(artifact):
-        _hold(agent_id, [
+        _hold(agent_id, retry, [
             f"{artifact.name} exists but has no 'REPORT <id>' line, so it is not "
             "a report. Its first line must be the report block's 'REPORT "
             "<run id>/<nn>' (PROTOCOL.md section 3); any document goes below "
@@ -184,7 +183,7 @@ def main() -> None:
     notes: list[str] = []
     art_bad = cr.check(artifact, lane=lane_of, warn=notes)
     if art_bad:
-        _hold(agent_id, [f"{artifact.name} does not satisfy PROTOCOL.md "
+        _hold(agent_id, retry, [f"{artifact.name} does not satisfy PROTOCOL.md "
                          "section 3, so its head cannot be trusted either:"]
               + [f"  - {b}" for b in art_bad]
               + ([""] + ["Advisory, while you are here (these do not block):"]
@@ -198,7 +197,7 @@ def main() -> None:
         # 59 closed heads - and the three lanes with no Bash cannot run
         # --emit-head to get it. Telling them what is wrong without telling
         # them the answer just buys another guess.
-        _hold(agent_id,
+        _hold(agent_id, retry,
               [f"REPORT HEAD does not match {artifact.name}:"]
               + [f"  - {b}" for b in head_bad]
               + ["", "Return this head instead, filling in only what is left "

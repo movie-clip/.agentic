@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-07-ecs-animation-approach/12
+artifact:        C:\projects\investments\.agentic\projects\impact\runs\2026-10-07-ecs-animation-approach\12-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          plugin validate passed; 0 BLOCKING, 1 SHOULD_FIX (rule 8); anchor: authoring.md rule text plus the two test .asmdef files and test-engineer.md tools line; Athena refs in both rows match; 7 UNVERIFIED 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           9
+headline:        testing.md passes the authoring gate; corrected asmdef rows are accurate, one SHOULD_FIX on the mislabelled References (Athena) column goes to Open

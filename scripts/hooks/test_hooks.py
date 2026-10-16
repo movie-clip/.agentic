@@ -234,17 +234,32 @@ check("but a real violation carries the advisories with it",
 
 print("C — bounding, which is what keeps a hook from hanging a session")
 
-# `stop_hook_active` is the documented bound: Claude Code sets it once a stop
-# hook has blocked this turn, and a hook that ignores it loops until the
-# platform's hard cap overrides it. Each gate must release on sight of it, in
-# the exact state that would otherwise hold.
+# `stop_hook_active` arrives on exactly the attempt after a hold, so the head
+# gate must still check that attempt: the counter bounds it, and the flag bounds
+# only a payload with no agent_id to count.
 _p = payload(HEAD)
 _p["last_assistant_message"] = "no head at all"
 code, err = run(HEAD_GATE, _p)
 check("the head gate holds a lane with no head", code == 2, f"{code} {err}")
 _p["stop_hook_active"] = True
 code, err = run(HEAD_GATE, _p)
-check("and releases it when stop_hook_active is set", (code, err) == (0, ""),
+check("and holds it a second time with stop_hook_active set", code == 2,
+      f"{code} {err}")
+code, err = run(HEAD_GATE, _p)
+check("then releases it, by the counter", code == 0 and "two attempts" in err,
+      f"{code} {err}")
+
+(d / "06-head.txt").unlink()
+_p = payload(HEAD)
+_p["stop_hook_active"] = True
+code, err = run(HEAD_GATE, _p)
+check("a corrected head on the retry is checked and saved",
+      (code, err) == (0, "") and (d / "06-head.txt").is_file(), f"{code} {err}")
+
+_p = {"agent_type": "backend-engineer", "last_assistant_message": "no head",
+      "stop_hook_active": True}
+code, err = run(HEAD_GATE, _p)
+check("with no agent_id, stop_hook_active still releases", code == 0,
       f"{code} {err}")
 
 # The network gate needs a real unlinted file to have anything to hold on, so it

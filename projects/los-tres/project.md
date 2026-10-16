@@ -125,8 +125,8 @@ Which directories count as server code and which as frontend is set by the
 first stack decision. It is not guessed here.
 
 **No project tool server.** `los-tres/.mcp.json` declares only `github`, the
-GitHub MCP server the orchestrator uses for the tracker (`phases.md` § Git and
-the tracker). No `mcp__project__*` or `mcp__github__*` tool is granted to any
+GitHub MCP server the orchestrator uses for the tracker (`phases.md`
+§ Tracker). No `mcp__project__*` or `mcp__github__*` tool is granted to any
 lane. Lanes run the commands `CLAUDE.md` names, under `Bash`. Before wiring a
 project tool server, read `protocol/authoring.md` § "The project tool server".
 
@@ -144,5 +144,4 @@ authoring order. `phases.md`'s `verify` rows are what `check_report.py` reads.
   add a lint command and a test command, and list both in `CLAUDE.md`
   § Commands. Until it does, `integration` cannot pass a build
   (`architecture.md` § Integration review).
-- **No lane commits.** Only the orchestrator commits, to the run's branch, and
-  pushes it (`phases.md` § Git and the tracker). Only a human merges.
+- **Git and GitHub:** `CLAUDE.md` § Git and tickets.

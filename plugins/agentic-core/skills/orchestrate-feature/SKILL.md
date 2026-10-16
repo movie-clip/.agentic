@@ -20,8 +20,9 @@ This skill is the **sequence**: what to do at intake, after each head, and at
 close. The rules it applies live in those files and are cited, not restated.
 
 **The one boundary.** In the main session you write only the run dir
-(`orchestrator.md` § 7 lists the files, and the git and tracker writes a
-project may grant). Every other edit, however small, is a work order. A `git rm` or `git mv` goes to the human.
+(`orchestrator.md` § 7 lists the files), plus the git and tracker writes § 8
+allows where the profile declares a tracker. Every other edit, however small,
+is a work order. A `git rm` or `git mv` goes to the human.
 
 The boundary gets crossed in three places. The first is an alarming finding
 mid-run: surface it and dispatch, don't fix it on the spot. The second is
@@ -40,7 +41,7 @@ Copy this checklist into your first message and tick it off as you go:
 ```
 Intake:
 - [ ] 1 bind and record the absolute agentic_root
-- [ ] 2 banner
+- [ ] 2 banner, and the tracker's server present if one is declared
 - [ ] 3 unfinished runs surfaced
 - [ ] 4 run.md opened (or resumed)
 - [ ] 5 every Phases row has a verdict
@@ -52,12 +53,12 @@ against the directory that holds it, write the absolute path down once, and
 build every later path by appending to it. If there is no `.agentic.json`,
 stop and say so. Then read `projects/<project>/project.md` (the `## Index`
 block first, then its always-read sections) and **all** of
-`projects/<project>/phases.md`.
+`projects/<project>/phases.md`, including its `## Tracker` block if it has one.
 
 **2 · Banner**, as your first output:
 
 ```
-agentic-core v<version> · project <name> · phases <the ones that fire> · budget <n> · tools <n|none>
+agentic-core v<version> · project <name> · phases <the ones that fire> · budget <n> · tools <n|none> · tracker <server|none>
 ```
 
 The version comes from `plugins/agentic-core/.claude-plugin/plugin.json`. If
@@ -66,6 +67,10 @@ say so; if you cannot read the version, print `version UNKNOWN`. `tools` is
 the number of `mcp__project__*` tools in this session, or `none`. Do not
 dispatch differently on that number, because every pack names the raw command
 beside each tool.
+
+`tracker` is the server the profile's `## Tracker` block names, or `none`.
+Its tools must be in this session before the run starts (`orchestrator.md`
+§ 8).
 
 **3 · Surface unfinished runs.**
 
@@ -195,6 +200,26 @@ Only what the loop and the profile do not already say.
 
 ---
 
+## Tracker
+
+Only where the profile declares one; otherwise skip this section. The tools
+and limits are `orchestrator.md` § 8's; statuses and labels are the names the
+block maps. Write each identifier into `tracker.md` as it is created.
+
+| Point in the run | Tracker action |
+|---|---|
+| intake, the request names an issue | read it and record it as the run's issue |
+| framing approved | create the issues the brief names, label them, link sub-issues, add each to the board at the *new* status; record the run's issue |
+| specification approved | put the story file's path in the story issue's body; create one ticket sub-issue per ticket |
+| the human says go on the build plan | write the ruling to `decisions.md`; if no issue is recorded, create one at *new*. Create the branch from an up-to-date default branch and set *building* |
+| a lane that edited the repo returns, once `build` has fired (build, a `verify` fix, `close`) | commit its paths to the branch with `#<issue> <summary>` and push; the first push opens the draft pull request, its body `Closes #<issue>` |
+| close: `check_report.py <run_dir>/ --require-heads` exits 0 | once `build` has fired, mark the pull request ready, comment every gate verdict on it, set *reviewing*; then close the ledger |
+
+A run that never reaches `build` touches no branch (`orchestrator.md` § 8).
+The board's own automation moves the issue to done.
+
+---
+
 ## Close
 
 Dispatch the `close` lane against everything it owns: contract notes against
@@ -208,6 +233,7 @@ Close:
 - [ ] every remaining Open row is CARRIED for the human; the rest moved to Closed
 - [ ] every human stop has a decisions.md entry
 - [ ] check_report.py <run_dir>/ --require-heads exits 0
+- [ ] tracker declared and `build` fired: every repo edit committed and pushed, pull request ready (`orchestrator.md` § 8)
 - [ ] status: CLOSED, next: none — CLOSED
 ```
 
@@ -223,11 +249,12 @@ Then report to the user:
 - every re-plan, and what it changed
 - what is still open: `PARTIAL` lanes, `CARRIED` rows, unapplied corrections
 - any scope finding raised during the run
-- the exact command to run before committing, or, where the project grants
-  git writes, the pull request URL
+- the exact command to run before committing, or, where the profile declares a
+  tracker and `build` fired, the pull request URL; where it did not, the
+  uncommitted paths and that command (`orchestrator.md` § 8)
 
-You never commit or merge, except the git writes `orchestrator.md` § 7 lets a
-project's `phases.md` grant. If `dispatched` is 0 and the run was not a pure
+You never commit or merge, except the commits `orchestrator.md` § 8 allows
+where the profile declares a tracker. If `dispatched` is 0 and the run was not a pure
 `ground-truth` run, say so plainly: *"dispatched: 0 — I answered this in the
 main session, without lane isolation or gates."* The user decides whether that
 was acceptable.

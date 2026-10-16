@@ -24,6 +24,8 @@ have", which it reports as `SHOULD_FIX` and never fails on alone.
   before writing a command
 - **The project tool server** — per-lane grants and what they may assume
 - **Adding a project** — the files a new project needs
+- **Wiring a tracker** — the `## Tracker` block, and what the repo needs
+  before it
 
 ## The four-layer split
 
@@ -398,3 +400,49 @@ with different lanes?** If yes it belongs in the skill. If it names a lane, a
 directory, a formula or a document this project happens to have, it belongs in
 the `## Phases` table's `fires when` column, where the orchestrator reads it as
 data.
+
+## Wiring a tracker
+
+A tracker is optional and per project. `orchestrator.md` § 8 says what declaring one permits and what holds
+without one.
+
+**The repo side comes first**, because the block is checked against it:
+
+1. `.mcp.json` declares the tracker's MCP server under a key; that key is the
+   block's `server`. Credentials come from an environment variable, never a
+   literal.
+2. `.claude/settings.json` enables that server and denies, for `Bash` and
+   `PowerShell` alike: the server's merge tool, pushing to the default branch,
+   force-pushing, and the host's CLI (`gh` on GitHub), so the MCP server is the
+   only route. That file is the human's to edit.
+3. The host protects the default branch: pull requests only, no force-push, no
+   deletion, no bypass. This is the enforcement; the deny list is the second
+   layer.
+4. The board's status options and the repo's labels exist under the names the
+   block maps.
+5. `CLAUDE.md` says that only the orchestrator commits, to the run's branch,
+   and that only a human merges. Every lane reads it, and a `CLAUDE.md` that
+   still says "the human commits" contradicts the profile.
+
+**The block** goes in `phases.md`, after `## Phases`, and holds data only.
+The procedure is the skill's, so a second tracked project copies six rows, not
+a procedure:
+
+```markdown
+## Tracker
+
+| Key | Value |
+|---|---|
+| server | `github` — the `.mcp.json` key |
+| repo | `<owner>/<repo>` |
+| board | Project <n>, owned by <user or org> |
+| statuses | new `Backlog` · building `In progress` · reviewing `In review` · human only `Ready`, `Done` |
+| labels | epic `type:epic` · story `type:story` · ticket `type:ticket` |
+| branch | `<issue>-<slug>` from `main` |
+```
+
+The lint checks four things. The server is a key the repo's `.mcp.json`
+declares. No agent's `tools:` line holds `mcp__<server>__*`. The `build` row's
+human stop reads **yes**, because the go is the ruling a branch is created on.
+And no profile text restates the procedure or the limits in
+`orchestrator.md` § 8.

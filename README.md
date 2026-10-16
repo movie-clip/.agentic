@@ -159,8 +159,9 @@ What happens:
 8. **Tech lead (integration)** gates the engineering; change requests are
    relayed verbatim to the owning lane.
 9. **Reviewer** gates acceptance against the story.
-10. You run the suite and commit. No agent commits, unless a project's
-    `phases.md` grants the orchestrator git writes; no agent merges.
+10. You run the suite and commit. Where a project's `phases.md` declares a
+    `## Tracker`, the orchestrator commits to the run's branch and opens the
+    pull request instead, through the tracker's MCP server. No agent merges.
 
 ## What is deliberately not automated
 
@@ -177,7 +178,7 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 ## Current state
 
-v0.8.0 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
+v0.8.1 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
 Eleven agents. Six bound projects, each with its own profile and packs under
 `projects/`: `portfolio`, `budget`, `impact`, `tradingview`, `datoro` and
 `los-tres`.

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-16-tracker-v081-lint/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-16-tracker-v081-lint\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          parser PASS; 5 scoped files judged, rules 1-9; 4 BLOCKING, 0 SHOULD_FIX; anchor: authoring.md, and for its own § Wiring a tracker the agent tools: lines, los-tres .mcp.json/settings.json/CLAUDE.md, or
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         4
+skill_calls:     0
+risks:           8
+headline:        FAIL: SKILL.md conflicts on commits in tracked runs with no build; three rule-2 restatements of orchestrator.md § 8 in project.md, authoring.md and SKILL.md.

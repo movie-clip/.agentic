@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-16-tracker-v081-lint/03
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-16-tracker-v081-lint\03-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          parser PASS; F-2, F-3, F-4 fixed, F-1 fixed at its named lines but its situation still conflicts (F-5, round 2); 5 scoped files, rules 1-9; 1 BLOCKING, 0 SHOULD_FIX; anchor: authoring.md, and for § Wi
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           6
+headline:        F-2..F-4 fixed; F-1 continues as F-5 (round 2): SKILL.md:216 and :252-253 still direct PR actions in a tracked run where build never fired, against orchestrator.md § 8.

@@ -373,8 +373,8 @@ reported at the dispatch that caused it instead of at close-out. `Rounds` and
 actual authority, and the integration gate runs the project's whole acceptance
 command rather than the subset the run happened to touch. The reviewer agent is
 a *pre-*check that catches problems cheaply; it never replaces a green suite.
-No lane commits, and no agent merges; a project may grant the orchestrator
-branch commits (`protocol/orchestrator.md` § 7).
+No lane commits, and no agent merges; a project that declares a tracker lets
+the orchestrator commit to the run's branch (`protocol/orchestrator.md` § 8).
 
 **A lane cannot delete or rename a file.** Deliberate — deletion is the one repo
 edit with no diff to review. A lane does the half it can and reports the other

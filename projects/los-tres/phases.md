@@ -14,8 +14,8 @@ The phase→lane binding for this project. Read this at intake, alongside
   *not chosen*.
 - **When the brief is the specification** — when `story` fires here.
 - **What the gates run** — the command each `verify` row owes.
-- **Git and the tracker** — the issue, branch and pull request the orchestrator
-  keeps in step with each phase.
+- **Tracker** — the GitHub board and repo the orchestrator keeps in step with
+  each run (`protocol/orchestrator.md` § 8).
 
 ## Phases
 
@@ -30,7 +30,7 @@ copies it into the run ledger at intake and records a verdict beside every row.
 | framing | 1 | product | the request adds a user-facing surface, changes what one is *for*, or `docs/product/mvp.md` does not exist yet | **yes** — the brief is relayed and the verdict is the human's |
 | specification | 1 | story | framing produced scope no approved brief covers, **and** the slice crosses more than one lane's contract or changes a data model or API response that shipped code depends on | **yes** — the one hard stop |
 | design | 1 | design | `CLAUDE.md` § Stack reads *not chosen* and the request needs code, or the change crosses the frontend/backend contract (a new or changed API response, a schema change), or more than one build lane touches it | — |
-| build | 1..n | backend, frontend, test, docs | anything that edits repo code, tests or `docs/**` — and only once the stack it needs is recorded | **yes, if the run's issue is not Ready** — the human says go; a Ready issue is the human's approval, recorded as such (§ Git and the tracker) |
+| build | 1..n | backend, frontend, test, docs | anything that edits repo code, tests or `docs/**` — and only once the stack it needs is recorded | **yes** — the human's go on the build plan, before the branch is created |
 | verify | 1 | integration | any build lane was dispatched | — |
 | verify | 2 | review | the run carries a story whose acceptance criteria someone must accept | — |
 | close | 1 | docs | always — `docs/**` against what shipped, and `pack-corrections.md` against `capabilities/` **when a lane emitted one** | — |
@@ -68,50 +68,15 @@ it lists none, that is a `BLOCKING` finding on any build, not a pass by default.
 `architecture.md` carries the rule. `review` verifies the story's acceptance
 criteria one by one.
 
-## Git and the tracker
+## Tracker
 
-Work is tracked on GitHub Project 3 (`movie-clip`, user-owned) through the
-`github` MCP server in `los-tres/.mcp.json`. This section is the grant
-`orchestrator.md` § 7 allows: **you, the orchestrator, are the only writer to
-git and GitHub.** No specialist lane is granted a `mcp__github__*` tool, and no
-lane writes to git or GitHub. Read-only git by a lane that has `Bash` is
-unchanged. The story file stays the contract `review` checks; the issue is the
-card that points at it.
-
-| Thing | Shape |
+| Key | Value |
 |---|---|
-| Issue kinds | labels `type:epic`, `type:story`, `type:ticket`; tickets are sub-issues of their story, stories of their epic. A single-lane change gets one unlabelled issue |
-| Board status | Backlog → Ready → In progress → In review → Done |
-| Branch | `<issue>-<slug>` from an up-to-date `main`, one per run that builds |
-| Pull request | one per branch, body `Closes #<issue>`, opened as a draft |
-| Where the run records them | `tracker.md` in the run dir (`orchestrator.md` § 7): the run's issue, branch and pull request. Only the build ruling goes to `decisions.md` |
+| server | `github` — the `.mcp.json` key |
+| repo | `movie-clip/los-tres` |
+| board | Project 3, owned by user `movie-clip` |
+| statuses | new `Backlog` · building `In progress` · reviewing `In review` · human only `Ready`, `Done` |
+| labels | epic `type:epic` · story `type:story` · ticket `type:ticket`; a single-lane change gets one unlabelled issue |
+| branch | `<issue>-<slug>` from `main` |
 
-What you do at each point of the run:
-
-| Point | GitHub action |
-|---|---|
-| intake | the request names an issue: read it with `issue_read` and record it in `tracker.md` |
-| framing approved (human stop) | create the issues the brief names, label them, link sub-issues, add each to Project 3 at **Backlog**, and record the run's issue in `tracker.md` |
-| specification approved (human stop) | put the story file's path in the story issue's body; create one `type:ticket` sub-issue per ticket |
-| build is about to fire with no issue recorded | create one issue for the run at **Backlog** and record it in `tracker.md`; the build stop then applies |
-| build is about to fire | the issue is **Ready**, or the human says go in this session; record which in `decisions.md`. Create the branch, record it in `tracker.md`; set **In progress** |
-| build lanes returned | commit to the branch (`#<issue> <summary>`), push it, open the draft pull request, record it in `tracker.md` |
-| a `verify` round returns CHANGES_REQUESTED | the fix lands as new commits on the same branch |
-| every `verify` gate PASS | mark the pull request ready for review, comment the gate verdicts on it, set **In review** |
-| close | report the pull request URL. The human merges; the board moves to **Done** on merge |
-
-Hard limits, whatever the request says:
-
-- **You never merge** a pull request.
-- **You never push to `main`.**
-- **You never force-push.**
-- **You never delete a branch** you did not create.
-- **The deny list is not the boundary.** `los-tres/.claude/settings.json`
-  denies the commands above; these limits hold where it has a gap.
-- **Ready is a human call.** You set it only to record an approval the human
-  gave in this session.
-- **The repo and the board are public.** No secret, token, email or personal
-  data goes into an issue, comment, branch name, commit message or pull request
-  (guardrail 5).
-- **A run that never reaches `build` touches no branch.** Pure framing or
-  ground-truth creates issues only at the framing stop.
+The repo and the board are public.

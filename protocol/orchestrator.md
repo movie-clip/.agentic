@@ -27,6 +27,8 @@ Every slice gets a directory:
   05-frontend.md
   cr/CR-1.md                    change requests, one file each
   pack-corrections.md           appended as they arrive
+  tracker.md                    the run's issue, branch and pull request — only
+                                where the profile declares a tracker (§ 8)
 ```
 
 You create `run.md` at `intake` and update it after every head you receive.
@@ -739,16 +741,7 @@ acceptance evidence the project's `phases.md` assigns to the main session.
 Every other edit to the bound repo or the network is a work order. A
 `git rm` or `git mv` is the human's to run (core § 3), so hand it to them.
 
-**Git and tracker writes, where a project grants them.** By default you make
-none. A project's `phases.md` may grant you writes of these kinds: create the
-run's branch, commit to it and push it; open, update and comment on its pull
-request; create, edit, label, link, comment on and move issues on its tracker.
-The list in that `phases.md` is the limit: you make only the writes it names,
-at the points it names. Where it grants tracker writes, the run dir also holds
-`tracker.md`, which records the run's issue, branch and pull request. Those
-writes record the lanes' work; they never replace a lane's edit. No grant
-covers merging, pushing to the default branch, force-pushing, or `git rm` and
-`git mv`.
+**Git and tracker writes.** § 8 says when you make any, and its limit.
 
 Doing it always looks cheaper in the moment, and the result is frequently good,
 which is what makes it dangerous. A run that answers its own request in the main
@@ -756,3 +749,60 @@ session has no scope fence, no capability pack, no gate, no artifact and no
 ledger entry — and it teaches, by succeeding, that the network is ceremony.
 
 `dispatched: 0` is a disclosure, not a result. Say it out loud at close-out.
+
+---
+
+## 8. The tracker
+
+A project opts in by giving its `phases.md` a `## Tracker` block
+(`authoring.md` § "Wiring a tracker" has its shape). No block means no
+tracker: you make no git or tracker write, and the human commits. Nothing else
+in this section applies to such a project.
+
+**What the block grants you, and nothing more.** Create the run's branch,
+commit to it and push it; open, update and comment on its pull request; create,
+edit, label, link, comment on and move issues on the declared board. Those
+writes record the lanes' work; they never replace a lane's edit. You are the
+only writer: no lane is granted the server's tools or makes a git write.
+
+**The branch exists only once `build` has fired.** In a tracked run where it
+did not, you make no commit and no push, and whatever the `close` lane edited
+stays uncommitted for the human; the close-out report says so.
+
+**Every tracker and pull-request call goes through the MCP server the block
+names**, as `mcp__<server>__*` tools; the repo's deny list removes the host's
+CLI. The server is how a project swaps or adds a tracker without touching this
+file. Branch, commit and push act on the working tree, so they run `git` under
+`Bash`.
+
+**The server is checked at intake.** If the block names a server and no
+`mcp__<server>__*` tool is in your session, the run does not start: say which
+server is missing and stop. A run that discovers it at its first write has
+already spent a human stop it cannot record.
+
+**Hard limits, whatever the request says:**
+
+- You never merge a pull request, push to the default branch, force-push,
+  delete a branch, or run `git rm` or `git mv`.
+- You commit only what lanes in this run changed. Stage the paths their
+  artifacts name; anything else `git status` shows goes to the human, not into
+  the commit.
+- You never set a status the block reserves for the human.
+- No secret, token, email, personal data or local filesystem path goes into an
+  issue, comment, branch name, commit message or pull request.
+- The host's branch rules are the enforcement and the repo's permission deny
+  list a second layer. These limits hold where both have a gap.
+
+**`tracker.md`** is the run's record of what it touched on the tracker, so a
+resumed session finds them without searching:
+
+```markdown
+# Tracker — <run-id>
+issue:   #<n> <url>        the issue this run delivers
+created: #<n>, #<n>        every issue this run created, or none
+branch:  <name>            or none, until build
+pr:      #<n> <url> draft | ready, or none
+```
+
+The ruling that lets `build` start still goes to `decisions.md`; `tracker.md`
+holds identifiers, never a decision.

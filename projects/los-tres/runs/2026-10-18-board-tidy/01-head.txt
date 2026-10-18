@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-18-board-tidy/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-18-board-tidy\01-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order verification was NONE; edits checked by reading the edit results only
+changed:         6
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           5
+headline:    Applied the four rule-8 items and deleted the stale stack wording at project.md lines 8 and 130-131; guardrails and Index untouched.

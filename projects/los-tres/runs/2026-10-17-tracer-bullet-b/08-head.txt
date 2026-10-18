@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-17-tracer-bullet-b/08
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-17-tracer-bullet-b\08-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate: passed. check_network_edit: 4 UNLINTED (the 4 packs judged here; warning, exit 0). Anchor: protocol/authoring.md. 1 BLOCKING (testing.md, rule 9); 8 SHOULD_FIX (5 carried from 13, 3 new); 11
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         12
+skill_calls:     0
+risks:           15
+headline:        testing.md fails rule 9 (l.65 dev-database ban contradicts the e2e path in l.27/l.33); backend, frontend and architecture packs pass with 8 SHOULD_FIX.

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-17-tracer-bullet-b/05
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-17-tracer-bullet-b\05-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order verification NONE (no shell); command-to-script mapping in handoff
+changed:         2
+contract_notes:  5
+pack_corrections: 0
+handoff:         6
+skill_calls:     0
+risks:           4
+headline:        CLAUDE.md § Commands now lists every slice B script and the Compose verbs. It also covers SEED_DEMO_DATA and the stale-.env fix, the first-run demo steps, and the demo page URL.

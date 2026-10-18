@@ -50,6 +50,9 @@ matching test, and it should be one that would fail if the rule broke:
   parsing would round wrongly (for example `19.99`, `0.29`).
 - **(5)** A `/go/<offer>` click row holds no IP, user agent or cookie, and the
   response sets no cookie.
+  - Counting rules are proven in the integration project one rule at a time on an otherwise countable request.
+  - The e2e cannot show a counted row because every e2e offer is a demo offer.
+  - The privacy test spies on `console.*` and reads `row_to_json` of the click row.
 - **Matching (0008), slice B cut:** EAN attach, EAN with a different brand
   rejected into the report (`ean_brand_conflict`), null brand on either side
   attaches, no EAN creates a product, invalid EAN rejected. Brand + part-number
@@ -64,7 +67,7 @@ files.
 
 Any integration test or helper that writes to the database calls `assertTestDatabase()` (`tests/support/db.ts`) first, so it only ever writes `${DB_NAME}_test`; e2e writes only through `import-feeds` in `globalSetup` (§ Running tests).
 
-Every public response is asserted to have no `Set-Cookie`; a browser visit also asserts `context.cookies()` is empty and no request leaves the app origin.
+Every public response is asserted to have no `Set-Cookie`; a browser visit also asserts `context.cookies()` is empty and no request leaves the app origin. The one exception is the `/go` click-through, which asserts the browser's request to the shop's `.example` host (§ Shared scaffolding and gotchas).
 
 ## Shared scaffolding and gotchas
 
@@ -75,6 +78,10 @@ Every public response is asserted to have no `Set-Cookie`; a browser visit also 
   `tests/fixtures/feeds/`; shipped-demo expectations in `tests/fixtures/demo.ts`.
 - `tests/support/network-off.ts`: `stubNetworkOff`; every importer test stubs
   fetch to throw.
+- `tests/support/go.ts`: `callGo(offer, {method, headers})` calls the route's GET/HEAD/OPTIONS with a countable default request (Host `shop.test`, browser UA; a header set to null is removed), `allClicks()`, `insertGoOffer({shop, feed, product, offer})` (visible by default, `feed.isDemo` for demo).
+- Playwright `page.route` does not intercept the redirect target of a navigation (`/go` 302 to a shop host): the click-through asserts the browser's request to the `.example` host with `page.waitForRequest`, and the page ends on a chrome-error page.
+- Force a failure in the real route by `vi.mock` of `@/server/clicks/record` or `@/server/clicks/offer-target` with `importOriginal` and a `vi.hoisted` switch.
+- A `\b` in a Python non-raw string written into a test file becomes a backspace character, so write regexes with Write or a raw string.
 - Also in `tests/support`: `pg-error.ts`, `page-checks.ts`, `messages.ts`.
 - React components render in the unit project with `renderToStaticMarkup` from
   `react-dom/server` and `createElement`; `.module.css` imports need no config.

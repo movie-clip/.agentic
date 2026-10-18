@@ -10,7 +10,7 @@ without a read. Treat it as read. (If it is genuinely not in your context, read
 it — that is the one case where it is worth a tool call.)
 
 This file carries what `CLAUDE.md` does not: the lane map, the **numbering** a
-`REFUSED` cites, and the rules for building before a stack decision exists.
+`REFUSED` cites, and the rules for building on the recorded stack and for a choice no decision covers.
 Phase bindings live in `phases.md`, which the orchestrator reads at intake and
 no specialist lane needs.
 

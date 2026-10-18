@@ -25,11 +25,11 @@ convention you never read is not.
 
 ## Before the stack is recorded
 
-The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` only if the tech-lead plan names no directory or file for what you are asked to build.
+The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` if the tech-lead plan names no directory or file for what you are asked to build, or if it needs a framework or package-manager choice no recorded decision covers (`project.md` § Building before the stack exists).
 
 ## Layout
 
-UI under `src/app` (pages), `src/components`, `src/i18n` (`locale.ts`, `request.ts`), `messages/es-ES.json`, `src/app/globals.css` (CSS Modules, owner ruling 2026-10-17, `docs/decisions/0011`: co-located `*.module.css`; `globals.css` keeps the reset and the CSS custom properties; add no new global classes). Public pages under `src/app/(public)/`, admin under `src/app/admin/`. A component never imports `src/db`, `src/server` or `src/config`, and receives finished strings: the layout or page reads configuration and passes it down as a prop. A page (`page.tsx`) is a server component and may import `src/server` read functions and `formatEuroCents`; it never imports `src/db`.
+UI under `src/app` (pages), `src/components`, `src/i18n` (`locale.ts`, `request.ts`), `messages/es-ES.json`, `src/app/globals.css` (CSS Modules, owner ruling 2026-10-17, `docs/decisions/0011`: co-located `*.module.css`; `globals.css` keeps the reset and the CSS custom properties; add no new global classes). Public pages under `src/app/(public)/`, admin under `src/app/admin/`. A component never imports `src/db`, `src/server` or `src/config`, and receives finished strings: the layout or page reads configuration and passes it down as a prop. A page (`page.tsx`) is a server component and may import `src/server` read functions, `formatEuroCents` and `goPath` (`src/server/clicks/go-path.ts`); it never imports `src/db`.
 
 A CSS Module file next to a component is imported as `styles` and typed by Next's `*.module.css` declaration. Class names are hashed in the HTML, so tests select by `data-testid` or role, never by class.
 
@@ -59,9 +59,10 @@ Working-copy files are CRLF on Windows (autocrlf): edit existing files with the 
 - **(1)** Public pages show only what the server's visibility scope returned.
   The client never filters by approval or hidden state to compensate.
 - **(2)** Shop links always point at `/go/<offer>`, never straight at a shop or
-  affiliate URL, and the client never fetches shop pages. Until the `/go`
-  slice ships, offer rows render no link at all (owner call Q4); the read
-  contract still carries `offerId` for it.
+  affiliate URL, and the client never fetches shop pages.
+  - Each offer row has one plain `<a rel="sponsored nofollow">` to `goPath(offerId)`; the page maps `goPath` and passes the finished href to the component.
+  - Never `next/link` (it prefetches).
+  - Never `target`, `noreferrer` or `referrerpolicy` (the source page comes from the Referer).
 - **(3)** Admin screens rely on the server's role check. Hiding a button is a
   UX choice, not access control.
 - **(4)** Show the final product price with IVA included. Never do money

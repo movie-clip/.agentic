@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-18-s1-1-go-redirect/02
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-18-s1-1-go-redirect\02-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          lint and typecheck clean; second db:generate said "No schema changes"; integration 105 passed (13 files); unit 291 passed (17 files); curl /go/1 gave 302, Location on tienda-demo-uno.example, no Set-C
+changed:         16
+contract_notes:  8
+pack_corrections: 3
+handoff:         8
+skill_calls:     0
+risks:           5
+headline:        /go/<offer> redirects visible offers (302), 404s the rest, and counts only real navigations into a new clicks table; migration 0001 generated and the curl check passed.

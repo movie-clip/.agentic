@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-18-s1-1-go-redirect/08
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-18-s1-1-go-redirect\08-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          exit 0, run.md and 01-07 ok; plugin validate passed; 4 BLOCKING, 4 SHOULD_FIX; 4 UNVERIFIED premises; anchor authoring.md (read in full) against the 6 files and their git diff; no "not chosen" left ou
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         8
+skill_calls:     0
+risks:           7
+headline:        FAIL: four contradictions to fix (testing.md off-origin rule, frontend.md goPath import, phases.md design gap, "BLOCKED only if" in two packs); phases.md parses

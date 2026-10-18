@@ -19,7 +19,7 @@ convention you never read is not.
 
 | Section | Read it when |
 |---|---|
-| Proposing a stack | your mode is DESIGN and `CLAUDE.md` § Stack reads *not chosen* |
+| Proposing a stack | your mode is DESIGN and a choice no recorded decision covers needs an option proposed |
 | Design pass: what to settle before the engineers start | your mode is DESIGN and the stack is recorded |
 | Integration review: the checks only you can make | your mode is INTEGRATION |
 | Severity calls | your mode is INTEGRATION and you are writing a change request |
@@ -45,8 +45,12 @@ one lives in code:
   admin, and admin entry points check the session on the server (guardrail 3).
 - **Money** (`src/server/money.ts`). One money helper, in integer cents, which
   every price goes through (guardrail 4).
-- **Click log.** One `/go/<offer>` handler is the only writer of clicks, and
-  its row shape has no field for IP, user agent or cookie (guardrail 5).
+- **Click log.** Its row shape has no field for IP, user agent, cookie or referer (guardrail 5). Files and roles:
+  - `src/server/clicks/record.ts`: the only writer.
+  - `src/server/clicks/counting.ts`: the only reader of the user agent.
+  - `src/server/clicks/offer-target.ts`: the only reader of `offers.url`.
+  - `src/server/clicks/handle-go.ts`: the handler.
+  - `src/app/(public)/go/[offer]/route.ts`: the route.
 
 ## Proposing a stack
 

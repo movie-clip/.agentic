@@ -10,8 +10,6 @@ The phase→lane binding for this project. Read this at intake, alongside
 
 - **Phases** — the binding table: which lane fills each phase, in what order,
   and the clause that decides whether it fires. Copied into the run ledger.
-- **The stack run** — what a request looks like while `CLAUDE.md` § Stack reads
-  *not chosen*.
 - **When the brief is the specification** — when `story` fires here.
 - **What the gates run** — the command each `verify` row owes.
 - **Tracker** — the GitHub board and repo the orchestrator keeps in step with
@@ -29,7 +27,7 @@ copies it into the run ledger at intake and records a verdict beside every row.
 | ground-truth | 1 | recon | the request names existing code or rests on an unverified claim about current behaviour | — |
 | framing | 1 | product | the request adds a user-facing surface, changes what one is *for*, or `docs/product/mvp.md` does not exist yet | **yes** — the brief is relayed and the verdict is the human's |
 | specification | 1 | story | framing produced scope no approved brief covers, **and** the slice crosses more than one lane's contract or changes a data model or API response that shipped code depends on | **yes** — the one hard stop |
-| design | 1 | design | `CLAUDE.md` § Stack reads *not chosen* and the request needs code, or the change crosses the frontend/backend contract (a new or changed API response, a schema change), or more than one build lane touches it | — |
+| design | 1 | design | the change crosses the frontend/backend contract (a new or changed API response, a schema change), or more than one build lane touches it, or the request needs a choice no recorded decision covers (`project.md` § Building before the stack exists) | — |
 | build | 1..n | backend, frontend, test, docs | anything that edits repo code, tests or `docs/**` — and only once the stack it needs is recorded | **yes** — the human's go on the build plan, before the branch is created |
 | verify | 1 | integration | any build lane was dispatched | — |
 | verify | 2 | review | the run carries a story whose acceptance criteria someone must accept | — |
@@ -37,19 +35,6 @@ copies it into the run ledger at intake and records a verdict beside every row.
 
 `quant-audit` has no row. `project.md` § "Why `quant` is not bound" is the
 reason.
-
-### The stack run
-
-While `CLAUDE.md` § Stack reads *not chosen*, a request that needs code runs
-`framing → design` and then **stops**. `design` returns a stack proposal, and
-`build` does not fire: its clause requires the stack to be recorded. The
-orchestrator relays the proposal and records the owner's choice, in the owner's
-words, in the run's `decisions.md`. The owner's decision then goes to `docs`,
-which writes it as `docs/decisions/NNNN-<topic>.md` and updates `CLAUDE.md`
-§ Stack at close. The next run builds on it.
-
-A request that is pure scope, such as "what should the MVP contain", runs
-`framing → close` and needs no stack.
 
 ### When the brief is the specification
 

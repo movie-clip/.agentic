@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-18-s1-1-go-redirect/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-18-s1-1-go-redirect\04-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          gate exit 0; lint and typecheck clean; vitest 37 files, 573 passed, 0 skipped (unit 20 files 404 passed, integration 17 files 169 passed); playwright 31 passed, 0 skipped
+changed:         12
+contract_notes:  1
+pack_corrections: 4
+handoff:         4
+skill_calls:     0
+risks:           6
+headline:        S1.1 tests landed across unit, integration and e2e, covering guardrails 1 and 5 and each counting rule; npm run gate exits 0 with 573 vitest and 31 Playwright tests passing.

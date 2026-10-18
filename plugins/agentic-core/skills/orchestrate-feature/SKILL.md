@@ -209,7 +209,7 @@ block maps. Write each identifier into `tracker.md` as it is created.
 | Point in the run | Tracker action |
 |---|---|
 | intake, the request names an issue | read it and record it as the run's issue |
-| framing approved | create the issues the brief names, label them, link sub-issues, add each to the board at the *new* status; record the run's issue |
+| framing approved | create the issues the brief names, label them, link sub-issues, mark each dependency the brief declares as *blocked by* on the dependent issue (the relationship, not body text), add each to the board at the *new* status; record the run's issue |
 | specification approved | put the story file's path in the story issue's body; create one ticket sub-issue per ticket |
 | the human says go on the build plan | write the ruling to `decisions.md`; if no issue is recorded, create one at *new*. Create the branch from an up-to-date default branch and set *building* |
 | a lane that edited the repo returns, once `build` has fired (build, a `verify` fix, `close`) | commit its paths to the branch with `#<issue> <summary>` and push; the first push opens the draft pull request, its body `Closes #<issue>` |

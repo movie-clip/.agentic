@@ -4,20 +4,20 @@ Repo: `C:\projects\investments\los-tres` (Los Tres)
 Bound via `los-tres/.agentic.json`.
 
 **`CLAUDE.md` is already in your context.** Claude Code loads the repo's
-`CLAUDE.md` into every dispatched lane at startup, so the product, the stack
-(once chosen), the layout, the canonical-doc map and the command list reach you
+`CLAUDE.md` into every dispatched lane at startup, so the product, the stack,
+the layout, the canonical-doc map and the command list reach you
 without a read. Treat it as read. (If it is genuinely not in your context, read
 it — that is the one case where it is worth a tool call.)
 
 This file carries what `CLAUDE.md` does not: the lane map, the **numbering** a
-`REFUSED` cites, and the rules for building in a repo that has no code yet.
+`REFUSED` cites, and the rules for building before a stack decision exists.
 Phase bindings live in `phases.md`, which the orchestrator reads at intake and
 no specialist lane needs.
 
-**This profile is greenfield.** The repo was bound before its first line of
-code, so the packs carry the product's constraints and almost no code
-conventions. There are none to record yet. The first slices *set* the
-conventions; `pack_corrections` is how they land in the packs, and the first
+**This profile is young.** The stack is recorded (`CLAUDE.md` § Stack) and the
+tracer-bullet slices A and B exist, but the packs still carry mostly the
+product's constraints and few code conventions. Later slices *set* the
+conventions; `pack_corrections` is how they land in the packs, and the next
 several runs should produce more of them than a mature project does. That is the
 loop working (`protocol/packs.md`), not a finding.
 
@@ -84,7 +84,9 @@ feeds, products and offers the public sees (guardrail 1).
 
 The approved scope is `docs/product/mvp.md` (2026-10-16). It replaced an
 earlier marketplace scope, so a brief, plan or note that mentions sellers,
-orders, Stripe or vehicle fitment is stale. There is no backlog yet.
+orders, Stripe or vehicle fitment is stale. The backlog is GitHub Project 3
+(`CLAUDE.md` § Canonical documentation); the build order is the Slice field on
+each story.
 
 A brief that depends on a market fact nobody has established (for example,
 whether a network will approve us) says so in `risks`.
@@ -93,17 +95,19 @@ whether a network will approve us) says so in `risks`.
 
 **No lane picks the stack.** Language, framework, database, hosting and data
 sources are the owner's decisions. Each one is recorded in `docs/decisions/` and
-summarised in `CLAUDE.md` § Stack. While that section reads *not chosen*:
+summarised in `CLAUDE.md` § Stack. The stack is recorded there, so a build lane builds on it and does not reopen it. A change to a
+`CLAUDE.md` § Stack line is the owner's call: propose it and stop. For a
+choice the recorded decisions do not cover:
 
-- `tech-lead` (DESIGN) may **propose** a stack, comparing options against the
+- `tech-lead` (DESIGN) may **propose** an option, comparing options against the
   five guardrails, but the proposal is a report, not a decision.
 - A build lane that would have to choose a framework, a package manager or a
-  directory layout to complete its order reports `BLOCKED` and names the
+  directory layout that no decision covers reports `BLOCKED` and names the
   decision it needs. It does not choose.
 
-Once a decision is recorded, the first slice that builds on it also writes the
-conventions it set into the matching pack, through `pack_corrections`. That
-covers layout, commands and the test runner.
+A slice that builds on a recorded decision also writes the conventions it set
+into the matching pack, through `pack_corrections`. That covers layout,
+commands and the test runner.
 
 ## Lane routing
 
@@ -121,9 +125,6 @@ covers layout, commands and the test runner.
 | review | `reviewer` | — | acceptance gate: PASS / FAIL — only where a story exists |
 | protocol-lint | `protocol-linter` | — | **authoring gate**: network files under `<agenticRoot>` against `protocol/authoring.md`. Not a delivery phase |
 
-Which directories count as server code and which as frontend is set by the
-first stack decision. It is not guessed here.
-
 **No project tool server.** `los-tres/.mcp.json` declares only `github`, the
 GitHub MCP server the orchestrator uses for the tracker (`phases.md`
 § Tracker). No `mcp__project__*` or `mcp__github__*` tool is granted to any
@@ -140,8 +141,8 @@ authoring order. `phases.md`'s `verify` rows are what `check_report.py` reads.
 
 ## Mechanical gates — never bypass
 
-- **There is no gate command yet.** The first slice that adds code must also
-  add a lint command and a test command, and list both in `CLAUDE.md`
-  § Commands. Until it does, `integration` cannot pass a build
+- **The gate is `npm run gate`** (`CLAUDE.md` § Commands): lint, typecheck,
+  tests and e2e against the Compose stack.
+- **`integration` cannot pass a build until the gate exits 0**
   (`architecture.md` § Integration review).
 - **Git and GitHub:** `CLAUDE.md` § Git and tickets.

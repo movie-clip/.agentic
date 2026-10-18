@@ -31,19 +31,20 @@ convention you never read is not.
 Whatever the stack, these boundaries exist. Every design pass names where each
 one lives in code:
 
-- **Public visibility.** One shared query scope decides what is public: an
+- **Public visibility** (`src/server/visibility.ts`; product read in
+  `src/server/catalogue/product-page.ts`). One shared query scope decides what is public: an
   offer from an approved feed that is not hidden, and a product that is not
   hidden and not in the matching queue. Every public read (catalogue, search,
   product page, sitemap, `/go/<offer>`) goes through it (guardrail 1).
-- **Feed ingestion.** One importer, `import-feeds`, is the only writer of
+- **Feed ingestion** (`src/server/importer/`, `source.ts` the only fetch). One importer, `import-feeds`, is the only writer of
   products and offers from outside data. It reads only feeds registered in the
   database and has no code path that fetches a shop's web pages (guardrail 2).
-- **Matching.** One matching module implements `docs/decisions/0008`. The
+- **Matching** (`src/server/matching.ts`). One matching module implements `docs/decisions/0008`. The
   importer and the admin merge and split tools both call it.
 - **Role check.** Every server entry point declares whether it is public or
   admin, and admin entry points check the session on the server (guardrail 3).
-- **Money.** One money type or helper, in integer cents, which every price goes
-  through (guardrail 4).
+- **Money** (`src/server/money.ts`). One money helper, in integer cents, which
+  every price goes through (guardrail 4).
 - **Click log.** One `/go/<offer>` handler is the only writer of clicks, and
   its row shape has no field for IP, user agent or cookie (guardrail 5).
 
@@ -73,6 +74,9 @@ will answer differently and both will look right in isolation.
 touches. If the slice would create a second public-visibility filter, a second
 writer of products or offers, a second matcher or a second money helper, stop
 it in the plan.
+
+**How server-side CLIs run in the image.** Settle it (compiled, relative
+imports, `--conditions=react-server`) before any lane writes an entry point.
 
 **The lane split and order.** The order is backend contract first, then
 frontend, then test. Name which lane owns what.

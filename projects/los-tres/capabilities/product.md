@@ -1,7 +1,7 @@
 # Capability pack: product — project `los-tres`
 
 For the `producer` lane. How requests get shaped in a price-comparison site
-that has an approved MVP scope but no code and no backlog yet.
+that has an approved MVP scope, a tracer-bullet code base (slices A and B) and a backlog on GitHub Project 3.
 
 ---
 
@@ -26,6 +26,7 @@ convention you never read is not.
 |---|---|
 | `docs/product/mvp.md` | the approved MVP scope (2026-10-16): what is in, what is explicitly out, and the owner's settled product calls |
 | `docs/decisions/` | stack and architecture decisions, one file each, numbered |
+| GitHub Project 3 | the backlog: epics, stories, tickets and owner tasks; the Slice field is the build order |
 
 `mvp.md` replaced an earlier marketplace scope. Do not reconstruct scope from
 memory of marketplaces: there are no sellers, orders or payments here.

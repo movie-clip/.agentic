@@ -2,9 +2,9 @@
 
 For the `test-engineer` lane.
 
-**No test infrastructure exists yet.** The first build slice chooses the runner
-together with the stack. Whoever sets it up records the runner, the commands
-and the directory layout here through `pack_corrections`.
+Slice A set the runners, commands and directory layout (§ Running tests).
+Whoever adds a runner, fixture or command convention records it here through
+`pack_corrections`.
 
 ---
 
@@ -14,19 +14,27 @@ Read this block first. You are not expected to read this file end to end — rea
 what your order touches. Reading one extra section is cheap; acting on a
 convention you never read is not.
 
-**Always read:** **What must always be covered** · **Definition of done for this lane**
+**Always read:** **What must always be covered** · **Shared scaffolding and gotchas** · **Definition of done for this lane**
 
 | Section | Read it when |
 |---|---|
-| Running tests | you are running or adding tests — empty until the first build slice fills it |
+| Running tests | you are running or adding tests, or touching a test config |
 
 ---
 
 ## Running tests
 
-*Not yet established.* `CLAUDE.md` § Commands is the authority once it lists a
-test command. If it lists none and your order needs one, report `BLOCKED`
-rather than choosing a runner.
+Vitest 5 with two projects in `vitest.config.mts` (the package stays CommonJS; the config uses `import.meta.dirname`): `unit` (`tests/unit`, no database, no network) and `integration` (`tests/integration`, serial, real PostgreSQL, database `${DB_NAME}_test` on the Compose `db` service, pointed at by `tests/support/test-database-env.ts`, needs `npm run db:up`). `tests/support/global-setup.ts` drops and recreates `${DB_NAME}_test` on every integration run (`drop database ... with (force)`) and migrates it with `runMigrations` from `src/db/migrate.ts`. Integration files call `resetDatabase()` (`tests/support/db.ts`) in `beforeEach` and `closeDb()` in `afterAll`. Playwright in `tests/e2e`, chromium only, against the Compose `app` at `E2E_BASE_URL` (default `http://127.0.0.1:${APP_PORT}`), no webServer, needs `npm run stack:up`. Commands: `npm run test:unit`, `test:integration`, `test` (both), `test:e2e`, `test:e2e:install`, and `npm run gate` = lint, tsc, db:up, test, stack:up, test:e2e. Env comes from `.env` via `process.loadEnvFile`. Helpers in `tests/support`, fixtures in `tests/fixtures`.
+
+`CLAUDE.md` § Commands is the authority for the command list.
+
+`vitest.config.mts` and `playwright.config.ts` must not import from `tests/`: tsconfig includes them, `next build` typechecks them in the image, and `.dockerignore` removes `tests/`. Put shared logic behind `setupFiles` or `globalSetup` instead (Playwright's takes a string path).
+
+E2E data comes from Playwright `globalSetup` (`tests/e2e/global-setup.ts`), which runs `docker compose run --rm -T --no-deps app import-feeds` and throws a named message on `feeds=0` (quoted in `CLAUDE.md` § Commands). The e2e write rule is in § What must always be covered.
+
+Umami answers 307 at `/`. Assert 200 on `/api/heartbeat`, and on `/` only through a client that follows redirects. Host port 3000 may be taken, so never write a literal base URL: specs use the `baseURL` and `request` fixtures, and only `playwright.config.ts` computes it from `.env` (`appBaseUrl()` is gone).
+
+Expected site name and copy come from `SITE_NAME` in `.env` and `messages/es-ES.json`, never a literal. Raw server HTML is parsed by `page.setContent` in a context with `javaScriptEnabled: false`, not by an HTML parser dependency.
 
 ## What must always be covered
 
@@ -42,11 +50,48 @@ matching test, and it should be one that would fail if the rule broke:
   parsing would round wrongly (for example `19.99`, `0.29`).
 - **(5)** A `/go/<offer>` click row holds no IP, user agent or cookie, and the
   response sets no cookie.
-- **Matching (0008):** EAN match, brand + normalised part number match, and
-  conflict → queue, each with a fixture.
+- **Matching (0008), slice B cut:** EAN attach, EAN with a different brand
+  rejected into the report (`ean_brand_conflict`), null brand on either side
+  attaches, no EAN creates a product, invalid EAN rejected. Brand + part-number
+  matching and the queue are tested when they ship.
+- **es-ES prices and seams.** Assertions on es-ES prices normalise U+00A0
+  (`normaliseSpaces`, `tests/support/messages.ts`). `tests/unit/seams.test.ts`
+  scans the source so the visibility flags, `fetch(`, `node:fs`, `@/db` in
+  pages and `/ 100` stay out of places they do not belong.
 
 Never call a live affiliate network in a test. Import from local fixture feed
 files.
+
+Any integration test or helper that writes to the database calls `assertTestDatabase()` (`tests/support/db.ts`) first, so it only ever writes `${DB_NAME}_test`; e2e writes only through `import-feeds` in `globalSetup` (§ Running tests).
+
+Every public response is asserted to have no `Set-Cookie`; a browser visit also asserts `context.cookies()` is empty and no request leaves the app origin.
+
+## Shared scaffolding and gotchas
+
+- `tests/support/catalogue.ts`: insert helpers whose defaults are the fully
+  VISIBLE state, so a test sets only the one flag it is about.
+- `tests/support/feeds.ts`: `fixtureDeps`, where a feed row's `url` is the
+  fixture file name, and `textDeps`. Local feed files live in
+  `tests/fixtures/feeds/`; shipped-demo expectations in `tests/fixtures/demo.ts`.
+- `tests/support/network-off.ts`: `stubNetworkOff`; every importer test stubs
+  fetch to throw.
+- Also in `tests/support`: `pg-error.ts`, `page-checks.ts`, `messages.ts`.
+- React components render in the unit project with `renderToStaticMarkup` from
+  `react-dom/server` and `createElement`; `.module.css` imports need no config.
+- The ESLint Node API runs in Vitest (`new ESLint({cwd})`, `lintText(code,
+  {filePath})` on virtual paths under `src/`). The first call loads
+  eslint-config-next and takes seconds, so those tests pass a 60 s timeout.
+- `getDb` caches its pool: close it with `closeDb()` before and after
+  `vi.stubEnv` changes `DATABASE_URL`.
+- Prove a malformed slug runs no query black-box: stop the pool, point
+  `DATABASE_URL` at an unused port, call the read function. A malformed slug
+  returns null; a well-formed one rejects.
+- On Windows (autocrlf) existing files are CRLF, so a multi-line Edit
+  `old_string` fails: use single-line edits or rewrite the file with Write.
+- A Python script that opens a file with `open(p,'wb')` before building the
+  content truncates it if the build raises: read, build, then write. Pass
+  `encoding='utf-8'`; the default is cp1252.
+- A long Bash heredoc containing apostrophes failed to parse: use Write.
 
 ## Definition of done for this lane
 

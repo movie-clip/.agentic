@@ -2,57 +2,76 @@
 
 For the `backend-engineer` lane. Server code, the data schema and migrations.
 
-**No backend exists yet.** This pack carries the constraints and no code
-conventions. The slice that creates the server writes the conventions it set
-(layout, route shape, migration command) here through `pack_corrections`.
+Slices A and B set the layout, delivery and migration conventions below. Route
+shape is still to be written by the slice that adds one, through
+`pack_corrections`.
 
 ---
 
-## Index
+## Contents
 
-Read this block first. You are not expected to read this file end to end — read
-what your order touches. Reading one extra section is cheap; acting on a
-convention you never read is not.
+Read this file in full.
 
-**Always read:** **Before the stack is recorded** · **Guardrails, in code terms** · **Definition of done for this lane**
-
-| Section | Read it when |
-|---|---|
-| Layout | you are adding a file — empty until the first build slice fills it |
+- **Before the stack is recorded**
+- **Layout**
+- **Guardrails, in code terms**
+- **Definition of done for this lane**
 
 ---
 
 ## Before the stack is recorded
 
-If `CLAUDE.md` § Stack reads *not chosen*, or the tech-lead plan in your
-`inputs` does not name the framework and directory you are to use, report
-`BLOCKED` and name the missing decision. Do not choose one.
+The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` only if the tech-lead plan names no directory or file for what you are asked to build.
 
 ## Layout
 
-*Not yet established.* The first build slice records it here.
+One Next.js app at the repo root, npm, Node 22. Server-only code: `src/config` (env readers, `getSiteName`, `isDemoSeedEnabled`), `src/db` (`getDb()`, `schema/`, `migrations/`, `runMigrations`), `src/server` (`visibility.ts`, `money.ts`, `matching.ts`, `slug.ts`, `catalogue/`, `importer/`, `seed/`), `src/cli` (thin mains for `migrate`, `seed`, `import-feeds`). Files in these four directories import each other relatively, never with `@/`: the CLI is compiled by `tsc -p tsconfig.cli.json` to `dist/` and run with `node --conditions=react-server`, and tsc does not rewrite aliases. ESLint enforces it. `tsconfig.cli.json` needs `lib: ["ES2023"]`: the default ES2022 lib types `useGrouping` as boolean and rejects `'always'`. Delivery files at the root: `Dockerfile`, `docker-entrypoint.sh` (verb dispatcher: `server`, `migrate`, `seed`, `import-feeds`; unknown verb exits 64), `compose.yaml`, `docker/db-init`. Every public route is under `src/app/(public)/`, every admin route under `src/app/admin/`.
+
+Compose binds every published port to `127.0.0.1`. The `app` image runs `HOSTNAME=0.0.0.0`. `.gitattributes` keeps `*.sh` LF. Pinned: TypeScript 5.9 (npm `latest` is 7.x, unverified against eslint-config-next), ESLint 9, Next 16, Postgres 17, Umami `postgresql-v2.20.2`.
+
+Next 16 loads `.env` itself, so `npm run dev` needs no env loader. If a host port is taken (for example 3000), set `APP_PORT` in `.env`; never stop another project's container to free it.
+
+Identity ids are not reused or rewound: a seed re-run burns identity values on `on conflict do nothing`, so ids 1 and 2 hold only on a fresh database. Tests and scripts look feeds up by slug or url, never assume an id after a second seed.
+
+Working-copy files are CRLF on Windows (autocrlf), so a scripted multi-line string replace on an existing file silently does nothing: use the Edit tool and check `git diff`.
 
 ## Guardrails, in code terms
 
-- **(1) Visibility.** Every public read goes through the one visibility scope
-  the plan names: approved feed, not hidden, not in the matching queue. Only
-  admin-scoped paths approve feeds or hide items. Seeds create feeds as not
-  approved, except the demo feed the seed marks as demo.
+- **(1) Visibility.** Every public read goes through the one visibility scope,
+  `src/server/visibility.ts`: approved feed, not hidden, not in the matching
+  queue. Only admin-scoped paths approve feeds or hide items. Seeds are
+  insert-only (`on conflict do nothing`) and create nothing approved except
+  rows marked `is_demo` and the demo shops; they never change an existing row.
+  `SEED_DEMO_DATA` is true in `.env.example` and false by default in Compose.
 - **(2) No scraping.** The importer fetches only the URL of a feed registered in
   the database, and parses it as CSV or XML feed data. Never add a crawler, a
   headless browser or an HTML parser for shop pages.
+  `src/server/importer/source.ts` is the only place that fetches or reads a
+  feed.
 - **(3) Roles.** Every route declares whether it is public or admin. Admin
   routes and server actions check the session on the server.
-- **(4) Money.** Integer cents, through the single money helper the plan names.
+- **(4) Money.** Integer cents, through the single money helper,
+  `src/server/money.ts` (parse and format).
   Feed prices are parsed from their decimal text straight to cents, never
   through a float. No float column and no float arithmetic.
 - **(5) Personal data.** The click row has no IP, user agent or cookie field.
   Log ids, not emails. Read secrets from the environment, and add each new
-  variable to `.env.example` with no value.
+  variable to `.env.example`: secrets blank and generated by
+  `npm run env:init`, non-secret settings with their local default. Never read
+  `process.env` at module load; read it in a function.
+- **Import side effects.** Importing a `src/db` or `src/config` module must not
+  open a connection or throw; `next build` runs with no database.
 - **Imports are isolated.** One failing feed records its error in its import
   report and never stops the other feeds.
 - **Migrations.** Every schema change is a migration, never a hand edit to
-  the database.
+  the database. `npm run db:generate -- --name <name>` writes SQL to
+  `src/db/migrations/`; commit it. Once a migration is merged to `main` it is
+  never edited. The app container migrates on every `server` start.
+  drizzle-kit is pinned `^0.31.11` against drizzle-orm 0.45.4.
+- **Feed URLs and lint.** A feed URL may hold an API key: never print or log
+  one; CLI mains print only an error code. ESLint `no-restricted-imports`
+  overrides do not merge: an override must repeat the scraping-library
+  patterns.
 
 ## Definition of done for this lane
 
@@ -61,5 +80,8 @@ If `CLAUDE.md` § Stack reads *not chosen*, or the tech-lead plan in your
 - [ ] Lint and test commands from `CLAUDE.md` § Commands run and passing, or
       their absence reported
 - [ ] Contract notes emitted for every field the frontend will consume
+- [ ] Compose logs checked for no feed URL, database URL or `.example` host
+      (Next's own `http://localhost:3000` and `http://0.0.0.0:3000` start-up
+      lines are expected)
 - [ ] Any convention you established (path, command, pattern) written as a
       `pack_corrections` entry for this file

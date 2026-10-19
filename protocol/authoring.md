@@ -116,6 +116,8 @@ than a list:
 > a test, a gate, a validator, or the human approval step?**
 > If yes, Sonnet. If no, Opus.
 
+One lane is on Opus by exception, not by the test: `tech-lead` (see the table).
+
 Frequency is the second term. A lane that runs on every dispatch multiplies its
 tier by the dispatch count; a lane that runs once per run, or only when the
 substance calls for it, pays the premium seldom. Highest consequence × lowest
@@ -123,7 +125,7 @@ frequency is the profile that earns Opus.
 
 | Model | Lanes | Why |
 |---|---|---|
-| `opus` | `quantitative-researcher`, `protocol-linter`, `tech-lead` | **The first two have no downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. `tech-lead` is the owner's ruling (2026-10-18): its design pass fixes the contract every build lane then follows, and it pairs Opus with `low` effort so the tier, not the dial, carries the judgment. |
+| `opus` | `quantitative-researcher`, `protocol-linter`, `tech-lead` | **The first two have no downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. `tech-lead` fails the test, since `integration` is followed by `review`, and is on Opus by the owner's ruling: its design pass fixes the contract every build lane then follows, and it pairs Opus with `low` effort so the tier, not the dial, carries the judgment. |
 | `sonnet` | `producer`, `story-author`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
@@ -149,16 +151,16 @@ the top of the range.
 | Effort | Lanes | Why |
 |---|---|---|
 | `high` | `producer`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the user sees, whether it is acceptable, and the two that write the code the contract describes. |
-| `low` | `tech-lead` | Opus at the lowest dial: the model tier buys the design and review judgment, and `low` keeps the report terse and the tool calls few. Owner's ruling, 2026-10-18. |
-| `medium` | `quantitative-researcher`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
+| `low` | `tech-lead` | Opus at the lowest dial: the model tier buys the design and review judgment, and `low` keeps the report terse and the tool calls few. |
+| `medium` | `quantitative-researcher`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two no-downstream-check Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
 
 `quantitative-researcher` and `protocol-linter` sit at `medium` **on the model
-tier, not on the effort dial**: they are the two lanes on Opus, and the tier
-is what buys their judgment. This is a deliberate trade — see the caveat
+tier, not on the effort dial**: they are the two lanes with no downstream
+check, and the tier is what buys their judgment. This is a deliberate trade — see the caveat
 below.
 
-`low` is used once, for `tech-lead` on Opus (owner's ruling, 2026-10-18). `max` is not a default anywhere; it is the escalation for a lane
-the run has shown to be struggling, on the same evidence rule as a model
+`max` is not a default anywhere; it is the escalation for a lane the run has
+shown to be struggling, on the same evidence rule as a model
 escalation: a `BLOCKED` that is not a missing input, or a second change-request
 round.
 
@@ -179,12 +181,13 @@ turns rather than depth. Leave it unset unless a lane demonstrably runs away —
 a turn cap that fires mid-task produces a truncated report, which is worse than
 an expensive one, and `status: PARTIAL` will not always catch it.
 
-### Why `integration` and `review` are on Sonnet
+### Why `review` and `ux-review` are on Sonnet
 
 `quant-audit` and `protocol-lint` are on Opus for the reason the model table
 gives — nothing downstream checks them. These two are different because
-something does: `integration` is followed by `review`, and `review` by the
-human's acceptance of the work itself.
+something does: `ux-review` is followed by `review`, and `review` by the
+human's acceptance of the work itself. `integration` runs on `tech-lead`,
+which is on Opus by the owner's ruling, not by this reasoning.
 
 The second reason is the one to reuse when tiering a new gate. **A gate whose
 load-bearing checks sit on mechanisms is far less tier-sensitive than one

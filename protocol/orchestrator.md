@@ -547,8 +547,8 @@ open only that part:
 sed -n '/^contract_notes:/,/^[a-z_]*:/p' <run_dir>/04-backend.md
 ```
 
-**Planning artifacts are read by their brief.** `product`, `design`, `story` and
-`quant` RESEARCH produce artifacts far longer than the report block — a plan and
+**Planning artifacts are read by their brief.** `product`, `ux`, `design`,
+`story` and `quant` RESEARCH produce artifacts far longer than the report block — a plan and
 its stories run to hundreds of lines, and perhaps thirty of them are routing
 decisions you act on. Every such artifact carries, directly below its report
 block, a `## Orchestrator brief` of at most 15 lines. Read the brief. Read the sections the brief names, if you

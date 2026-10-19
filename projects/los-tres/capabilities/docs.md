@@ -1,7 +1,8 @@
 # Capability pack: docs — project `los-tres`
 
 For the `docs-engineer` lane. Runs at close-out, after the `integration` gate
-(and `review`, when a story exists) passes, or after a framing-only or
+(and `ux-review` when a screen changed, and `review` when a story exists)
+passes, or after a framing-only or
 stack run that the owner approved.
 
 **Never run this lane on unverified work.** This lane propagates correctness

@@ -151,7 +151,7 @@ Head <nn>:
 - **`PASS` is the lane's claim and `detail` is the evidence.** "802 passed" and
   "802 passed, 4 skipped" are different results. When `detail` disagrees with
   the order, open the artifact.
-- **Planning lanes** (`product`, `quant` RESEARCH, `story`, `design`): read the
+- **Planning lanes** (`product`, `quant` RESEARCH, `story`, `ux`, `design`): read the
   `## Orchestrator brief` and the sections it names, not the whole document.
 - **`REFUSED`** on a guardrail is the system working. Take it to the user and
   never re-dispatch it with softer wording.

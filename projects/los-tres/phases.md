@@ -60,7 +60,10 @@ looking at. `review` verifies the story's acceptance criteria one by one.
 ### What `ux` feeds
 
 The UX spec goes to `design` (the tech lead plans the contract from its data
-needs) and to the `frontend` build order, both as an `inputs` path. A `FAIL`
+needs) and to the `frontend` build order, both as an `inputs` path. When the
+spec says `direction: new` or `direction: changed` and `decisions.md` records
+the human's approval, the spec and `decisions.md` also go to the close-out
+`docs` order as `inputs`, so it can write `docs/design/system.md`. A `FAIL`
 from `ux-review` routes its findings to `frontend`, like any gate's.
 
 ## Tracker

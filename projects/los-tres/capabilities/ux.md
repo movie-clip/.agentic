@@ -95,8 +95,13 @@ Phone (390 wide) and desktop (1280 wide) are the two viewports. Open every
 image with `Read` before you judge it. A finding names its screenshot file.
 
 The CLI cannot press Tab, so keyboard focus is not visible in a screenshot.
-Check `:focus-visible` styles in the CSS and label the result a consistency
-check, not a screenshot check.
+Check both halves as consistency checks, labelled so:
+
+- **Visibility:** the `:focus-visible` styles in the CSS.
+- **Order:** fetch the page (`curl -s <url>`), list the focusable elements
+  (`a[href]`, `button`, `input`, `select`, `textarea`, `[tabindex]` not `-1`)
+  in document order, and compare that order with the reading order in the
+  screenshots. A positive `tabindex` is a finding.
 
 ## Producing the states
 
@@ -152,4 +157,4 @@ UX-REVIEW mode:
 - [ ] Phone and desktop screenshots of every screen in scope, each opened and
       cited
 - [ ] Every spec check marked `SATISFIED`, `GAP`, `DRIFTED` or `not checked`
-- [ ] Taste observations in `risks`, never in the verdict
+- [ ] Taste observations in `handoff` as `SHOULD_FIX`, never in the verdict

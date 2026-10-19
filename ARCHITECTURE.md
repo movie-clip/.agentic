@@ -239,31 +239,32 @@ validator, the human approval step?* If yes, Sonnet. If no, Opus. Only
 `quantitative-researcher` and `protocol-linter` fail it. A wrong formula is
 engineered perfectly, tested thoroughly, satisfies every acceptance criterion
 and passes every other gate; a wrong `model:` line in an agent file bills wrong
-on every dispatch forever and shows up as nothing at all. `effort` is the second
-dial and is not the model — `high` for the five lanes that decide something,
-`medium` for
-the rest, because the implicit default is `xhigh` and an omission is a silent
+on every dispatch forever and shows up as nothing at all. `tech-lead` is also on
+Opus, by the owner's ruling rather than the test. `effort` is the second dial
+and is not the model — `high` for the five lanes that decide something, `low`
+for `tech-lead`, `medium` for the rest, because the implicit default is `xhigh` and an omission is a silent
 escalation rather than a neutral one.
 
-## 6. Why four gates
+## 6. Why five gates
 
 | Gate | Judges | Fails on |
 |---|---|---|
 | `quantitative-researcher` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
+| `designer` UX-REVIEW | the **rendered UI** | a failed spec check, a missing state, a broken phone layout, an accessibility-floor breach, copy that contradicts the spec |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
 | `protocol-linter` | the **network's own files** | an agent, skill, pack or protocol section that breaks `authoring.md` |
 
 None subsumes another. A wrong formula can be engineered flawlessly, tested
-thoroughly, and satisfy every acceptance criterion — the second and third gates
-would both pass it, because neither is looking at the arithmetic. That is why
+thoroughly, and satisfy every acceptance criterion — the engineering and
+acceptance gates would both pass it, because neither is looking at the arithmetic. That is why
 the quant gate runs first where analytics changed: if the mathematics is wrong,
 the others are measuring the wrong thing. The converse holds too — correct math
 can be wired into the wrong lane, or ship a feature nobody asked for. One gate
 holding every standard in one context is exactly the dilution this network
 exists to avoid.
 
-The first three gate a **delivery** run and are the ones the close-out sweep
+The first four gate a **delivery** run and are the ones the close-out sweep
 checks. `protocol-lint` gates **authoring** orders and sits outside that set on
 purpose: it has nothing to say about a run that changes the bound repo, and
 `protocol-lint skipped (not an authoring order)` on every delivery ledger is a

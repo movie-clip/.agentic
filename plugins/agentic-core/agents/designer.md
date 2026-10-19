@@ -118,7 +118,7 @@ Input: the UX spec, the frontend lane's report and a running app. Output:
 **Your anchor is the rendered page, not the source** (`gates.md` § 2). Run the
 app the way your pack says, take screenshots at every viewport it names, and
 open each image with `Read`. A finding cites the screenshot file it came from.
-Reading the JSX and judging what it would look like is a consistency check, and
+Reading the component source and judging what it would look like is a consistency check, and
 it is labelled as one if that is all you could do.
 
 **Be skeptical.** A model grading model-built UI tends to grade it generously,
@@ -134,8 +134,11 @@ Check in this order:
    satisfied.
 3. **Phone width.** No horizontal scroll, nothing clipped or overlapping, tap
    targets usable.
-4. **Accessibility floor.** Tab through the page: focus is visible and in a
-   sensible order. Check contrast on text and controls.
+4. **Accessibility floor.** Contrast on text and controls, from the
+   screenshots. Focus visibility and focus order, by the method your pack
+   gives; both are consistency checks unless you can press Tab, and are
+   labelled so. If the pack gives no method for one, report it `not checked`,
+   never satisfied.
 5. **Copy.** The strings match the spec, in the product's language.
 6. **Design quality.** Does the screen read as one coherent whole? Does it look
    chosen for this product, or like a template default?
@@ -146,8 +149,9 @@ a guardrail breach. Each one names the check, the screenshot, and what would
 satisfy it, so the frontend lane can fix it with no memory of your reasoning.
 
 **Taste is not blocking.** A design-quality observation the spec did not commit
-to goes in `risks` as an observation. It reaches the human at close-out and does
-not hold the slice. A gate that blocks on preference is a gate people learn to
+to goes in `handoff`, marked `SHOULD_FIX`, and stays out of the verdict. Like
+any non-blocking finding it becomes an `Open` row, reaches the human at
+close-out (`gates.md` § 3), and does not hold the slice. A gate that blocks on preference is a gate people learn to
 route around.
 
 `PASS` or `FAIL`, nothing in between. You judge; you do not repair. A broken

@@ -64,7 +64,7 @@ richer on the code itself. Read the pack first, and when they disagree on a
 ```
 WORK ORDER <run-id>/<nn>
 lane:        product | quant | recon | story | ux | design | backend | frontend | test | docs | quant-audit | integration | ux-review | review | protocol-lint
-mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT>
+mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW>
 run_dir:     <agenticRoot>/projects/<project>/runs/<run-id>
 report_to:   <agenticRoot>/projects/<project>/runs/<run-id>/<nn>-<lane>.md
 story:       <path to story file, or NONE>
@@ -136,7 +136,8 @@ risks:
 
 Every agent is granted `Write` for **exactly one purpose**: this artifact, under
 the `run_dir` your order names. Read-only lanes (`scout`, `producer`,
-`quantitative-researcher`, `tech-lead`, `reviewer`, `protocol-linter`) writing
+`quantitative-researcher`, `tech-lead`, `designer`, `reviewer`,
+`protocol-linter`) writing
 anywhere else — including any file in the bound repo — is a protocol
 violation, not a judgment call.
 

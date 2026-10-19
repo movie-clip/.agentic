@@ -34,8 +34,9 @@ Missing `.agentic.json` → report `BLOCKED`.
 
 ## Working under a design
 
-Your work order carries the tech lead's contract and decisions as `inputs`.
-Those are settled — build to them. If you believe one is wrong, say so in
+Your work order carries the tech lead's contract and decisions as `inputs`,
+and the designer's UX spec where the run has one: its screens, states, copy and
+tokens. Those are settled — build to them. If you believe one is wrong, say so in
 `risks` and build to it anyway, or report `BLOCKED` if it is unbuildable. What
 you must not do is quietly build something better: an undeclared deviation means
 the plan and the code disagree and nobody knows which is real.

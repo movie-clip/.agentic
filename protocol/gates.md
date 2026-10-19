@@ -1,5 +1,5 @@
 <!-- Extension: GATE LANES only — tech-lead, reviewer,
-     quantitative-researcher, protocol-linter.
+     quantitative-researcher, protocol-linter, designer (UX-REVIEW).
      Read after PROTOCOL.md core. Not restated anywhere else. -->
 
 # Protocol extension — gates
@@ -11,12 +11,13 @@ other lane may fill, and it is what the run turns on.
 
 ## 1. What each gate checks
 
-Four gates, checking different things:
+Five gates, checking different things:
 
 | Gate | Judges | Fails on |
 |---|---|---|
 | `quantitative-researcher` AUDIT | the **mathematics** | a wrong formula, a mislabelled trust class, a number that does not reproduce |
 | `tech-lead` INTEGRATION | the **engineering** | contracts misaligned across lanes, the design not followed |
+| `designer` UX-REVIEW | the **rendered screen** | a UX spec check, state or phone layout that fails on screenshot, a breach of the accessibility floor |
 | `reviewer` | **acceptance** | the story's criteria not satisfied |
 | `protocol-linter` | the **network's own files** | an agent, skill, pack or protocol section that breaks `authoring.md` |
 

@@ -50,7 +50,7 @@ MID = [
     "## Artifacts",
     "| # | lane | mode | agent | model | artifact | status | verdict |",
     "|---|------|------|-------|-------|----------|--------|---------|",
-    "| 01 | design | DESIGN | tech-lead | sonnet | 01-design.md | DONE | - |",
+    "| 01 | design | DESIGN | tech-lead | opus | 01-design.md | DONE | - |",
     "",
 ]
 
@@ -118,7 +118,7 @@ check("the refusal really did not write", "spent:        2" in raw(d))
 
 print("C - a row already on a slot is corrected, not duplicated")
 d = fixture()
-run(d, "--row", "01 | design | DESIGN | tech-lead | sonnet | 01-design.md | "
+run(d, "--row", "01 | design | DESIGN | tech-lead | opus | 01-design.md | "
                 "PARTIAL | -")
 after = raw(d)
 check("the slot is rewritten in place", after.count("| 01 | design |") == 1)

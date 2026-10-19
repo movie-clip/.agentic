@@ -51,11 +51,12 @@ SECTIONS = ["changed", "verification", "contract_notes",
 COUNTED = ["changed", "contract_notes", "pack_corrections", "handoff",
            "skill_calls", "risks"]
 
-LANES = {"product", "quant", "recon", "story", "design", "backend", "frontend",
-         "test", "docs", "quant-audit", "integration", "review",
-         "protocol-lint"}
+LANES = {"product", "quant", "recon", "story", "ux", "design", "backend",
+         "frontend", "test", "docs", "quant-audit", "integration", "ux-review",
+         "review", "protocol-lint"}
 # Lanes permitted to render a judgment. Everyone else writes verdict: NONE.
-GATE_LANES = {"integration", "review", "quant-audit", "protocol-lint"}
+GATE_LANES = {"integration", "ux-review", "review", "quant-audit",
+              "protocol-lint"}
 # Only the tech lead's integration pass may request changes.
 CR_LANES = {"integration"}
 
@@ -65,7 +66,8 @@ CR_LANES = {"integration"}
 # none of these is required by route alone - which is exactly why the ledger has
 # to say what happened to each one rather than the sweep guessing.
 #
-# Deliberately three where GATE_LANES is four. The fourth, `protocol-lint`,
+# Deliberately three where GATE_LANES is five. `ux-review` is resolved from
+# the profile's `verify` rows like any other gate. The fifth, `protocol-lint`,
 # gates authoring orders against the network's own files; it has nothing to say
 # about a run that changes the bound repo, and requiring every delivery ledger
 # to write `protocol-lint skipped (not an authoring order)` would be a line that

@@ -21,6 +21,7 @@ convention you never read is not.
 | Section | Read it when |
 |---|---|
 | Recording an owner decision | the run's `decisions.md` holds an approved MVP scope or stack choice |
+| Recording the design system | the run's UX spec says `direction: new` or `direction: changed` |
 | The second close-out order: applying pack corrections | your order is a close-out pack-corrections order |
 
 ---
@@ -31,6 +32,7 @@ convention you never read is not.
 |---|---|
 | `docs/product/mvp.md` | approved MVP scope: in, out, settled owner calls |
 | `docs/decisions/NNNN-<topic>.md` | one recorded decision each: context, options, the owner's choice, consequences |
+| `docs/design/system.md` | the design system the human approved: principles, tokens, components, copy voice |
 | `CLAUDE.md` § Stack, § Commands | the summary every lane loads at startup |
 
 ## Recording an owner decision
@@ -39,6 +41,13 @@ Write it from `decisions.md`, in the owner's words, never from a proposal the
 owner did not approve. A stack decision produces a `docs/decisions/` file
 **and** the matching `CLAUDE.md` § Stack line, both in the same order. Change
 nothing else in `CLAUDE.md`.
+
+## Recording the design system
+
+When the run's UX spec says `direction: new` or `direction: changed` and
+`decisions.md` records the human's approval, write `docs/design/system.md` from
+the spec's `Design system` section. Copy it; do not edit the design. If the
+human approved it with changes, the changes in `decisions.md` win.
 
 ## The second close-out order: applying pack corrections
 

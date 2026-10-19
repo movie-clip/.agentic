@@ -37,11 +37,12 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 │     ├─ quantitative-researcher.md opus/medium    formulas · trust classes · financial gate
 │     ├─ story-author.md            sonnet/medium  drafts the ticketed story (human approves)
 │     ├─ scout.md                   sonnet/medium  read-only recon
-│     ├─ tech-lead.md               sonnet/high    design pass + integration gate
+│     ├─ tech-lead.md               opus/low       design pass + integration gate
 │     ├─ backend-engineer.md        sonnet/high
 │     ├─ frontend-engineer.md       sonnet/high
 │     ├─ test-engineer.md           sonnet/medium
 │     ├─ docs-engineer.md           sonnet/medium
+│     ├─ designer.md                sonnet/high    UX spec + design gate (screenshots)
 │     ├─ reviewer.md                sonnet/high    acceptance gate
 │     └─ protocol-linter.md         opus/medium    authoring gate — network files vs authoring.md
 ├─ projects/portfolio/                    ← project-SPECIFIC layer
@@ -178,8 +179,8 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 ## Current state
 
-v0.8.2 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
-Eleven agents. Six bound projects, each with its own profile and packs under
+v0.8.4 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
+Twelve agents. Six bound projects, each with its own profile and packs under
 `projects/`: `portfolio`, `budget`, `impact`, `tradingview`, `datoro` and
 `los-tres`.
 

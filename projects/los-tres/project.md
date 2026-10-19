@@ -116,12 +116,14 @@ commands and the test runner.
 | recon | `scout` | — | read-only exploration of what already exists in the repo |
 | product | `producer` | `product.md` | MVP scope, which change this is, where "no" lives |
 | story | `story-author` | — | drafts a ticketed story when a slice needs one |
+| ux | `designer` (UX) | `ux.md` | the flow, screens, states, copy and design system a change commits to, before the tech lead plans it. Edits no repo file |
 | design | `tech-lead` (DESIGN) | `architecture.md` | stack proposals, the frontend/backend contract, the lane split |
 | backend | `backend-engineer` | `backend.md` | server code, data schema and migrations (non-test) |
 | frontend | `frontend-engineer` | `frontend.md` | the public catalogue and the admin UI (non-test) |
 | test | `test-engineer` | `testing.md` | test files and test infrastructure |
 | docs | `docs-engineer` | `docs.md` | `docs/**` and `CLAUDE.md` § Stack / § Commands, and — at close-out only — `<agenticRoot>/projects/los-tres/capabilities/**` when applying `pack-corrections.md` |
 | integration | `tech-lead` (INTEGRATION) | `architecture.md` | engineering gate: PASS / CHANGES_REQUESTED |
+| ux-review | `designer` (UX-REVIEW) | `ux.md` | **design gate**: the running app, screenshotted at phone and desktop widths, against the UX spec: PASS / FAIL |
 | review | `reviewer` | — | acceptance gate: PASS / FAIL — only where a story exists |
 | protocol-lint | `protocol-linter` | — | **authoring gate**: network files under `<agenticRoot>` against `protocol/authoring.md`. Not a delivery phase |
 
@@ -136,8 +138,8 @@ project tool server, read `protocol/authoring.md` § "The project tool server".
 Nothing here needs the mathematics gate. The site sorts prices, takes daily
 minimums for price history and counts clicks, and those are arithmetic covered
 by guardrail 4 and by tests. They are not a methodology anyone has to re-derive. Gates that apply:
-`integration`, `review` when a story exists, and `protocol-lint` on an
-authoring order. `phases.md`'s `verify` rows are what `check_report.py` reads.
+`integration`, `ux-review` when a screen changed, `review` when a story exists,
+and `protocol-lint` on an authoring order. `phases.md`'s `verify` rows are what `check_report.py` reads.
 
 ## Mechanical gates — never bypass
 

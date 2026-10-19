@@ -123,8 +123,8 @@ frequency is the profile that earns Opus.
 
 | Model | Lanes | Why |
 |---|---|---|
-| `opus` | `quantitative-researcher`, `protocol-linter` | **Neither has a downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
-| `sonnet` | `producer`, `story-author`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
+| `opus` | `quantitative-researcher`, `protocol-linter`, `tech-lead` | **The first two have no downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. `tech-lead` is the owner's ruling (2026-10-18): its design pass fixes the contract every build lane then follows, and it pairs Opus with `low` effort so the tier, not the dial, carries the judgment. |
+| `sonnet` | `producer`, `story-author`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
 **A report is not only its claims**, which is the half that is easy to miss when
@@ -144,11 +144,12 @@ other is only half-configured.
 an agent with no `effort:` line is not running "normally", it is running near
 the top of the range.
 
-**`medium` is this network's baseline.** Two levels are in use:
+**`medium` is this network's baseline.** Three levels are in use:
 
 | Effort | Lanes | Why |
 |---|---|---|
-| `high` | `producer`, `tech-lead`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the contract is, whether it is acceptable, and the two that write the code the contract describes. |
+| `high` | `producer`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the user sees, whether it is acceptable, and the two that write the code the contract describes. |
+| `low` | `tech-lead` | Opus at the lowest dial: the model tier buys the design and review judgment, and `low` keeps the report terse and the tool calls few. Owner's ruling, 2026-10-18. |
 | `medium` | `quantitative-researcher`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
 
 `quantitative-researcher` and `protocol-linter` sit at `medium` **on the model
@@ -156,7 +157,7 @@ tier, not on the effort dial**: they are the two lanes on Opus, and the tier
 is what buys their judgment. This is a deliberate trade — see the caveat
 below.
 
-`low` and `max` are not defaults anywhere. `max` is the escalation for a lane
+`low` is used once, for `tech-lead` on Opus (owner's ruling, 2026-10-18). `max` is not a default anywhere; it is the escalation for a lane
 the run has shown to be struggling, on the same evidence rule as a model
 escalation: a `BLOCKED` that is not a missing input, or a second change-request
 round.
@@ -191,6 +192,8 @@ leaning on the model noticing something.** `check_report.py` enforces the report
 shape, the head's counts and the brief's completeness; an acceptance criterion
 must name the observation that would prove it false; `gates.md` § 2 says what a
 gate must check against. These two have the most structure to lean on.
+`ux-review` sits on Sonnet for the same reason: every check in the UX spec names
+the screenshot that would prove it false, and taste never blocks.
 
 ### Escalating a single dispatch
 

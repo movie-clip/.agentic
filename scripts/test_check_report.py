@@ -97,6 +97,7 @@ check("fenced '- x' not counted as a bullet", cr.counts(doc2)["handoff"] == 1,
 print("F7 — lane inferred from filename")
 for fn, want in [("04-backend.md", "backend"), ("06-backend-T36.1.1.md", "backend"),
                  ("14-integration.md", "integration"), ("15-review.md", "review"),
+                 ("03-ux.md", "ux"), ("09-ux-review.md", "ux-review"),
                  ("02-delivery-brief.md", None), ("run.md", None)]:
     got = cr.lane_from_name(Path(fn))
     check(f"{fn} -> {want}", got == want, f"got {got}")
@@ -310,7 +311,7 @@ def _split(doc, lane):
 
 # Gate lanes have never exceeded 400 in a real run (longest: 310), so enforcing
 # it there costs nothing - and it is the only place a bullet is routed onward.
-for gate in ("integration", "review", "quant-audit", "protocol-lint"):
+for gate in ("integration", "ux-review", "review", "quant-audit", "protocol-lint"):
     b, w = _split(_bul(500), gate)
     check(f"{gate}: over the ceiling blocks",
           any("chars (max 400)" in x for x in b), str(b))
@@ -324,7 +325,7 @@ for gate in ("integration", "review", "quant-audit", "protocol-lint"):
     check(f"{gate}: a fact plus its citation is silent at 250",
           not b and not w, f"{b} {w}")
 
-for lane in ("backend", "docs", "story", "test", "frontend"):
+for lane in ("backend", "docs", "story", "test", "frontend", "ux"):
     b, w = _split(_bul(500), lane)
     check(f"{lane}: over the ceiling only advises",
           not b and any("chars (max 400)" in x for x in w), f"{b} {w}")

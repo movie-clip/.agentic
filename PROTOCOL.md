@@ -11,7 +11,7 @@ Then read **your extension**, and only yours:
 | Your role | Also read |
 |---|---|
 | orchestrator (main session) | `protocol/orchestrator.md` |
-| `tech-lead`, `reviewer`, `quantitative-researcher` | `protocol/gates.md` |
+| `tech-lead`, `reviewer`, `quantitative-researcher`, `designer` in UX-REVIEW mode | `protocol/gates.md` |
 | `protocol-linter` | `protocol/gates.md` **and** `protocol/authoring.md` |
 | `docs-engineer`, on a close-out order | `protocol/packs.md` |
 | every other lane | nothing else |
@@ -63,7 +63,7 @@ richer on the code itself. Read the pack first, and when they disagree on a
 
 ```
 WORK ORDER <run-id>/<nn>
-lane:        product | quant | recon | story | design | backend | frontend | test | docs | quant-audit | integration | review | protocol-lint
+lane:        product | quant | recon | story | ux | design | backend | frontend | test | docs | quant-audit | integration | ux-review | review | protocol-lint
 mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT>
 run_dir:     <agenticRoot>/projects/<project>/runs/<run-id>
 report_to:   <agenticRoot>/projects/<project>/runs/<run-id>/<nn>-<lane>.md
@@ -147,7 +147,7 @@ One fact per bullet. The orchestrator routes bullets individually, so a
 
 | lane | target | ceiling |
 |---|---|---|
-| gate lanes — `integration`, `review`, `quant-audit`, `protocol-lint` | 300 | **400, enforced** |
+| gate lanes — `integration`, `ux-review`, `review`, `quant-audit`, `protocol-lint` | 300 | **400, enforced** |
 | `recon`, `quant` RESEARCH | 400 | 600, advisory |
 | everything else | 300 | 400, advisory |
 
@@ -270,7 +270,7 @@ is the reference; the artifact is the content.
 
 ### Artifacts with a body beyond the block
 
-Planning lanes (`product`, `design`, `story`, `quant` RESEARCH) produce
+Planning lanes (`product`, `ux`, `design`, `story`, `quant` RESEARCH) produce
 artifacts far longer than the report block — story sets, technical plans,
 metrics inventories. Directly below the report block — never above it; the
 block's `REPORT` line is always the artifact's first — those artifacts
@@ -359,8 +359,8 @@ INTEGRATION). It is **not** `status: PARTIAL` — the order succeeded; the thing
 it judged did not.
 
 Only `tech-lead` in `INTEGRATION` mode may emit `CHANGES_REQUESTED`. Only
-`reviewer`, `tech-lead`, `quantitative-researcher` in `AUDIT` mode and
-`protocol-linter` may emit `PASS` or `FAIL`. Every other lane writes
+`reviewer`, `tech-lead`, `quantitative-researcher` in `AUDIT` mode, `designer`
+in `UX-REVIEW` mode and `protocol-linter` may emit `PASS` or `FAIL`. Every other lane writes
 `verdict: NONE`.
 
 ## 7. Field discipline

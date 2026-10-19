@@ -181,9 +181,9 @@ without a tool call. The profile carries what `CLAUDE.md` does not — the lane
 map, the numbered guardrails a lane may refuse an order over, and the friction
 the repo docs do not record.
 
-## 5. Roster — 11 agents, 13 lanes
+## 5. Roster — 12 agents, 15 lanes
 
-The lane is the unit of dispatch; two agents fill two lanes each, because a
+The lane is the unit of dispatch; three agents fill two lanes each, because a
 design pass and an integration gate are different jobs with different inputs
 even when the same role does them.
 
@@ -193,6 +193,7 @@ even when the same role does them.
 | `product` | `producer` | `product.md` | **the front door.** Roadmap placement, epic/story shaping, sequencing — and where "no" lives |
 | `quant` | `quantitative-researcher` (RESEARCH) | `quant.md` | formulas, academic grounding, trust-class analysis, metrics inventory, before a story exists |
 | `story` | `story-author` | `story.md` | drafts the ticketed story. Decides nothing — not placement, not the contract |
+| `ux` | `designer` (UX) | `ux.md` | the flow, screens, states, copy and design system, settled before the tech lead plans the contract |
 | `design` | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, and the lane split, settled before anyone codes |
 | `backend` | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test). Owns the contract source of truth |
 | `frontend` | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test). Mirrors server schemas exactly |
@@ -200,6 +201,7 @@ even when the same role does them.
 | `docs` | `docs-engineer` | `docs.md` | `docs/**`, and at close-out only, applying `pack-corrections.md` back into the packs |
 | `quant-audit` | `quantitative-researcher` (AUDIT) | `quant.md` | **mathematics gate.** Independently recomputes published numbers, checks trust labels |
 | `integration` | `tech-lead` (INTEGRATION) | `architecture.md` | **engineering gate.** PASS / CHANGES_REQUESTED, per lane |
+| `ux-review` | `designer` (UX-REVIEW) | `ux.md` | **design gate.** Screenshots the running app at phone and desktop widths against the UX spec. PASS / FAIL |
 | `review` | `reviewer` | — | **acceptance gate.** ACs one by one, test-plan fidelity. PASS / FAIL |
 | `protocol-lint` | `protocol-linter` | — | **authoring gate.** The network's own files against `authoring.md` |
 
@@ -212,7 +214,7 @@ dir.** "Read-only" was never quite true. What actually bounds the planning and
 gate lanes is that they hold no `Edit` — though `Bash` remains a write primitive
 for the lanes that have it, and that is a real gap, not a rounding error.
 
-**Six of the eleven agents reach the bound repo's `project` MCP server** — `run_tests`,
+**Six of the twelve agents reach the bound repo's `project` MCP server** — `run_tests`,
 `probe_engine`, `build_snapshot`, `check_gates`, `reset_goldens` — granted
 narrowly, with the verifying gates (`reviewer`, `tech-lead`) getting nothing
 that mutates. It exists because lanes
@@ -230,7 +232,7 @@ plugins/agentic-core` reports it by file and reason; `protocol-linter` runs that
 before it reads anything, and `authoring.md` § "The frontmatter has to parse, or
 none of it applies" is the rule it cites.
 
-**Model and effort are pinned in frontmatter on all eleven, never `inherit`.**
+**Model and effort are pinned in frontmatter on all twelve, never `inherit`.**
 The policy is in `authoring.md`; the rationale is one test: *would a wrong
 answer from this lane be caught by anything downstream — a test, a gate, a
 validator, the human approval step?* If yes, Sonnet. If no, Opus. Only

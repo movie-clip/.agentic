@@ -27,10 +27,12 @@ copies it into the run ledger at intake and records a verdict beside every row.
 | ground-truth | 1 | recon | the request names existing code or rests on an unverified claim about current behaviour | — |
 | framing | 1 | product | the request adds a user-facing surface, changes what one is *for*, or `docs/product/mvp.md` does not exist yet | **yes** — the brief is relayed and the verdict is the human's |
 | specification | 1 | story | framing produced scope no approved brief covers, **and** the slice crosses more than one lane's contract or changes a data model or API response that shipped code depends on | **yes** — the one hard stop |
-| design | 1 | design | the change crosses the frontend/backend contract (a new or changed API response, a schema change), or more than one build lane touches it, or the request needs a choice no recorded decision covers (`project.md` § Building before the stack exists) | — |
+| design | 1 | ux | the request adds or changes a public or admin screen, a user flow, or user-facing copy | **yes**, when the spec says `direction: new` or `direction: changed`: the spec is relayed and the verdict is the human's. `direction: unchanged` passes without a stop |
+| design | 2 | design | the change crosses the frontend/backend contract (a new or changed API response, a schema change), or more than one build lane touches it, or the request needs a choice no recorded decision covers (`project.md` § Building before the stack exists) | — |
 | build | 1..n | backend, frontend, test, docs | anything that edits repo code, tests or `docs/**` — and only once the stack it needs is recorded | **yes** — the human's go on the build plan, before the branch is created |
 | verify | 1 | integration | any build lane was dispatched | — |
-| verify | 2 | review | the run carries a story whose acceptance criteria someone must accept | — |
+| verify | 2 | ux-review | `ux` was satisfied, or a build lane changed what a public or admin screen renders | — |
+| verify | 3 | review | the run carries a story whose acceptance criteria someone must accept | — |
 | close | 1 | docs | always — `docs/**` against what shipped, and `pack-corrections.md` against `capabilities/` **when a lane emitted one** | — |
 
 `quant-audit` has no row. `project.md` § "Why `quant` is not bound" is the
@@ -50,8 +52,16 @@ row as `not triggered (the delivery brief in <nn> is the specification)`, and
 
 `integration` runs the lint and test commands `CLAUDE.md` § Commands lists. If
 it lists none, that is a `BLOCKING` finding on any build, not a pass by default.
-`architecture.md` carries the rule. `review` verifies the story's acceptance
-criteria one by one.
+`architecture.md` carries the rule. `ux-review` screenshots the running app at
+phone and desktop widths and checks the UX spec (`ux.md`); it runs after
+`integration` passes, because a screen that fails the gate is not worth
+looking at. `review` verifies the story's acceptance criteria one by one.
+
+### What `ux` feeds
+
+The UX spec goes to `design` (the tech lead plans the contract from its data
+needs) and to the `frontend` build order, both as an `inputs` path. A `FAIL`
+from `ux-review` routes its findings to `frontend`, like any gate's.
 
 ## Tracker
 

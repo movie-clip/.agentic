@@ -194,9 +194,10 @@ load-bearing checks sit on mechanisms is far less tier-sensitive than one
 leaning on the model noticing something.** `check_report.py` enforces the report
 shape, the head's counts and the brief's completeness; an acceptance criterion
 must name the observation that would prove it false; `gates.md` § 2 says what a
-gate must check against. These two have the most structure to lean on.
-`ux-review` sits on Sonnet for the same reason: every check in the UX spec names
-the screenshot that would prove it false, and taste never blocks.
+gate must check against. These two have the most structure to lean on:
+`review` checks criteria that each name a falsifying observation, and
+`ux-review` checks a UX spec whose every check names the screenshot that would
+prove it false, with taste never blocking.
 
 ### Escalating a single dispatch
 

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-20-designer-lint-followup/02
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-20-designer-lint-followup\02-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          no Bash tool in this lane; the orchestrator runs check_report.py. Edit applied to line 487 only.
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           2
+headline:        CR-1: orchestrator.md:487 reduced to a pointer to core § 5 with no added rule.

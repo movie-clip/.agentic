@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-20-designer-lint-followup/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-20-designer-lint-followup\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate passed. N1 RESOLVED, both risks RESOLVED; Open-row sweep rule kept (core § 5 + check_report.py:1203). 1 new BLOCKING (rule 9). Anchor: designer.md/reviewer.md frontmatter, 3 run ledgers. 1 pr
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         1
+skill_calls:     0
+risks:           4
+headline:        Leftovers all resolved, but new orchestrator.md:487 "never a round" contradicts core § 5 round: and check_report's Rounds-row check - FAIL.

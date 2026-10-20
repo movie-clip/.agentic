@@ -459,11 +459,12 @@ phase model is calibrated for this project yet.
 ### A gate that fails routes; it does not stop the run
 
 No gate can dispatch, so every `FAIL` becomes work only if you make it work.
-The route is one shape for all four of them:
+The route is one shape for all five of them:
 
 1. **One change request per blocking finding**, at `<run_dir>/cr/CR-<n>.md`,
    in the shape core § 5 gives. `tech-lead` writes its own and hands you the
-   paths; for `quant-audit`, `reviewer` and `protocol-lint` the file is yours
+   paths; for `quant-audit`, `ux-review`, `reviewer` and `protocol-lint` the
+   file is yours
    to write, and its body **points at the gate's finding rather than restating
    it** — you did not find it, and your words carrying its authority is the
    relay rule's own failure case (§ 5).
@@ -483,9 +484,7 @@ The route is one shape for all four of them:
 4. **Re-run that gate.** That one. The others judged work nothing has touched,
    and their verdicts stand.
 
-Non-blocking findings do not hold the slice: they become `Open` rows and reach
-the human at close-out. A `SHOULD_FIX` change request with no `Open` row is a
-finding that left the run quietly, and the close-out sweep fails it.
+Non-blocking findings follow core § 5: they do not hold the slice, and reach the human through an `Open` row.
 
 ### Re-plan on evidence, and version it
 

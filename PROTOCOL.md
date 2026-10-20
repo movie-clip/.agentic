@@ -311,8 +311,8 @@ scope fence: <the files this order may open and change>
 
 - **Who writes it.** `tech-lead` in INTEGRATION mode writes its own: it cannot
   dispatch, so it names the paths in `handoff` and the orchestrator relays each
-  as a fresh work order. Every other gate — `quant-audit`, `reviewer`,
-  `protocol-lint` — returns a verdict and cannot write orders either, so the
+  as a fresh work order. Every other gate — `quant-audit`, `ux-review`,
+  `reviewer`, `protocol-lint` — returns a verdict and cannot write orders either, so the
   orchestrator writes the request that carries their finding. One mechanism,
   with the finding one file further away.
 - **If you found it, state it.** In the body: the finding (file:line, specific),

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s6-1-leftovers/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s6-1-leftovers\04-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          3 of 3 S6.1 rule-8 findings resolved; 0 BLOCKING, 1 SHOULD_FIX (rule 8); 0 raw U+2028/U+2029/control chars in the 3 packs; plugin validate passed; anchor: authoring.md + frontend.md:32 + agent tools: 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           3
+headline:        All three S6.1 rule-8 findings are resolved, no raw U+2028/U+2029 remains, and one new rule-8 SHOULD_FIX is filed on testing.md:93.

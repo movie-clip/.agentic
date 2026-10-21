@@ -38,6 +38,8 @@ Home e2e selects by the S5.2 testids (`home-panel`, `category-tree`, `category-g
 
 Listing e2e select only by the `data-testid` values of the design contract; the category name is read by `getByRole` heading level 1. Category pages are server pages: parse `request().get` HTML with `openRawHtml` for JS-off checks.
 
+Product JSON-LD e2e reads the raw `request.get` HTML with a regex over script tags (expect one match) and `JSON.parse`, then `openRawHtml` for the selector and the visible-price comparison; selector `script[type="application/ld+json"][data-testid="product-jsonld"]`.
+
 Expected site name and copy come from `SITE_NAME` in `.env` and `messages/es-ES.json`, never a literal. Raw server HTML is parsed by `page.setContent` in a context with `javaScriptEnabled: false`, not by an HTML parser dependency.
 
 ## What must always be covered
@@ -88,7 +90,10 @@ Every public response is asserted to have no `Set-Cookie`; a browser visit also 
 - `tests/support/go.ts`: `callGo(offer, {method, headers})` calls the route's GET/HEAD/OPTIONS with a countable default request (Host `shop.test`, browser UA; a header set to null is removed), `allClicks()`, `insertGoOffer({shop, feed, product, offer})` (visible by default, `feed.isDemo` for demo).
 - Playwright `page.route` does not intercept the redirect target of a navigation (`/go` 302 to a shop host): the click-through asserts the browser's request to the `.example` host with `page.waitForRequest`, and the page ends on a chrome-error page.
 - Force a failure in the real route by `vi.mock` of `@/server/clicks/record` or `@/server/clicks/offer-target` with `importOriginal` and a `vi.hoisted` switch.
-- A `\b` in a Python non-raw string written into a test file becomes a backspace character, so write regexes with Write or a raw string.
+- A `\b` in a Python non-raw string, a Python heredoc or a regex literal (in an e2e spec too) written into a test file becomes a backspace character, so write regexes with Write or a raw string.
+- `tests/integration/product-jsonld.test.ts` feeds `getPublicProductBySlug` into `buildProductJsonLd` to prove hidden and unapproved offers cannot reach the JSON-LD.
+- The escape for U+2028 or U+2029 (backslash, `u`, then the four digits) typed in a test string literal may arrive as the raw character: use `String.raw` for expected escape text.
+- Check a written test file for a stray raw character with `cat -A`.
 - Also in `tests/support`: `pg-error.ts`, `page-checks.ts`, `messages.ts`.
 - React components render in the unit project with `renderToStaticMarkup` from
   `react-dom/server` and `createElement`; `.module.css` imports need no config.

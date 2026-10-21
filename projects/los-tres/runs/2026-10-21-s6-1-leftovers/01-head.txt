@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s6-1-leftovers/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s6-1-leftovers\01-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          gate exit 0; vitest 46 files 770 tests passed; playwright 70 passed. Raw-char grep -c for the UTF-8 bytes of U+2028/U+2029 returned 0 (was 3 lines); cat -A of lines 107,122,123 shows plain \u2028 back
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           2
+headline:        The four raw U+2028/U+2029 characters in product-jsonld.test.ts are now  escapes, assertions unchanged, and the gate exits 0.

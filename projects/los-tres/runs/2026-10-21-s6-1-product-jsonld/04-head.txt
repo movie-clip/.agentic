@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s6-1-product-jsonld/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s6-1-product-jsonld\04-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          gate exit 0; vitest 46 files, 770 tests passed; playwright 70 passed
+changed:         4
+contract_notes:  0
+pack_corrections: 3
+handoff:         3
+skill_calls:     0
+risks:           3
+headline:        Unit, integration and e2e tests prove the product JSON-LD is correct, safe and visible-offers-only; npm run gate exits 0.

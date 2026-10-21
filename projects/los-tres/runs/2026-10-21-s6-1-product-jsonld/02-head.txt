@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s6-1-product-jsonld/02
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s6-1-product-jsonld\02-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          lint clean; tsc and tsc -p tsconfig.cli.json clean; vitest unit 23 files, 476 tests passed
+changed:         2
+contract_notes:  3
+pack_corrections: 1
+handoff:         5
+skill_calls:     0
+risks:           2
+headline:        Added centsToDecimalString to money.ts and the product-jsonld builder and serialiser per design; lint, typecheck and unit tests pass.

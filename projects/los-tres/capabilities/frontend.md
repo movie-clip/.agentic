@@ -31,6 +31,10 @@ The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` if the tech-lead
 
 UI under `src/app` (pages), `src/components`, `src/i18n` (`locale.ts`, `request.ts`), `messages/es-ES.json`, `src/app/globals.css` (CSS Modules, owner ruling 2026-10-17, `docs/decisions/0011`: co-located `*.module.css`; `globals.css` keeps the reset and the CSS custom properties; add no new global classes). Public pages under `src/app/(public)/`, admin under `src/app/admin/`. A component never imports `src/db`, `src/server` or `src/config`, and receives finished strings: the layout or page reads configuration and passes it down as a prop. A page (`page.tsx`) is a server component and may import `src/server` read functions, `formatEuroCents` and `goPath` (`src/server/clicks/go-path.ts`); it never imports `src/db`.
 
+Listing components: `ProductCard`, `ProductGrid`, `Pagination`, `CategoryEmpty` in `src/components` (display strings only); page-level styles in a `page.module.css` beside the `page.tsx`.
+
+`.page p { color: var(--color-muted) }` (specificity 0,1,1) beats a single-class module rule on any `<p>` inside `.page`: use a `span` or `h2` for text that must not be muted, and `p` only for muted prose.
+
 A CSS Module file next to a component is imported as `styles` and typed by Next's `*.module.css` declaration. Class names are hashed in the HTML, so tests select by `data-testid` or role, never by class.
 
 Working-copy files are CRLF on Windows (autocrlf): edit existing files with the Edit tool and write new ones with Write. A long Bash heredoc containing an apostrophe failed to parse in Git Bash.
@@ -53,6 +57,7 @@ Working-copy files are CRLF on Windows (autocrlf): edit existing files with the 
 - Pages and the root layout that show configuration or data export `dynamic = 'force-dynamic'`; never read `SITE_NAME` or any env at module load. A changed `SITE_NAME` takes a container restart (`docker compose up -d`), not a rebuild.
 - `next.config.ts` is wrapped with `createNextIntlPlugin('./src/i18n/request.ts')`; server components use `getTranslations(namespace)` and `getLocale()` from `next-intl/server`. Add `NextIntlClientProvider` only when the first client component needs messages.
 - `getRequestConfig` sets `timeZone: 'Europe/Madrid'`; dates are ICU placeholders in messages, for example `{date, date, medium}`. Counts use ICU plurals. Public product pages live at `src/app/(public)/producto/[slug]/page.tsx`, call one `cache()`-wrapped read function, and call `notFound()` on `null`.
+- Listing pages read `?pagina` through `parsePageParam`, call `notFound()` on a null read, link page 1 as the clean path with no `?pagina=1`, and use plain `<a>` (not `next/link`) for card and pagination links.
 
 ## Guardrails, in code terms
 
@@ -63,6 +68,7 @@ Working-copy files are CRLF on Windows (autocrlf): edit existing files with the 
   - Each offer row has one plain `<a rel="sponsored nofollow">` to `goPath(offerId)`; the page maps `goPath` and passes the finished href to the component.
   - Never `next/link` (it prefetches).
   - Never `target`, `noreferrer` or `referrerpolicy` (the source page comes from the Referer).
+  - A product card has one link, to `/producto/<slug>`, stretched over the card with a `::after` pseudo-element on the title anchor; it never carries a `/go` link.
 - **(3)** Admin screens rely on the server's role check. Hiding a button is a
   UX choice, not access control.
 - **(4)** Show the final product price with IVA included. Never do money

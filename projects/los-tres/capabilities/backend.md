@@ -25,7 +25,7 @@ The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` if the tech-lead
 
 ## Layout
 
-One Next.js app at the repo root, npm, Node 22. Server-only code: `src/config` (env readers, `getSiteName`, `isDemoSeedEnabled`), `src/db` (`getDb()`, `schema/`, `migrations/`, `runMigrations`), `src/server` (`visibility.ts`, `money.ts`, `matching.ts`, `slug.ts`, `error-code.ts`, `catalogue/`, `clicks/` (`go-path.ts`, `counting.ts`, `source-page.ts`, `offer-target.ts`, `record.ts`, `handle-go.ts`), `importer/`, `seed/`), `src/cli` (thin mains for `migrate`, `seed`, `import-feeds`). Files in these four directories import each other relatively, never with `@/`: the CLI is compiled by `tsc -p tsconfig.cli.json` to `dist/` and run with `node --conditions=react-server`, and tsc does not rewrite aliases. ESLint enforces it. `tsconfig.cli.json` needs `lib: ["ES2023"]`: the default ES2022 lib types `useGrouping` as boolean and rejects `'always'`. Delivery files at the root: `Dockerfile`, `docker-entrypoint.sh` (verb dispatcher: `server`, `migrate`, `seed`, `import-feeds`; unknown verb exits 64), `compose.yaml`, `docker/db-init`. Every public route is under `src/app/(public)/`, every admin route under `src/app/admin/`. The public route `src/app/(public)/go/[offer]/route.ts` exports GET, HEAD and OPTIONS as one function and builds every response in one `respond()`.
+One Next.js app at the repo root, npm, Node 22. Server-only code: `src/config` (env readers, `getSiteName`, `isDemoSeedEnabled`), `src/db` (`getDb()`, `schema/`, `migrations/`, `runMigrations`), `src/server` (`visibility.ts`, `money.ts`, `matching.ts`, `slug.ts` (with `isWellFormedSlug`), `error-code.ts`, `catalogue/` (`product-page.ts`, `category-page.ts`, `page-param.ts`), `clicks/` (`go-path.ts`, `counting.ts`, `source-page.ts`, `offer-target.ts`, `record.ts`, `handle-go.ts`), `importer/`, `seed/`), `src/cli` (thin mains for `migrate`, `seed`, `import-feeds`). Files in these four directories import each other relatively, never with `@/`: the CLI is compiled by `tsc -p tsconfig.cli.json` to `dist/` and run with `node --conditions=react-server`, and tsc does not rewrite aliases. ESLint enforces it. `tsconfig.cli.json` needs `lib: ["ES2023"]`: the default ES2022 lib types `useGrouping` as boolean and rejects `'always'`. Delivery files at the root: `Dockerfile`, `docker-entrypoint.sh` (verb dispatcher: `server`, `migrate`, `seed`, `import-feeds`; unknown verb exits 64), `compose.yaml`, `docker/db-init`. Every public route is under `src/app/(public)/`, every admin route under `src/app/admin/`. The public route `src/app/(public)/go/[offer]/route.ts` exports GET, HEAD and OPTIONS as one function and builds every response in one `respond()`.
 
 Compose binds every published port to `127.0.0.1`. The `app` image runs `HOSTNAME=0.0.0.0`. `.gitattributes` keeps `*.sh` LF. Pinned: TypeScript 5.9 (npm `latest` is 7.x, unverified against eslint-config-next), ESLint 9, Next 16, Postgres 17, Umami `postgresql-v2.20.2`.
 
@@ -39,9 +39,13 @@ Working-copy files are CRLF on Windows (autocrlf), so a scripted multi-line stri
 
 - **(1) Visibility.** Every public read goes through the one visibility scope,
   `src/server/visibility.ts`: approved feed, not hidden, not in the matching
-  queue. Only admin-scoped paths approve feeds or hide items. Seeds are
+  queue, and product mapped to a category (`products.category_id` is not null). Only admin-scoped paths approve feeds or hide items. Seeds are
   insert-only (`on conflict do nothing`) and create nothing approved except
-  rows marked `is_demo` and the demo shops; they never change an existing row.
+  rows marked `is_demo` and the demo shops, and insert the demo
+  `feed_category_mappings` (on conflict do nothing); a mapping decides category
+  only, never the visibility of a feed. They never change an existing row.
+  The importer sets `products.category_id` after creation only from null (first
+  mapped wins) and never clears it: the one product column it touches later.
   `SEED_DEMO_DATA` is true in `.env.example` and false by default in Compose.
 - **(2) No scraping.** The importer fetches only the URL of a feed registered in
   the database, and parses it as CSV or XML feed data. Never add a crawler, a

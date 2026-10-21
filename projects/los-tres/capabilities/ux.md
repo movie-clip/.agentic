@@ -94,8 +94,7 @@ npx playwright screenshot --viewport-size=1280,800 --full-page --lang=es-ES <url
 Phone (390 wide) and desktop (1280 wide) are the two viewports. Open every
 image with `Read` before you judge it. A finding names its screenshot file.
 
-The CLI cannot press Tab, so keyboard focus is not visible in a screenshot.
-Check both halves as consistency checks, labelled so:
+The CLI cannot press Tab, so keyboard focus is not visible in a screenshot. A short node script using the repo's `playwright` package can: run it with `createRequire` from the repo `package.json`, press Tab and screenshot; then focus is a screenshot check, not a consistency check. Without that script, check both halves as consistency checks, labelled so:
 
 - **Visibility:** the `:focus-visible` styles in the CSS.
 - **Order:** fetch the page (`curl -s <url>`), list the focusable elements
@@ -110,9 +109,14 @@ Check both halves as consistency checks, labelled so:
 | a product with offers | `/producto/demo-filtro-de-aceite-oc-1234` (demo data, two shops) |
 | not found | `/producto/no-existe` |
 | home | `/` |
+| category, two pages | `/categoria/filtros` (26 products, 2 pages) |
+| category, last page | `/categoria/filtros?pagina=2` (2 cards) |
+| category, one card, no brand, single page | `/categoria/escobillas-y-bombillas` |
+| category, empty (200) | `/categoria/aceites-y-lubricantes` |
+| not found | `/categoria/no-existe` and `/categoria/filtros?pagina=3` (404) |
 
 Any state this table cannot produce (one offer, a missing image, the longest
-title, an empty list) is reported as `not checked` with the reason. Never mark
+title, a product with no offers) is reported as `not checked` with the reason. Never mark
 it satisfied. Add a row here through `pack_corrections` when a slice adds a way
 to reach a state.
 

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-19-s5-1-category-browse/07
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-19-s5-1-category-browse\07-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          gate exit 0: lint and typecheck clean; vitest 42 files, 705 tests passed; playwright 63 passed (8.2s). Consistency check against 03-design § Contract, no external anchor applies.
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           3
+headline:        S5.1 passes integration: contract aligned, mapped rule only in visibleProductWhere, money in integer cents, gate green; no CRs.

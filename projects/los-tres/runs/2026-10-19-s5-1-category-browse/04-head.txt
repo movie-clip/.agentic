@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-19-s5-1-category-browse/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-19-s5-1-category-browse\04-backend.md
+status:          PARTIAL
+verdict:         NONE
+verification:    FAIL
+detail:          lint and typecheck pass; test:unit 403 passed, 1 failed (tests/unit/feed-source.test.ts:29 pins the demo CSV header, now ends with ,category). Expected consequence of the required column; test lane fi
+changed:         13
+contract_notes:  7
+pack_corrections: 4
+handoff:         9
+skill_calls:     0
+risks:           6
+headline:        Category schema, migration 0002, mapped-only visibility, category read function, importer assignment and demo data built; one unit test pins the old demo CSV header and needs the test lane.

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-19-s5-1-category-browse/03
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-19-s5-1-category-browse\03-design.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          The order's verification was NONE. Plan written from the code at main 8c30965 (schema, visibility, product-page, offer-target, importer, seed, demo feeds, tests/support, seams and route tests).
+changed:         1
+contract_notes:  6
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           6
+headline:        S5.1 plan fixed: category_id column plus per-feed mapping, rule in the one visibility scope, getPublicCategoryPage contract, and backend → frontend → test lanes with affected tests named.

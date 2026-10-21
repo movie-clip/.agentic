@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/05
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\05-test.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          gate exit 0: lint, tsc, vitest 44 files / 734 tests passed (unit and integration), playwright 67 passed (home.spec.ts has 7).
+changed:         5
+contract_notes:  0
+pack_corrections: 3
+handoff:         3
+skill_calls:     1
+risks:           3
+headline:        Home category tree is covered by integration, render and e2e tests, including I-1 over every node, and npm run gate exits 0.

@@ -31,9 +31,9 @@ The stack is recorded in `CLAUDE.md` § Stack. Report `BLOCKED` if the tech-lead
 
 UI under `src/app` (pages), `src/components`, `src/i18n` (`locale.ts`, `request.ts`), `messages/es-ES.json`, `src/app/globals.css` (CSS Modules, owner ruling 2026-10-17, `docs/decisions/0011`: co-located `*.module.css`; `globals.css` keeps the reset and the CSS custom properties; add no new global classes). Public pages under `src/app/(public)/`, admin under `src/app/admin/`. A component never imports `src/db`, `src/server` or `src/config`, and receives finished strings: the layout or page reads configuration and passes it down as a prop. A page (`page.tsx`) is a server component and may import `src/server` read functions, `formatEuroCents` and `goPath` (`src/server/clicks/go-path.ts`); it never imports `src/db`.
 
-Listing components: `ProductCard`, `ProductGrid`, `Pagination`, `CategoryEmpty` in `src/components` (display strings only); page-level styles in a `page.module.css` beside the `page.tsx`.
+Listing components: `ProductCard`, `ProductGrid`, `Pagination`, `CategoryEmpty` (`homeLabel` optional: no link when omitted), `CategoryTree` (home groups), `SiteHeader` (styles in `SiteHeader.module.css`) in `src/components` (display strings only); page-level styles in a `page.module.css` beside the `page.tsx`.
 
-`.page p { color: var(--color-muted) }` (specificity 0,1,1) beats a single-class module rule on any `<p>` inside `.page`: use a `span` or `h2` for text that must not be muted, and `p` only for muted prose.
+`.page p { color: var(--color-muted) }` (specificity 0,1,1) beats a single-class module rule on any `<p>` inside `.page`: text that must not be muted is a `span` or `h2`, and `p` is for muted prose; where it must stay a `p` (the home tagline), override with a two-class selector under the container (`.panel .tagline`), never `!important`.
 
 A CSS Module file next to a component is imported as `styles` and typed by Next's `*.module.css` declaration. Class names are hashed in the HTML, so tests select by `data-testid` or role, never by class.
 

@@ -108,7 +108,8 @@ The CLI cannot press Tab, so keyboard focus is not visible in a screenshot. A sh
 |---|---|
 | a product with offers | `/producto/demo-filtro-de-aceite-oc-1234` (demo data, two shops) |
 | not found | `/producto/no-existe` |
-| home | `/` |
+| home, populated | `/` |
+| home, no category has products | not producible without wiping the demo database; report not checked unless a separate empty database is available |
 | category, two pages | `/categoria/filtros` (26 products, 2 pages) |
 | category, last page | `/categoria/filtros?pagina=2` (2 cards) |
 | category, one card, no brand, single page | `/categoria/escobillas-y-bombillas` |

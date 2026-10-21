@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/01
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\01-ux.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          check_report.py exits 0 on this artifact. The spec was drawn against screenshots of the current home (h1 and one line) and category page; the new home does not exist yet, so no check below was run aga
+changed:         2
+contract_notes:  5
+pack_corrections: 1
+handoff:         6
+skill_calls:     2
+risks:           8
+headline:        UX spec for the home category tree. direction changed (brand panel, header fix). Hide-empty-categories rule settled, so the demo-categories open point is covered. 34 checks, no new token.

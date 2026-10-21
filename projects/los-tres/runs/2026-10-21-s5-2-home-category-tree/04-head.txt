@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/04
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\04-frontend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          lint clean, tsc (app and CLI) clean, unit 22 files / 464 tests passed.
+changed:         9
+contract_notes:  4
+pack_corrections: 2
+handoff:         6
+skill_calls:     0
+risks:           4
+headline:        Home now renders the brand panel and public category tree (or no-products state); shared header gets a content-width column, 44px link and 3px focus ring.

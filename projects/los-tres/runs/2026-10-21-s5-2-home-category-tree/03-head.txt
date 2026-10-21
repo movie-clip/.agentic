@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/03
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\03-backend.md
+status:          DONE
+verdict:         NONE
+verification:    PASS
+detail:          lint clean, both tsc projects clean, db healthy, npm test 42 files / 706 tests passed. A throwaway integration smoke (since removed) also passed: tree shape, grandchild counted in ancestors, empty chi
+changed:         2
+contract_notes:  4
+pack_corrections: 1
+handoff:         5
+skill_calls:     2
+risks:           3
+headline:        getPublicCategoryTree() added in category-tree.ts, counted through visibleProductWhere() with the category page's subtree rule; seams test extended; lint, typecheck and npm test pass.

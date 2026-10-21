@@ -32,7 +32,7 @@ Whatever the stack, these boundaries exist. Every design pass names where each
 one lives in code:
 
 - **Public visibility** (`src/server/visibility.ts`; product read in
-  `src/server/catalogue/product-page.ts`). One shared query scope decides what is public: an
+  `src/server/catalogue/product-page.ts`, category listing in `category-page.ts`, home tree in `category-tree.ts`; all call `visibleProductWhere()`). One shared query scope decides what is public: an
   offer from an approved feed that is not hidden, and a product that is not
   hidden and not in the matching queue. Every public read (catalogue, search,
   product page, sitemap, `/go/<offer>`) goes through it (guardrail 1).

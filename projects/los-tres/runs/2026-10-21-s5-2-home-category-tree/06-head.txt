@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/06
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\06-integration.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          gate exit 0: lint clean, tsc app+CLI clean, vitest 44 files / 734 tests passed, playwright 67 passed. Consistency check against 02-design contract; no external anchor applies.
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         3
+skill_calls:     0
+risks:           4
+headline:        S5.2 home category tree is coherent with the 02-design contract, holds guardrail 1, gate green; one should_fix to share the subtree CTE later.

@@ -34,6 +34,8 @@ E2E data comes from Playwright `globalSetup` (`tests/e2e/global-setup.ts`), whic
 
 Umami answers 307 at `/`. Assert 200 on `/api/heartbeat`, and on `/` only through a client that follows redirects. Host port 3000 may be taken, so never write a literal base URL: specs use the `baseURL` and `request` fixtures, and only `playwright.config.ts` computes it from `.env` (`appBaseUrl()` is gone).
 
+Home e2e selects by the S5.2 testids (`home-panel`, `category-tree`, `category-group[-link|-count]`, `category-row[-link|-count]`, `site-header-link`); the home count text is `icuPlural(messages.Home.productCount, n)`.
+
 Listing e2e select only by the `data-testid` values of the design contract; the category name is read by `getByRole` heading level 1. Category pages are server pages: parse `request().get` HTML with `openRawHtml` for JS-off checks.
 
 Expected site name and copy come from `SITE_NAME` in `.env` and `messages/es-ES.json`, never a literal. Raw server HTML is parsed by `page.setContent` in a context with `javaScriptEnabled: false`, not by an HTML parser dependency.
@@ -75,8 +77,9 @@ Every public response is asserted to have no `Set-Cookie`; a browser visit also 
 ## Shared scaffolding and gotchas
 
 - `tests/support/catalogue.ts`: insert helpers whose defaults are the fully
-  VISIBLE state, so a test sets only the one flag it is about. `insertProduct` defaults `categoryId` to a shared test category (`defaultCategoryId`, found by slug so it survives `resetDatabase`); pass `categoryId: null` for the unmapped state. `insertCategory`, `insertCategoryMapping` and `insertListedProduct` (a product with one visible offer per price) live in the same file.
+  VISIBLE state, so a test sets only the one flag it is about. `insertProduct` defaults `categoryId` to a shared test category (`defaultCategoryId`, found by slug so it survives `resetDatabase`); pass `categoryId: null` for the unmapped state. `insertCategory({slug,name,parentId,position})`, `insertCategoryMapping` and `insertListedProduct` (a product with one visible offer per price) live in the same file.
 - Category feed fixtures are `tests/fixtures/feeds/category-*.csv` (mixed, ean-one/two/three, no-column); demo category expectations are `DEMO_CATEGORY_COUNTS` and friends in `tests/fixtures/demo.ts`, and `DEMO_COUNTS` carries `publicProducts` and `categoryMappings`.
+- A malformed category slug needs no DB bypass, `categories.slug` has no check constraint; insert it directly. A parent cycle is built by inserting then updating `parent_id`.
 - `tests/support/feeds.ts`: `fixtureDeps`, where a feed row's `url` is the
   fixture file name, and `textDeps`. Local feed files live in
   `tests/fixtures/feeds/`; shipped-demo expectations in `tests/fixtures/demo.ts`.

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-s5-2-home-category-tree/10
+artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s5-2-home-category-tree\10-docs.md
+status:          DONE
+verdict:         NONE
+verification:    NOT_RUN
+detail:          order verification was NONE; wording follows 09-protocol-lint F1 handoff
+changed:         1
+contract_notes:  0
+pack_corrections: 0
+handoff:         1
+skill_calls:     0
+risks:           0
+headline:    frontend.md § Layout now gives one rule with precedence for a non-muted p inside .page, resolving the F1 contradiction.

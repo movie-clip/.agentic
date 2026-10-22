@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-grill-plan-rebuild/02
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-grill-plan-rebuild\02-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          validate passed (0 errors on grill-plan; LICENSE/icon directory notes only). F1 resolved. 0 BLOCKING, 0 SHOULD_FIX. Anchor: authoring.md § Two instructions may not disagree, SKILL.md § 2, orchestrator
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         4
+skill_calls:     0
+risks:           2
+headline:        F1 is fixed: in grill-plan § 3, raised facts now go to ground-truth and "the gaps below" points only at lines 63-65; the fix adds no new contradiction and the description is unchanged.

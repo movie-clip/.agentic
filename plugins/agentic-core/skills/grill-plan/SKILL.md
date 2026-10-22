@@ -1,6 +1,6 @@
 ---
 name: grill-plan
-description: Use this at every human stop of an orchestrate-feature run that hands the human a planning artifact - the producer's delivery brief at framing, the story draft at specification, a UX spec whose direction is new or changed, and the design phase's plan at the build go when design fired - and whenever the human asks to grill a plan. Maps the artifact's decisions as a tree, sends unsourced claims and silent assumptions back to the lane that made them, settles fact questions through the ground-truth phase, and only then puts the remaining decisions to the human in numbered rounds with a recommended answer each, writing every ruling to decisions.md.
+description: Use this at every human stop of an orchestrate-feature run that hands the human a planning artifact - the producer's delivery brief at framing, the story draft at specification, a UX spec whose direction is new or changed, and the design phase's plan at the build go when design fired. Maps the artifact's decisions as a tree, sends unsourced claims and silent assumptions back to the lane that made them, settles fact questions through the ground-truth phase, and only then puts the remaining decisions to the human in numbered rounds with a recommended answer each, writing every ruling to decisions.md.
 argument-hint: the planning artifact to grill, by run-dir path
 ---
 
@@ -54,7 +54,11 @@ dispatched and recorded as `orchestrator.md` § 1 and § 3 say.
 
 A lane-gap order asks; it does not answer. Quote no preferred answer, and name
 the artifact section each question came from in `inputs`. The lane returns a
-revised artifact as a new slot.
+revised artifact as a new slot. Build the tree again from it (§ 1): nodes the
+revision settled drop out, nodes it raised join, and nodes a `decisions.md`
+entry settled stay settled (§ 2). The revision gets no lane-gap round of its
+own: a lane gap it leaves open or raises is handled as the gaps below are, and
+a fact node it raises goes to `ground-truth` (§ 2).
 
 One lane-gap round per human stop, however many slots the revisions take. Gaps
 still open after it become human questions, each labelled with what the lane

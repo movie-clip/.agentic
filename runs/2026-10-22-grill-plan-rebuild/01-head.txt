@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-grill-plan-rebuild/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-grill-plan-rebuild\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate passed (0 errors on grill-plan; LICENSE/icon directory notes only). 1 BLOCKING finding (authoring.md § Two instructions may not disagree), 0 SHOULD_FIX. Anchor: authoring.md, orchestrator.md 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           3
+headline:        FAIL: grill-plan § 3's "what it leaves open goes to the human" sends fact nodes raised by the revision to the human, contradicting § 2's fact → ground-truth sort.

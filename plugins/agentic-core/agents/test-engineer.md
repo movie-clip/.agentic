@@ -13,14 +13,14 @@ merely look reasonable.
 ## Bind first
 
 Bind per `PROTOCOL.md` § 1, before reading any source file. Walk **up** from
-cwd for `.agentic.json`, resolve `agenticRoot` against the directory that
-holds it, then read — in this order:
+cwd for `.agentic.json`, resolve `agenticRoot` and `projectDir` against the
+directory that holds it, then read — in this order:
 
 1. `<agenticRoot>/PROTOCOL.md` — the core, in full. It is short.
-2. `<agenticRoot>/projects/<project>/project.md` — **the `## Index` block
+2. `<projectDir>/project.md` — **the `## Index` block
    first**, then the sections it marks always-read, then any section your
    order touches.
-3. `<agenticRoot>/projects/<project>/capabilities/testing.md` — your capability
+3. `<projectDir>/capabilities/testing.md` — your capability
    pack, read the same way: index first, then what your order touches.
 
 Missing `.agentic.json` → report `BLOCKED`.

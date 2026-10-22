@@ -79,17 +79,17 @@ check("a skill is in scope",
       ne.is_network("plugins/agentic-core/skills/orchestrate-feature/SKILL.md"))
 check("the core and its extensions are in scope",
       ne.is_network("PROTOCOL.md") and ne.is_network("protocol/gates.md"))
-check("a profile, its phases and a pack are in scope",
-      ne.is_network("projects/budget/project.md")
-      and ne.is_network("projects/budget/phases.md")
-      and ne.is_network("projects/budget/capabilities/testing.md"))
+# Profiles and packs are project docs in each project's repo, and the lint
+# runs are judged by check_report.py, not by a lint of their own.
+check("lint runs are out of scope",
+      not ne.is_network("runs/2026-01-01-x/run.md"))
 
 # The manifest's gate is `claude plugin validate`, not an authoring judgment, so
 # a version bump must not ask for a lint round.
 check("the plugin manifest is out of scope",
       not ne.is_network("plugins/agentic-core/.claude-plugin/plugin.json"))
-check("run artifacts and ledgers are out of scope",
-      not ne.is_network("projects/budget/runs/2026-01-01-x/run.md"))
+check("a project folder left behind is out of scope too",
+      not ne.is_network("projects/budget/capabilities/testing.md"))
 check("human-facing docs are out of scope",
       not any(ne.is_network(p) for p in
               ("README.md", "ROADMAP.md", "TECH-DEBT.md", "ARCHITECTURE.md")))
@@ -98,12 +98,12 @@ check("scripts are out of scope - their gate is their tests",
 
 print("a passing artifact that names the file is coverage")
 
-_ok = _unlinted(_tree([("projects/p/runs/2026-01-02-lint/01-protocol-lint.md",
+_ok = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
                         PASS_ART + "\n`protocol/authoring.md:349` is fine\n")]))
 check("named by full path, PASS, newer than the edit", _ok[0][1] is not None,
       str(_ok))
 
-_base = _unlinted(_tree([("projects/p/runs/2026-01-02-lint/01-protocol-lint.md",
+_base = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
                           PASS_ART + "\n`authoring.md:349` is fine\n")]))
 check("the basename spelling counts too", _base[0][1] is not None, str(_base))
 
@@ -112,11 +112,11 @@ print("and these three are not")
 _none = _unlinted(_tree([]))
 check("no artifact at all is reported", _none[0][1] is None, str(_none))
 
-_fail = _unlinted(_tree([("projects/p/runs/2026-01-02-lint/01-protocol-lint.md",
+_fail = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
                           FAIL_ART + "\n`protocol/authoring.md:349` is wrong\n")]))
 check("a FAIL verdict is not coverage", _fail[0][1] is None, str(_fail))
 
-_other = _unlinted(_tree([("projects/p/runs/2026-01-02-lint/01-protocol-lint.md",
+_other = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
                            PASS_ART + "\n`protocol/gates.md:12` is fine\n")]))
 check("an artifact naming a different file is not coverage",
       _other[0][1] is None, str(_other))
@@ -127,7 +127,7 @@ check("an artifact naming a different file is not coverage",
 # passing lint would have been exempt from every later edit.
 print("an artifact older than the edit is not evidence for it")
 
-_stale = _unlinted(_tree([("projects/p/runs/2026-09-17-bind/02-protocol-lint.md",
+_stale = _unlinted(_tree([("runs/2026-09-17-bind/02-protocol-lint.md",
                            PASS_ART + "\nAnchor: protocol/authoring.md\n")],
                          art_newer=False))
 check("a lint that predates the edit does not cover it",
@@ -135,9 +135,9 @@ check("a lint that predates the edit does not cover it",
 
 # And with both present the newest wins, so the line printed names the lint that
 # actually looked at this edit rather than whichever glob came first.
-_both = _tree([("projects/p/runs/2026-09-17-bind/02-protocol-lint.md",
+_both = _tree([("runs/2026-09-17-bind/02-protocol-lint.md",
                 PASS_ART + "\nAnchor: protocol/authoring.md\n")])
-_new = _both / "projects/p/runs/2026-10-01-lint/02-protocol-lint.md"
+_new = _both / "runs/2026-10-01-lint/02-protocol-lint.md"
 _new.parent.mkdir(parents=True, exist_ok=True)
 _new.write_text(PASS_ART + "\n`protocol/authoring.md:349` re-judged\n",
                 encoding="utf-8")

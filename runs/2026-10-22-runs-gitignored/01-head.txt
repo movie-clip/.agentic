@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-runs-gitignored/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-runs-gitignored\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate passed (license/icon warnings only); P1-P4 PASS; 1 BLOCKING finding (designer.md:121, orphaned by P2); 0 script git dependencies; anchor: authoring.md + orchestrator.md § 8 + orchestrate-feat
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         9
+skill_calls:     0
+risks:           2
+headline:        P1-P4 pass; FAIL because P2 orphans designer.md:121, which still says images are not committed with the run, citing a rule P2 removed.

@@ -2,8 +2,9 @@
 """A network-layer edit with no `protocol-lint` artifact naming it.
 
 PROTOCOL.md binds every lane to files this repo owns: the agent definitions and
-skills under `plugins/`, the core and its extensions under `protocol/`, and each
-project's profile, phase bindings and capability packs. `protocol-linter` is the
+skills under `plugins/`, and the core and its extensions under `protocol/`.
+Project profiles and capability packs live in each project's own repo now, as
+project docs reviewed in its pull requests. `protocol-linter` is the
 gate on all of it -- and it only ever runs when someone asks for it, which is
 TD-05. A hand edit to any of those files reaches every future dispatch ungated.
 
@@ -22,21 +23,20 @@ settle.
 
 Scope, and why each exclusion is deliberate:
 
-  in    plugins/*/agents/**, plugins/*/skills/**, protocol/**, PROTOCOL.md,
-        projects/*/project.md, projects/*/phases.md, projects/*/capabilities/**
+  in    plugins/*/agents/**, plugins/*/skills/**, protocol/**, PROTOCOL.md
         -- which is `protocol-linter`'s own declared trigger, verbatim. A scope
         wider than the gate's subject reports files the gate would decline
   out   plugins/*/.claude-plugin/** -- the manifest's gate is `claude plugin
         validate`, which the linter runs but does not judge; a version bump is
         not an authoring change
-  out   projects/*/runs/** -- artifacts and ledgers, written by a run, judged by
-        `check_report.py`; a lint of them would be a category error
+  out   runs/** -- the lint runs themselves; artifacts and ledgers are judged
+        by `check_report.py`, and a lint of them would be a category error
   out   README/ARCHITECTURE/ROADMAP/TECH-DEBT -- human-facing, read by
         no lane, and `authoring.md` sends provenance to them on purpose
   out   scripts/** -- code, and its gate is its tests
 
 Evidence, deliberately literal. A `*-protocol-lint.md` artifact somewhere under
-`projects/*/runs/` that (a) has `verdict: PASS`, (b) names the changed file by
+`runs/` - where every run that lints a network edit is filed - that (a) has `verdict: PASS`, (b) names the changed file by
 repo-relative path or basename, and (c) is **no older than the file it covers**.
 The linter's own output format earns (b): a `FAIL` must name the rule, the file
 and the line, and a `PASS` names what it covered in `verification.detail`.
@@ -73,8 +73,6 @@ NETWORK = (
     re.compile(r"^plugins/[^/]+/skills/.+\.md$"),
     re.compile(r"^protocol/.+\.md$"),
     re.compile(r"^PROTOCOL\.md$"),
-    re.compile(r"^projects/[^/]+/(project|phases)\.md$"),
-    re.compile(r"^projects/[^/]+/capabilities/.+\.md$"),
 )
 
 
@@ -106,7 +104,7 @@ def changed(against: str = "HEAD") -> list[str]:
 def lint_artifacts() -> list[tuple[Path, str, float]]:
     """Every `protocol-lint` artifact that returned PASS, with its text and mtime."""
     passed = []
-    for art in sorted(ROOT.glob("projects/*/runs/*/*protocol-lint.md")):
+    for art in sorted(ROOT.glob("runs/*/*protocol-lint.md")):
         try:
             text = art.read_text(encoding="utf-8", errors="replace")
             mtime = art.stat().st_mtime
@@ -177,11 +175,11 @@ def main() -> int:
 
     print(f"\n{len(missing)} of {len(rows)} network file(s) changed have no "
           f"passing protocol-lint artifact naming them.")
-    print("Dispatch `protocol-linter` over them from a bound repo session "
-          "before this ships - `.agentic` itself is not bound, so a linter "
-          "dispatched from here reports BLOCKED at its bind step. When the "
-          "subject is `authoring.md` or `protocol-linter.md` itself, the anchor "
-          "is the other agent files, not the rule text.")
+    print("Dispatch `protocol-linter` over them from this repo before this "
+          "ships; the run is filed under `runs/` here (`authoring.md` "
+          "§ \"Linting a network edit\"). When the subject is "
+          "`authoring.md` or `protocol-linter.md` itself, the anchor is the "
+          "other agent files, not the rule text.")
     return 1 if args.strict else 0
 
 

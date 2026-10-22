@@ -29,16 +29,21 @@ Every specialist agent, as its **first action**, before reading any source file:
 1. Find `.agentic.json`. Start at cwd and **walk up** until you find it or reach
    a filesystem root. cwd is not necessarily the repo root.
    ```json
-   { "agenticRoot": "../.agentic", "project": "portfolio" }
+   { "agenticRoot": "../.agentic", "project": "portfolio", "projectDir": "agentic" }
    ```
-   `agenticRoot` is relative **to the directory containing `.agentic.json`**.
-   Resolve it against that directory, not against cwd.
+   `agenticRoot` and `projectDir` are relative **to the directory containing
+   `.agentic.json`**. Resolve both against that directory, not against cwd.
+   `agenticRoot` is the network: protocol, agents, scripts. `projectDir` is
+   this project's own folder, inside its repo: profile, packs and runs.
+   `.agentic` itself carries an `.agentic.json` naming only `agenticRoot`.
+   It is not a project, and the only lane dispatched from it is
+   `protocol-linter`, whose bind reads no profile.
 2. Read `<agenticRoot>/PROTOCOL.md` — this file, in full.
 3. Read your extension from the table above, if you have one.
-4. Read `<agenticRoot>/projects/<project>/project.md` — **the `## Index` block
+4. Read `<projectDir>/project.md` — **the `## Index` block
    first**, then the sections it names as always-read, then any section your
    order touches.
-5. Read `<agenticRoot>/projects/<project>/capabilities/<your-lane>.md` the same
+5. Read `<projectDir>/capabilities/<your-lane>.md` the same
    way: index first, then the sections your order touches.
 6. Only then start work.
 
@@ -65,8 +70,8 @@ richer on the code itself. Read the pack first, and when they disagree on a
 WORK ORDER <run-id>/<nn>
 lane:        product | quant | recon | story | ux | design | backend | frontend | test | docs | quant-audit | integration | ux-review | review | protocol-lint
 mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW>
-run_dir:     <agenticRoot>/projects/<project>/runs/<run-id>
-report_to:   <agenticRoot>/projects/<project>/runs/<run-id>/<nn>-<lane>.md
+run_dir:     <projectDir>/runs/<run-id>
+report_to:   <projectDir>/runs/<run-id>/<nn>-<lane>.md
 story:       <path to story file, or NONE>
 tickets:     <T-x.y.z, ...  or NONE>
 
@@ -91,7 +96,8 @@ What the fields bind you to:
 
 - **`scope` is a fence, not a hint.** Anything outside it means stop and report,
   not proceed. Your `report_to` path and the run dir are in scope implicitly;
-  nothing else under `<agenticRoot>` is.
+  nothing else under `<agenticRoot>` or `<projectDir>` is. A lint run has no
+  `<projectDir>`: its `run_dir` is `<agenticRoot>/runs/<run-id>`.
 - **`inputs` are paths. Open them.** They are named rather than quoted so that
   you read the specialist's own words instead of the orchestrator's summary.
 - **`non_goals` are binding.** They name what an eager agent would do anyway.
@@ -138,7 +144,7 @@ Every agent is granted `Write` for **exactly one purpose**: this artifact, under
 the `run_dir` your order names. Read-only lanes (`scout`, `producer`,
 `quantitative-researcher`, `tech-lead`, `designer`, `reviewer`,
 `protocol-linter`) writing
-anywhere else — including any file in the bound repo — is a protocol
+anywhere else — including any other file in the bound repo — is a protocol
 violation, not a judgment call.
 
 ### Bullet discipline

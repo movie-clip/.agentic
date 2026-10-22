@@ -3,7 +3,7 @@
 
 Pine has no local compiler. TradingView's editor is the only thing that can say
 "this compiles", and that check runs in the main session against a live chart
-(`projects/tradingview/project.md` § "Mechanical gates"). This script is the
+(tradingview's `agentic/project.md` § "Mechanical gates"). This script is the
 part that *can* run inside a lane: the class of defect that is visible in the
 text, cheap to check, and expensive to find on a chart.
 

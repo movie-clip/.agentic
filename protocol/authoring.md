@@ -23,6 +23,8 @@ have", which it reports as `SHOULD_FIX` and never fails on alone.
 - **A pack may not instruct a tool the lane does not have** — check `tools:`
   before writing a command
 - **The project tool server** — per-lane grants and what they may assume
+- **Linting a network edit** — the run, the order and the close for an
+  edit to network files
 - **Adding a project** — the files a new project needs
 - **Wiring a tracker** — the `## Tracker` block, and what the repo needs
   before it
@@ -33,7 +35,7 @@ have", which it reports as `SHOULD_FIX` and never fails on alone.
 |---|---|---|---|
 | Protocol | `PROTOCOL.md` + `protocol/*.md` | message shapes, binding, gates | anything about a specific repo, anything about a specific role's craft |
 | Role | `plugins/agentic-core/agents/<name>.md` | what this lane judges, tool discipline | any path, framework or convention from a specific repo |
-| Capability | `projects/<project>/capabilities/<lane>.md`, `project.md`, and `phases.md` | paths, frameworks, fixtures, commands, gotchas, external anchors; **which lane fills each phase and the clause that fires it** | message shapes, role definitions |
+| Capability | `<projectDir>/capabilities/<lane>.md`, `project.md`, and `phases.md` — in the project's own repo | paths, frameworks, fixtures, commands, gotchas, external anchors; **which lane fills each phase and the clause that fires it** | message shapes, role definitions |
 | Skill | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — how a run is opened, what happens between a head returning and the next dispatch, how one is closed | any rule the protocol states, and any lane or trigger the project declares; it cites both |
 
 If you are tempted to write `pytest` in an agent file, that line belongs in a
@@ -222,8 +224,8 @@ problem, not on a hunch.
 
 ## Writing for the reader you actually have
 
-Everything under `PROTOCOL.md`, `protocol/`, `projects/`, `agents/` and
-`skills/` is read **only by models**, once per dispatch, and by many dispatches
+Everything under `PROTOCOL.md`, `protocol/`, `agents/` and `skills/`, and
+every project's profile and packs, is read **only by models**, once per dispatch, and by many dispatches
 per run. That changes what earns its place:
 
 - **Keep the *why* that changes behaviour.** A rule with a stated consequence is
@@ -372,12 +374,45 @@ about to write has a tool to stand on:
   tool, because a gate that verifies must not also change the tree it is
   verifying. Goldens drift the integration gate finds goes to a build lane.
 
+## Linting a network edit
+
+Network files — `PROTOCOL.md`, `protocol/**`, agent definitions and skills —
+are edited in the main session of `.agentic`. Before an edit ships, lint it
+from that same session:
+
+1. Open `<agenticRoot>/runs/<YYYY-MM-DD>-<slug>/run.md`, in the ledger shape of
+   `orchestrator.md` § 1, with `project: none`, no `project_dir:`, one
+   `## Phases` row (`verify | protocol-lint`), and `protocol-lint` on
+   `gates:`. There is no project here, so no profile: `check_report.py` knows
+   a run in `<agenticRoot>/runs/` owes that one gate.
+2. Dispatch `protocol-linter` with every changed network file in `scope`, by
+   repo-relative path. `check_network_edit.py` matches changed files against
+   lint artifacts by path, so a file the order leaves out stays unlinted.
+3. On `FAIL`, the main session that authored the edit fixes the findings,
+   and the linter runs again. For a run in `<agenticRoot>/runs/` this step
+   replaces `orchestrator.md` § 3's change-request routing and § 7's
+   work-order boundary: no lane owns these files, and the fix is authoring,
+   like the edit. The two-round cap of `gates.md` § 4 still holds; a third
+   round on the same finding goes to the human.
+4. Close when `check_report.py <run_dir>/ --require-heads` and
+   `check_network_edit.py --strict` both exit 0.
+
 ## Adding a project
 
-Create `projects/<name>/project.md` and `projects/<name>/phases.md` plus
-capability packs, and drop `.agentic.json` in that repo. The `plugins/` layer is
-untouched — that is the entire reason for the split, and the test of whether it
-holds.
+In the repo, create `agentic/project.md`, `agentic/phases.md`, the capability
+packs under `agentic/capabilities/`. Drop
+`.agentic.json` at the repo root with `projectDir: "agentic"`. Add
+`agentic/runs/` to `.gitignore`: runs are local and never committed
+(`orchestrator.md` § "Closed runs are pruned"), and the ignore also keeps a
+lane's search out of old reports. The `plugins/` layer is untouched — that is
+the entire reason for the split, and the test of whether it holds.
+
+**The profile and packs are project docs.** They change with the code and are
+reviewed in its pull requests, so an edit to them owes no `protocol-lint`. The
+one exception is onboarding: lint a new profile and its packs once, as a
+run in `<agenticRoot>/runs/` (§ "Linting a network edit"), because
+`check_report.py` reads `phases.md` and a lane binds by `project.md`'s index,
+and both fail silently when malformed.
 
 **The profile is two files, split by reader.** `project.md` is what every lane
 reads: guardrails, lane map, mechanical gates. `phases.md` is the orchestrator's
@@ -394,11 +429,10 @@ approved scope is an issue rather than a story says so in the `specification`
 row. Neither needs a word changed under `plugins/`.
 
 **And the `verify` rows are machine-read.** `check_report.py` resolves a run's
-profile directory — from the ledger's `project:` field, or from the run dir's
-own path under `projects/<project>/runs/` — reads `project.md` and `phases.md`
-together, and takes the gate set from that table's `verify` rows. A project that
-has not split the two yet still works: the table is found in whichever file
-holds it. So declaring a gate in the profile is what makes close-out demand
+profile directory — from the ledger's `project_dir:` field, or from the run
+dir's own path under `<projectDir>/runs/` — reads `project.md` and `phases.md`
+together, and takes the gate set from that table's `verify` rows. A profile it
+cannot find is a close-out failure, not a default gate set. So declaring a gate in the profile is what makes close-out demand
 an account of it; there is no second list to keep in step, and no project is
 measured against another's gates.
 

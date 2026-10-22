@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-move-capability-layer/02
+artifact:        C:\projects\investments\.agentic\runs\2026-10-21-move-capability-layer\02-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          Validation passed, 0 frontmatter errors. F1-F9 all RESOLVED; 1 new BLOCKING (F10, caused by the F3 fix), 0 SHOULD_FIX, 1 UNVERIFIED premise. Anchors: check_report.py, check_network_edit.py, los-tres a
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           3
+headline:        F1-F9 resolved; FAIL on F10 (from F3): orchestrator.md:17-20 still names only network-edit lint runs as living in <agenticRoot>/runs/, omitting onboarding lints.

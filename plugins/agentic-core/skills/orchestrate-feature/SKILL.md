@@ -40,7 +40,7 @@ Copy this checklist into your first message and tick it off as you go:
 
 ```
 Intake:
-- [ ] 1 bind and record the absolute agentic_root
+- [ ] 1 bind and record the absolute agentic_root and project_dir
 - [ ] 2 banner, and the tracker's server present if one is declared
 - [ ] 3 unfinished runs surfaced
 - [ ] 4 run.md opened (or resumed)
@@ -49,11 +49,11 @@ Intake:
 ```
 
 **1 · Bind.** Walk up from cwd to `.agentic.json`. Resolve `agenticRoot`
-against the directory that holds it, write the absolute path down once, and
-build every later path by appending to it. If there is no `.agentic.json`,
-stop and say so. Then read `projects/<project>/project.md` (the `## Index`
-block first, then its always-read sections) and **all** of
-`projects/<project>/phases.md`, including its `## Tracker` block if it has one.
+and `projectDir` against the directory that holds it, write both absolute
+paths down once, and build every later path by appending to them. If there is
+no `.agentic.json`, stop and say so. Then read `<project_dir>/project.md` (the
+`## Index` block first, then its always-read sections) and **all** of
+`<project_dir>/phases.md`, including its `## Tracker` block if it has one.
 
 **2 · Banner**, as your first output:
 
@@ -75,7 +75,7 @@ Its tools must be in this session before the run starts (`orchestrator.md`
 **3 · Surface unfinished runs.**
 
 ```bash
-grep -L "^status: *CLOSED" <agentic_root>/projects/<project>/runs/*/run.md
+grep -L "^status: *CLOSED" <project_dir>/runs/*/run.md
 ```
 
 That prints every ledger that is not closed. Then follow `orchestrator.md`
@@ -84,7 +84,7 @@ this request is resumed, not re-dispatched. Do not hold the new request on the
 human's answer about any other run unless the two runs touch the same files.
 
 **4 · Open the ledger.** Create
-`projects/<project>/runs/<YYYY-MM-DD>-<slug>/run.md` from the template in
+`<project_dir>/runs/<YYYY-MM-DD>-<slug>/run.md` from the template in
 § 1. Copy the request verbatim. `status:` holds the bare enum; a reason goes on
 `blocked_on:`.
 
@@ -160,6 +160,11 @@ Head <nn>:
 
 ### Human stops
 
+A stop that hands the human a planning artifact (the brief at framing, the
+story draft at specification, a UX spec whose `direction` is `new` or
+`changed`, the design phase's plan at the build go when design fired) runs the
+`grill-plan` skill on it instead of relaying its open decisions as a list.
+
 When the human rules, write the ruling into `decisions.md` before the next
 dispatch: their words, the artifact and section that raised the question, and
 the phase it unblocks (§ 5 has the shape). Every order that depends on it then
@@ -177,13 +182,12 @@ Only what the loop and the profile do not already say.
   entrypoint, not by dispatching an audit. Findings go wherever the profile
   says the project reads them.
 - **framing.** "Add X" is a request to change the plan, and the plan is the
-  human's. Relay the brief and stop. If you are unsure whether framing fires,
+  human's. Grill the brief (§ Human stops) and stop. If you are unsure whether framing fires,
   it fires.
 - **specification.** The `story` row is narrower than framing: a one-lane slice
   with no contract crossing and no mathematics is already specified by the
-  approved brief. When the row does fire, it is a hard stop. Hand the draft to
-  the user, and get every open decision it escalates resolved and written into
-  `decisions.md` before the next dispatch.
+  approved brief. When the row does fire, it is a hard stop. Grill the draft
+  (§ Human stops) and stop.
 - **design.** This is the highest-value relay you make. Name the plan's
   contract section in the `inputs` of every lane that touches the boundary,
   and its reuse and decisions sections in the `inputs` of every affected lane.
@@ -223,13 +227,13 @@ The board's own automation moves the issue to done.
 ## Close
 
 Dispatch the `close` lane against everything it owns: contract notes against
-the repo's docs, `pack-corrections.md` against `capabilities/`, and the
+the repo's docs, `pack-corrections.md` against `<project_dir>/capabilities/`, and the
 project's planning documents. Then walk this:
 
 ```
 Close:
 - [ ] every Phases row: satisfied — <nn> | not triggered (<clause>)
-- [ ] every gate in gates: has a verdict or `skipped (<why>)`; protocol-lint too if pack-corrections.md exists
+- [ ] every gate in gates: has a verdict or `skipped (<why>)`
 - [ ] every remaining Open row is CARRIED for the human; the rest moved to Closed
 - [ ] every human stop has a decisions.md entry
 - [ ] check_report.py <run_dir>/ --require-heads exits 0

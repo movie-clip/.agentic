@@ -41,7 +41,7 @@ capability pack. The orchestrator sees only their reports.
 `portfolio/.claude/skills/` and the specialists reach for them as reference —
 except `build-story`, which is superseded and must not run: a slice built
 through it has no ledger, no gate verdicts, no contract notes, and ends with an
-agent commit. `projects/portfolio/project.md` § "Repo skills agents may invoke"
+agent commit. `portfolio/agentic/project.md` § "Repo skills agents may invoke"
 says which lane reaches for which.
 
 ## 2. The model: phases, not a route
@@ -63,7 +63,7 @@ project names, and fires only when its trigger is true of *this* request.
 **The phases are protocol; the lanes that fill them are not.** `PROTOCOL.md`
 knows nothing about what a project calls its lanes, whether it has a mathematics
 gate, or whether its unit of approved scope is a story or an issue. The binding
-lives in `projects/<project>/phases.md`: which lane fills each phase, in what
+lives in the project's `agentic/phases.md`: which lane fills each phase, in what
 order, and the clause that decides whether it fires. The orchestrator reads it
 at intake; no specialist lane needs it, which is why it is a file beside
 `project.md` rather than a section inside it.
@@ -97,7 +97,9 @@ turn:
 2. **Take the earliest phase** whose trigger is true and whose state is not
    `satisfied`. Earliest by dependency order, not by interest.
 3. **If that phase carries a human stop the human has not given, stop and ask.**
-   Proceeding is deciding.
+   Proceeding is deciding. Only an order that asks (a fact check, or a
+   question back to the lane that wrote the artifact) may go out at the stop,
+   so the human is asked about decisions rather than facts (`grill-plan`).
 4. **Write the ledger before you spend** — `phase:`, `next:`, and the dispatch
    about to be made.
 5. **Dispatch exactly one order.**
@@ -134,7 +136,7 @@ that closed.
 |---|---|---|---|
 | **Protocol** | `PROTOCOL.md` + `protocol/*.md` | message shapes, binding, gate rules | rarely |
 | **Role** | `plugins/agentic-core/agents/<name>.md` | what a lane judges, tool discipline | never for project reasons |
-| **Capability** | `projects/<project>/capabilities/<lane>.md`, `project.md`, `phases.md` | paths, frameworks, fixtures, commands, gotchas, phase bindings | every time the repo evolves |
+| **Capability** | `<repo>/agentic/capabilities/<lane>.md`, `project.md`, `phases.md` — in the project's own repo | paths, frameworks, fixtures, commands, gotchas, phase bindings | every time the repo evolves |
 | **Skill** | `plugins/agentic-core/skills/<name>/SKILL.md` | **sequence** — how a run is opened, what happens between a head returning and the next dispatch, how one is closed | rarely |
 
 `protocol/authoring.md` is the authority on this split and on what each layer
@@ -155,21 +157,33 @@ happened in a different order? If yes, it is a rule, it belongs in the protocol,
 and the step cites it.
 
 That split is the whole point of putting `.agentic` outside the repo. Point it
-at a second project and only the `projects/<name>/` folder is new.
+at a second project and only that repo's `agentic/` folder is new.
+
+**The capability layer lives in the project's repo, not here.** Its profile
+and packs sit in `<repo>/agentic/`, committed with the code they describe. Its
+runs sit beside them in `agentic/runs/`, gitignored: they are for analysing
+the network, not part of the product.
+A pack correction then lands on the same branch as the change that made the old
+wording false, and is reviewed in the same pull request. This follows Claude
+Code's own split: project instructions are shared through the project's version
+control, and a long-running agent's progress log lives in the project it
+tracks. Runs that lint edits to the network itself sit in `.agentic/runs/`,
+the repo their changes land in. `.agentic` is not a project: its
+`.agentic.json` names only `agenticRoot`, so the linter can bind there.
 
 ## 4. Binding a repo to the network
 
 The repo declares its own binding. `portfolio/.agentic.json`:
 
 ```json
-{ "agenticRoot": "../.agentic", "project": "portfolio" }
+{ "agenticRoot": "../.agentic", "project": "portfolio", "projectDir": "agentic" }
 ```
 
 Every agent's first action is: find `.agentic.json` by walking **up** from the
 working directory (a session started in a subdirectory is normal), resolve
 `agenticRoot` against the directory holding it — not against cwd — then read
 `PROTOCOL.md`, its one protocol extension if it has one, and the indexed
-sections of `projects/<project>/project.md` and its own capability pack. No
+sections of `<projectDir>/project.md` and its own capability pack. No
 `.agentic.json` above cwd means `BLOCKED`, not a guess at the layout.
 
 Nothing else in the network hardcodes a path, so moving `.agentic` or adding a
@@ -198,7 +212,7 @@ even when the same role does them.
 | `backend` | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test). Owns the contract source of truth |
 | `frontend` | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test). Mirrors server schemas exactly |
 | `test` | `test-engineer` | `testing.md` | everything under a test file — fixtures, goldens, the network guard |
-| `docs` | `docs-engineer` | `docs.md` | `docs/**`, and at close-out only, applying `pack-corrections.md` back into the packs |
+| `docs` | `docs-engineer` | `docs.md` | `docs/**`, and at close-out only, applying `pack-corrections.md` back into the project's packs |
 | `quant-audit` | `quantitative-researcher` (AUDIT) | `quant.md` | **mathematics gate.** Independently recomputes published numbers, checks trust labels |
 | `integration` | `tech-lead` (INTEGRATION) | `architecture.md` | **engineering gate.** PASS / CHANGES_REQUESTED, per lane |
 | `ux-review` | `designer` (UX-REVIEW) | `ux.md` | **design gate.** Screenshots the running app at phone and desktop widths against the UX spec. PASS / FAIL |
@@ -265,13 +279,11 @@ holding every standard in one context is exactly the dilution this network
 exists to avoid.
 
 The first four gate a **delivery** run and are the ones the close-out sweep
-checks. `protocol-lint` gates **authoring** orders and sits outside that set on
-purpose: it has nothing to say about a run that changes the bound repo, and
-`protocol-lint skipped (not an authoring order)` on every delivery ledger is a
-line that is always the same and therefore never read. Its one crossing point is
-the close-out `pack-corrections.md` dispatch — the only order in which a lane
-writes inside `<agenticRoot>` outside the run dir — so a non-empty
-`pack-corrections.md` obliges the ledger's `gates:` line to account for it.
+checks. `protocol-lint` gates the lint runs in `.agentic/runs/`, over edits
+to the network's own files; a delivery ledger never mentions it. A project's packs are
+project docs, reviewed in the pull request with the code, so a pack correction
+owes no lint. The linter judges a project's profile and packs once at
+onboarding, and again whenever an order asks for an audit.
 
 **A gate that reads only the source the work was built from is not a gate.** It
 catches slips, not wrong premises, and the failure is invisible: every gate

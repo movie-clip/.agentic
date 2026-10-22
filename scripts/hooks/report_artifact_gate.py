@@ -41,9 +41,9 @@ def _artifact(payload: dict) -> Path | None:
     if not raw:
         return None
     path = Path(raw)
-    # Under a `runs/<run-id>/` directory, wherever that sits - the network
-    # moved runs under `projects/<project>/` in v0.7.1 and this test did not
-    # need changing, which is the property to keep. run.md and
+    # Under a `runs/<run-id>/` directory, wherever that sits - runs have moved
+    # twice (into `projects/<project>/`, then into each project's own repo)
+    # and this test did not need changing, which is the property to keep. run.md and
     # pack-corrections.md are a ledger and a queue; neither opens with REPORT,
     # so _is_report drops them.
     if path.suffix != ".md" or path.parent.parent.name != "runs":

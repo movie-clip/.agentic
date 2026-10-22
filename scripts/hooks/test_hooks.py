@@ -263,15 +263,15 @@ check("with no agent_id, stop_hook_active still releases", code == 0,
       f"{code} {err}")
 
 # The network gate needs a real unlinted file to have anything to hold on, so it
-# plants one and removes it either way. `projects/*/capabilities/**` is in scope
-# and a `zz-` name sorts clear of anything the network ships.
-_probe = HOOKS.parent.parent / "projects" / "budget" / "capabilities" / "zz-test-hooks-probe.md"
+# plants one and removes it either way. `protocol/**` is in scope and a `zz-`
+# name sorts clear of anything the network ships.
+_probe = HOOKS.parent.parent / "protocol" / "zz-test-hooks-probe.md"
 try:
     _probe.parent.mkdir(parents=True, exist_ok=True)
     _probe.write_text("# probe" + chr(10), encoding="utf-8")
     _sid = f"test-hooks-{os.getpid()}"
     code, err = run(NETWORK_GATE, {"session_id": _sid})
-    check("the network gate holds on an unlinted pack",
+    check("the network gate holds on an unlinted protocol file",
           code == 2 and _probe.name in err, f"{code} {err}")
     code, err = run(NETWORK_GATE, {"session_id": _sid})
     check("one hold per session, then it releases and says so",

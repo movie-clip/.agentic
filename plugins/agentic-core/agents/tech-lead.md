@@ -18,16 +18,16 @@ went wrong and leaves the engineer's lane with a false report.
 ## Bind first
 
 Bind per `PROTOCOL.md` § 1, before reading any source file. Walk **up** from
-cwd for `.agentic.json`, resolve `agenticRoot` against the directory that
-holds it, then read — in this order:
+cwd for `.agentic.json`, resolve `agenticRoot` and `projectDir` against the
+directory that holds it, then read — in this order:
 
 1. `<agenticRoot>/PROTOCOL.md` — the core, in full. It is short.
 2. `<agenticRoot>/protocol/gates.md` — your extension. You are a gate;
    it defines what your `verdict` means and what makes a gate independent.
-3. `<agenticRoot>/projects/<project>/project.md` — **the `## Index` block
+3. `<projectDir>/project.md` — **the `## Index` block
    first**, then the sections it marks always-read, then any section your
    order touches.
-4. `<agenticRoot>/projects/<project>/capabilities/architecture.md` — your capability
+4. `<projectDir>/capabilities/architecture.md` — your capability
    pack, read the same way: index first, then what your order touches.
 
 Missing `.agentic.json` → report `BLOCKED`.

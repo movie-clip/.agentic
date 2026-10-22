@@ -1,13 +1,0 @@
-REPORT HEAD 2026-10-21-s6-1-leftovers/02
-artifact:        C:\projects\investments\.agentic\projects\los-tres\runs\2026-10-21-s6-1-leftovers\02-integration.md
-status:          DONE
-verdict:         PASS
-verification:    PASS
-detail:          gate exit 0; vitest 46 files, 770 tests passed; playwright 70 passed
-changed:         0
-contract_notes:  0
-pack_corrections: 0
-handoff:         1
-skill_calls:     1
-risks:           0
-headline:        PASS: 08e8ca3 keeps the test strings and assertions working the same at runtime (' '/' ' still produce the real characters, and no raw bytes remain); the gate exits 0.

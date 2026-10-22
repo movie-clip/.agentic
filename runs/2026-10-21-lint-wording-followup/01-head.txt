@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-lint-wording-followup/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-21-lint-wording-followup\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          Validation passed, 0 frontmatter errors. 4/4 edits judged: 3 clean, 1 BLOCKING (F1, packs.md:20-21). 0 SHOULD_FIX, 2 UNVERIFIED. Files: PROTOCOL.md, protocol/authoring.md, protocol/packs.md, protocol/
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         6
+skill_calls:     0
+risks:           4
+headline:        FAIL: packs.md:20-21 says the orchestrator commits pack corrections in any tracked run, but orchestrator.md § 8 forbids it unless build fired; other three edits clean.

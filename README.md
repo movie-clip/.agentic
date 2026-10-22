@@ -31,6 +31,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 │  ├─ .claude-plugin/plugin.json
 │  ├─ skills/
 │  │  ├─ orchestrate-feature/SKILL.md     ← the entry point; runs in the main session
+│  │  ├─ grill-plan/SKILL.md              ← human stops: questions to the lane, facts checked, then you
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
 │     ├─ producer.md                sonnet/high    roadmap · epics · stories · sequencing
@@ -45,28 +46,28 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 │     ├─ designer.md                sonnet/high    UX spec + design gate (screenshots)
 │     ├─ reviewer.md                sonnet/high    acceptance gate
 │     └─ protocol-linter.md         opus/medium    authoring gate — network files vs authoring.md
-├─ projects/portfolio/                    ← project-SPECIFIC layer
-│  ├─ project.md                          ← the binding profile
-│  ├─ runs/<date>-<slug>/                 ← run ledgers — a slice's state on disk
-│  └─ capabilities/
-│     ├─ product.md               for the producer
-│     ├─ quant.md                 for the quantitative researcher
-│     ├─ story.md                 for the story author
-│     ├─ architecture.md          for the tech lead
-│     ├─ backend.md · frontend.md · testing.md · docs.md
-└─ _repo-patch/.agentic.json              ← copy this into the repo root
+├─ .agentic.json                          ← { agenticRoot: "." } — lets the linter bind here; no project
+└─ runs/<date>-<slug>/                    ← lint runs over edits to the network's own files
+
+<repo>/                                   ← each bound project, e.g. portfolio
+├─ .agentic.json                          ← { agenticRoot, project, projectDir: "agentic" }
+└─ agentic/                               ← project-SPECIFIC layer, committed with the code
+   ├─ project.md                          ← the binding profile
+   ├─ phases.md                           ← phase → lane binding (orchestrator only)
+   ├─ runs/<date>-<slug>/                 ← run ledgers — local only, gitignored
+   └─ capabilities/                       ← one pack per lane: product.md, backend.md, …
 ```
 
 ## Install
 
-**1. Drop the pointer file into the repo.**
+**1. Bind the repo.** Create `.agentic.json` at the repo root:
 
-```
-copy .agentic\_repo-patch\.agentic.json C:\projects\investments\portfolio\.agentic.json
+```json
+{ "agenticRoot": "../.agentic", "project": "portfolio", "projectDir": "agentic" }
 ```
 
 This one file is the entire binding. Commit it — it is how any agent, in any
-session, finds its context pack.
+session, finds the network and the project's own `agentic/` folder.
 
 **2. Register the marketplace and install the plugin.** From Claude Code with
 `C:\projects\investments\portfolio` open:
@@ -179,10 +180,10 @@ It is not a substitute for `python scripts/run_all_tests.py`.
 
 ## Current state
 
-v0.8.4 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
-Twelve agents. Six bound projects, each with its own profile and packs under
-`projects/`: `portfolio`, `budget`, `impact`, `tradingview`, `datoro` and
-`los-tres`.
+v0.9.0 — `plugins/agentic-core/.claude-plugin/plugin.json` is the authority.
+Twelve agents. Six bound projects, each with its own profile, packs and runs
+in its repo's `agentic/` folder: `portfolio`, `budget`, `impact`,
+`tradingview`, `datoro` and `los-tres`.
 
 - **What is wrong or missing:** [`TECH-DEBT.md`](./TECH-DEBT.md), including the
   enforcement map — which rules a script backs and which rest on trust.
@@ -191,9 +192,10 @@ Twelve agents. Six bound projects, each with its own profile and packs under
 
 ## Extending
 
-Adding a project: create `projects/<name>/project.md` + capability packs, drop
-`.agentic.json` in that repo. The `plugins/` layer is untouched — that is the
-whole reason for the split.
+Adding a project: follow `protocol/authoring.md` § "Adding a project" — an
+`agentic/` folder with profile, phases and packs in that repo, plus
+`.agentic.json`. The `plugins/` layer is untouched — that is the whole reason
+for the split.
 
 Adding an agent: agent files carry **zero** repo specifics. If you are writing
 `pytest` into an agent file, that line belongs in a capability pack. See

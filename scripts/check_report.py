@@ -7,7 +7,9 @@
     python scripts/check_report.py <artifact> --head head.txt
     python scripts/check_report.py <run_dir>/ --require-heads      # close-out
 
-`<run_dir>` is `<agenticRoot>/projects/<project>/runs/<run-id>/`.
+`<run_dir>` is `<projectDir>/runs/<run-id>/` - `<projectDir>` being the
+project's `agentic/` folder in its own repo - or `<agenticRoot>/runs/<run-id>/`
+for a run that lints edits to the network itself.
 
 Exit 0 = valid. Exit 1 = violations, printed one per line. Lines prefixed `~`
 are advisory and do not fail the run.
@@ -60,29 +62,20 @@ GATE_LANES = {"integration", "ux-review", "review", "quant-audit",
 # Only the tech lead's integration pass may request changes.
 CR_LANES = {"integration"}
 
-# The three gates a delivery run can be asked for, checked against the ledger's
-# `gates:` line by the close-out sweep. `quant-audit` is conditional on the
-# substance being mathematical and `review` on there being a story to accept, so
-# none of these is required by route alone - which is exactly why the ledger has
-# to say what happened to each one rather than the sweep guessing.
-#
-# Deliberately three where GATE_LANES is five. `ux-review` is resolved from
-# the profile's `verify` rows like any other gate. The fifth, `protocol-lint`,
-# gates authoring orders against the network's own files; it has nothing to say
-# about a run that changes the bound repo, and requiring every delivery ledger
-# to write `protocol-lint skipped (not an authoring order)` would be a line that
-# is always the same and therefore never read.
+# The gates a run owes are the profile's `verify` rows, checked against the
+# ledger's `gates:` line by the close-out sweep. A conditional gate (`quant-audit`
+# on mathematical substance, `review` on a story to accept) is still owed an
+# account, which is why the ledger says what happened to each one rather than
+# the sweep guessing. `protocol-lint` is owed only where a profile declares it -
+# a lint run in `<agenticRoot>/runs/` owes it (`_NETWORK_PHASES`); a project's
+# profile does not declare it, since its packs are project docs reviewed in the
+# pull request.
 # The profile's `## Phases` table is the authority (`protocol/authoring.md`),
 # and it lives in `phases.md` beside `project.md` - see `_profile_text`:
-# its `verify` rows name the lanes that gate *this* project. This tuple is the
-# fallback for a ledger whose profile cannot be resolved - a run dir copied
-# elsewhere, a project.md not yet written - and it is this project's set, which
-# is why resolving beats it wherever resolution is possible.
-DEFAULT_LEDGER_GATES = ("quant-audit", "integration", "review")
-LEDGER_GATES = DEFAULT_LEDGER_GATES
-# Not in LEDGER_GATES - required only when the run produced pack
-# corrections. See check_authoring_gate.
-AUTHORING_GATE = "protocol-lint"
+# its `verify` rows name the lanes that gate *this* project. There is no
+# fallback set: a profile that cannot be resolved is a failure, because the
+# old fallback was one project's gates, and a mistyped `project_dir:` then
+# measured every other project against them without saying so.
 
 # PROTOCOL.md § 3 "Bullet discipline". One fact per bullet, short enough that
 # the orchestrator can route it without re-reading the artifact.
@@ -293,8 +286,7 @@ def check_ledger(ledger: Path, closed_only: bool = False) -> list[str]:
     problems = (check_header(ledger) + check_phases(ledger)
                 + check_budget(ledger) + check_decisions(ledger)
                 + check_rounds(ledger) + check_cr(ledger.parent)
-                + check_open_table(ledger) + check_models(ledger)
-                + check_authoring_gate(ledger.parent))
+                + check_open_table(ledger) + check_models(ledger))
     status = (_ledger_field(ledger.read_text(encoding="utf-8"), "status")
               or "").strip().upper()
     if status == "CLOSED" or not closed_only:
@@ -303,7 +295,7 @@ def check_ledger(ledger: Path, closed_only: bool = False) -> list[str]:
 
 
 LEDGER_CHECKS = ("header, phases, budget, rounds, cr, decisions, gates, open, "
-                 "models, authoring")
+                 "models")
 
 
 def lane_from_name(path: Path) -> str | None:
@@ -630,7 +622,7 @@ def _ledger_table(text: str, heading: str) -> list[list[str]]:
 
 
 def _gate_rows(arts: list[list[str]],
-               gates: tuple[str, ...] = DEFAULT_LEDGER_GATES) -> dict[str, str]:
+               gates: tuple[str, ...]) -> dict[str, str]:
     """Gate lane -> the verdict its last Artifacts row recorded."""
     seen: dict[str, str] = {}
     for row in arts:
@@ -688,36 +680,6 @@ def check_open_table(ledger: Path) -> list[str]:
     return problems
 
 
-def check_authoring_gate(run_dir: Path) -> list[str]:
-    """A run that rewrote the network's own files names the authoring gate.
-
-    `protocol-lint` is deliberately outside `LEDGER_GATES`: it gates authoring
-    orders, and a line reading `skipped (not an authoring order)` on every
-    delivery run is a line nobody reads.
-
-    But `pack-corrections.md` is an authoring order. It is the one dispatch
-    that *always* writes inside `<agenticRoot>` - `packs.md` § 3 says so
-    explicitly - and because it arrives at close-out inside a delivery run, the
-    rule above excused the only gate that judges what it wrote.
-    `2026-09-11-risk-summary-audit-foldable` is what that looks like: the docs
-    lane rewrote 51 lines of `capabilities/product.md`, disclosed in `risks`
-    that the edit went past what `packs.md` permits, and no gate saw it.
-
-    So the trigger is the file, not the route: corrections exist, therefore the
-    gate is accountable. `skipped` with a reason still satisfies this - the
-    point is that a human decided, not that the gate ran.
-    """
-    corrections = run_dir / "pack-corrections.md"
-    if not corrections.is_file() or not corrections.read_text(encoding="utf-8").strip():
-        return []
-    stated = _ledger_field((run_dir / "run.md").read_text(encoding="utf-8"), "gates")
-    if stated and AUTHORING_GATE in stated.lower():
-        return []
-    return [f"pack-corrections.md is non-empty, so this run edited the "
-            f"network's own files, but `gates:` does not account for "
-            f"{AUTHORING_GATE} - name it with its verdict, or `skipped` and why"]
-
-
 def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]:
     """Every gate either ran and is recorded, or is accounted for as skipped.
 
@@ -728,7 +690,10 @@ def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]
     where it survives and can be checked.
     """
     text = ledger.read_text(encoding="utf-8")
-    gates = gates if gates is not None else profile_gates(ledger)
+    if gates is None:
+        gates = profile_gates(ledger)
+        if not gates:
+            return [_NO_PROFILE]
     stated = _ledger_field(text, "gates")
     ran = _gate_rows(_ledger_table(text, "Artifacts"), gates)
     if stated is None:
@@ -804,20 +769,28 @@ def _stop_lanes(profile: str) -> set[str]:
 # pace without its close-out silently falling back to the default gate set.
 PROFILE_FILES = ("project.md", "phases.md")
 
+# A run in `<agenticRoot>/runs/` lints edits to the network's own files
+# (`protocol/authoring.md` § "Linting a network edit"). There is no project
+# there, so no profile to read - this is the one gate such a run owes.
+_NETWORK_PHASES = """## Phases
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| verify | 1 | protocol-lint | always - the run exists to lint a network edit | - |
+"""
+
 
 def _profile_text(ledger: Path) -> str | None:
     """This run's project profile, or None if it cannot be resolved.
 
-    The profile's files are joined in `PROFILE_FILES` order. A project that has
-    not split `phases.md` out yet resolves to `project.md` alone and behaves
-    exactly as before.
+    The profile's files are joined in `PROFILE_FILES` order. Two routes: the
+    ledger's `project_dir:` (absolute, written once at intake), then the run
+    dir's own path - `<projectDir>/runs/<run-id>/run.md` sits three levels
+    below the folder holding the profile.
     """
     text = ledger.read_text(encoding="utf-8")
-    root = _ledger_field(text, "agentic_root")
-    project = _ledger_field(text, "project")
-    dirs = []
-    if root and project:
-        dirs.append(Path(root) / "projects" / project)
+    pdir = _ledger_field(text, "project_dir")
+    dirs = [Path(pdir)] if pdir else []
     dirs.append(ledger.parent.parent.parent)
     for pdir in dirs:
         parts = []
@@ -830,25 +803,25 @@ def _profile_text(ledger: Path) -> str | None:
                 continue
         if parts:
             return "\n\n".join(parts)
+    if (ledger.parent.parent.parent / "PROTOCOL.md").is_file():
+        return _NETWORK_PHASES
     return None
 
 
 def profile_gates(ledger: Path) -> tuple[str, ...]:
-    """The gates this run's project declares, or the fallback set.
+    """The gates this run's project declares, or () if none can be found.
 
-    Two ways to the profile, both cheap. The ledger names `project:` and
-    `agentic_root:`, which is the explicit route; and a run dir living at
-    `<agenticRoot>/projects/<project>/runs/<run-id>/` knows its own profile from
-    its path, which is the route that survives a ledger missing the field.
-    Neither existing is not an error - the fallback is a real set, and a script
-    that refuses to run without a profile is a script the close-out skips.
+    The profile comes from `_profile_text`. An empty result is not a project
+    with no gates - every profile declares at least one `verify` row - so
+    `check_gates` reports it as a profile that could not be resolved.
     """
     profile = _profile_text(ledger)
-    if profile:
-        lanes = _verify_lanes(profile)
-        if lanes:
-            return lanes
-    return DEFAULT_LEDGER_GATES
+    return _verify_lanes(profile) if profile else ()
+
+
+_NO_PROFILE = ("no project profile with `verify` rows found - neither the "
+               "ledger's `project_dir:` nor the folder above `runs/` holds a "
+               "project.md or phases.md declaring the gates this run owes")
 
 
 def check_header(ledger: Path) -> list[str]:
@@ -1158,15 +1131,19 @@ def check_cr(run_dir: Path) -> list[str]:
     Three things are reconciled here rather than merely parsed: the `round:` a
     request claims against the `Rounds` table that counts it, the lane it names
     against the lane that table records, and a `SHOULD_FIX` against the `Open`
-    row that is supposed to carry it to the human. Each is a place two copies
-    of one fact can disagree, which is the only kind of error worth a check.
+    row that carries it to the human, or the `Closed` row that absorbed it.
+    Each is a place two copies of one fact can disagree, which is the only
+    kind of error worth a check.
     """
     cr_dir = run_dir / "cr"
     files = sorted(cr_dir.glob("CR-*.md")) if cr_dir.is_dir() else []
     ledger = run_dir / "run.md"
     text = ledger.read_text(encoding="utf-8") if ledger.is_file() else ""
     rounds = {_finding_id(r[0]): r for r in _ledger_table(text, "Rounds") if r}
-    open_text = " ".join(" ".join(r) for r in _ledger_table(text, "Open"))
+    # A SHOULD_FIX reaches the human through `Open`, or was absorbed and moved
+    # to `Closed` (orchestrator.md section 1) - either table carries it.
+    open_text = " ".join(" ".join(r) for heading in ("Open", "Closed")
+                         for r in _ledger_table(text, heading))
     problems, seen = [], set()
     for path in files:
         ident = _finding_id(path.stem)
@@ -1201,10 +1178,10 @@ def check_cr(run_dir: Path) -> list[str]:
                 problems.append(f"{path.name} names lane {lane!r} and its "
                                 f"`## Rounds` row names {table_lane!r}")
         if sev == "SHOULD_FIX" and ident not in open_text:
-            problems.append(f"{path.name} is SHOULD_FIX with no `## Open` row "
-                            f"naming it - a request that does not hold the "
-                            f"slice reaches the human through that table or "
-                            f"not at all")
+            problems.append(f"{path.name} is SHOULD_FIX with no `## Open` or "
+                            f"`## Closed` row naming it - a request that does "
+                            f"not hold the slice is carried to the human or "
+                            f"recorded as absorbed, never dropped")
         src = _cr_source(fields["raised by"] or "", run_dir)
         if fields["raised by"] and src is None:
             problems.append(f"{path.name} `raised by:` names no readable "

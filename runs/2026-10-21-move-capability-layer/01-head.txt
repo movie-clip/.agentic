@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-move-capability-layer/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-21-move-capability-layer\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          Validation passed, 0 frontmatter errors. 18/18 scoped files judged: 9 BLOCKING, 0 SHOULD_FIX. Anchors: check_report.py, check_network_edit.py, 6 bound repos' .agentic.json/.gitignore, run.md, and the 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         9
+skill_calls:     0
+risks:           4
+headline:        FAIL: 9 blocking findings - 5 duplicated rules, 3 conflicting instructions, 1 missing Contents entry; no stale projects/ paths, and binding works from impact and .agentic.

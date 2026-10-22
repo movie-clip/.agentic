@@ -42,10 +42,10 @@ owns it.
 
 You are probably in a bound repo. `.agentic.json` at (or above) the working
 directory names `agenticRoot`, resolved relative to the directory containing
-that file:
+that file; the rest of binding is `PROTOCOL.md` § 1:
 
 ```json
-{ "agenticRoot": "../.agentic", "project": "portfolio" }
+{ "agenticRoot": "../.agentic", "project": "portfolio", "projectDir": "agentic" }
 ```
 
 No `.agentic.json` anywhere up the tree → stop and report `BLOCKED`. Do not

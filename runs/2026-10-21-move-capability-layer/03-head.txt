@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-21-move-capability-layer/03
+artifact:        C:\projects\investments\.agentic\runs\2026-10-21-move-capability-layer\03-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          Validation passed, 0 frontmatter errors. F10 RESOLVED at protocol/orchestrator.md:17-21; F1-F9 not reopened; 0 new BLOCKING, 0 SHOULD_FIX, 2 UNVERIFIED premises. Anchors: orchestrator.md:201-206, auth
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           5
+headline:        F10 resolved at orchestrator.md:17-21; all 18 network files pass authoring.md with no new blocking findings.

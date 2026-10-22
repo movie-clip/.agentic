@@ -14,10 +14,14 @@ A run's state is **not** your memory. The main session compacts, restarts and
 loses things; a slice that only exists in a transcript cannot survive that, and
 a lost contract note ships as inconsistency.
 
-Every slice gets a directory:
+Every slice gets a directory in the project's own folder — `<projectDir>`,
+the `agentic/` folder of a bound repo. (A lint run lives in
+`<agenticRoot>/runs/` instead — over an edit to the network itself, or over a
+new project's profile and packs at onboarding; `authoring.md` § "Linting a
+network edit" and § "Adding a project" say how.)
 
 ```
-<agenticRoot>/projects/<project>/runs/<YYYY-MM-DD>-<slug>/
+<projectDir>/runs/<YYYY-MM-DD>-<slug>/
   run.md                        the ledger
   decisions.md                  what the human ruled at each stop, in their words
   01-recon.md                   lane reports, numbered in dispatch order
@@ -37,7 +41,8 @@ You create `run.md` at `intake` and update it after every head you receive.
 # RUN <run-id>
 request:      <the user's original words, verbatim>
 agentic_root: <the RESOLVED ABSOLUTE path>
-project:      <the profile this run is bound to — `projects/<project>/project.md`>
+project:      <the project name, as `.agentic.json` names it>
+project_dir:  <the RESOLVED ABSOLUTE path to projectDir>
 story:        <path, or NONE>
 status:       PLANNING | DISPATCHING | GATING | BLOCKED | CLOSED
 phase:        intake | ground-truth | framing | specification | design | build | verify | close
@@ -47,8 +52,7 @@ spent:        <n>
 blocked_on:   <one line, only when status is BLOCKED; otherwise omit>
 next:         <the single next action, always current — see below>
 gates:        <every gate the project declares under `verify` — each a verdict,
-              or skipped and why; plus protocol-lint when the run wrote a
-              pack-corrections.md>
+              or skipped and why>
 
 ## Phases
 | phase | lane | fires when | state |
@@ -194,31 +198,23 @@ profile's too; what follows is portfolio's, as an illustration of the shape.
 | `integration` | dispatched a build lane |
 | `quant-audit` | changed mathematical substance — a formula, a derived number, a trust classification |
 | `review` | carries a story whose criteria someone must accept |
-| `protocol-lint` | left a non-empty `pack-corrections.md` |
 
-`protocol-lint` judges the network's own files, so on an ordinary run against
-the bound repo it has nothing to say and does not appear at all — a line reading
-`skipped (not an authoring order)` every time is a line nobody reads. The
-close-out corrections dispatch is the one exception, because `packs.md` § 3
-makes it the only order in which a lane writes inside `<agenticRoot>` outside
-the run dir: an authoring order arriving inside a delivery run. So the trigger
-is the file, not the shape of the run — corrections on disk, therefore the
-gate is accountable, by verdict or by `skipped` and why.
+`protocol-lint` judges the network's own files, so a project's profile does not
+declare it and a delivery ledger does not mention it. It is owed by lint runs
+in `<agenticRoot>/runs/` — over a network edit, or over a new project's
+profile and packs at onboarding (`authoring.md` § "Linting a network edit"
+and § "Adding a project").
 
-**Which means `pack-corrections.md` exists only when a correction applies.** Do
-not open one to record that there was nothing to correct: a lane's own
+**`pack-corrections.md` exists only when a correction applies.** Do not open
+one to record that there was nothing to correct: a lane's own
 `pack_corrections: - none` is already that record, in the artifact whose head
-the count came from. A file written to say "nothing here" makes the gate
-accountable for nothing, and the reason written beside `skipped` is then a claim
-about the file's contents that no one re-reads. A gate can be right to skip
-while the ledger's stated reason for skipping it is false — and the false
-reason is the part a later reader believes.
+the count came from. The file is what triggers the close-out corrections order,
+so a file written to say "nothing here" dispatches a lane to do nothing.
 
 Record this in the ledger and not only in your close-out report. The report is
 prose said once to a human and gone by the next run; the ledger line is read
 back by `check_report.py <run_dir>/ --require-heads`, which matches it against
-the Artifacts rows and against `pack-corrections.md` and fails close-out on a
-gate that quietly did not run.
+the Artifacts rows and fails close-out on a gate that quietly did not run.
 
 ### `next:` is what makes a run resumable
 
@@ -244,11 +240,27 @@ in the project's `runs/` whose `status:` is not `CLOSED`, whatever request it
 was opened for, and show each one to the human. Then do what they say:
 
 - **resume it:** carry on from its `## Phases`, `## Artifacts` and `next:`;
-- **drop it:** the human deletes the run dir, and git history keeps it. Cite a
-  dropped run by id afterwards, as `runs/README.md` says for pruned runs;
+- **drop it:** the human deletes the run dir. Cite a dropped run by id
+  afterwards, as § "Closed runs are pruned" says;
 - **leave it:** say so, and continue with the new request.
 
 A run left unfinished and never mentioned again is the failure to avoid.
+
+### Closed runs are pruned
+
+**Runs are local and never committed.** A run is the record for analysing the
+network, not part of the product: the repo's `.gitignore` excludes
+`agentic/runs/`, so no commit, yours or § 8's, carries one.
+**A closed run is pruned once what it taught is in the protocol, the profile
+or a pack.** A run earns its
+disk while it is open, while its work is uncommitted, or while it is the
+evidence for a change not yet made. After that it is a transcript of a
+decision already encoded elsewhere. Pruning deletes it for good.
+
+So **cite a run by its id, never by a path.** A commit message naming the run
+ids it acted on is the durable form. A pack, a protocol file or a repo doc that
+tells a reader to open a run artifact breaks the moment that run is pruned, so
+the claim it supports has to stand on its own.
 
 ### `Open` holds what is still open
 
@@ -296,10 +308,11 @@ row that has moved to `## Closed`.
 an enum and sometimes holds a sentence cannot be read by anything, including a
 future session of yourself resuming this run.
 
-**`agentic_root` is written once, resolved and absolute.** Record
-`C:\projects\investments\.agentic`, not `../.agentic`. Every `run_dir`,
-`report_to` and `inputs` path is then built by appending to that recorded
-string, never by re-joining a relative fragment. Repeated relative-path
+**`agentic_root` and `project_dir` are written once, resolved and absolute.**
+Record `C:\projects\investments\.agentic`, not `../.agentic`, and
+`C:\projects\investments\los-tres\agentic`, not `agentic`. Every `run_dir`,
+`report_to` and `inputs` path is then built by appending to those recorded
+strings, never by re-joining a relative fragment. Repeated relative-path
 arithmetic across a dozen work orders is how a run ends up dispatching against
 `C:\projects\investments.agentic\...` — one separator from correct, and silent.
 
@@ -324,7 +337,7 @@ project names, and fires only when its trigger is true of *this* request.
 **The phases are protocol; the lanes that fill them are not.** This file does not
 know what your project calls its lanes, whether it has a mathematics gate, or
 whether its unit of approved scope is a story, a ticket or an issue. Read
-`projects/<project>/phases.md` at intake: it binds each phase to a lane, in
+`<project_dir>/phases.md` at intake: it binds each phase to a lane, in
 order, with the clause that decides whether that lane fires. It is yours alone —
 no specialist lane reads it, which is why it is a file beside `project.md`
 rather than a section inside it.
@@ -390,7 +403,11 @@ Every turn:
    find most interesting.
 3. **If there is none, the phase is `close`.**
 4. **If that phase carries a human stop the human has not given, stop and ask.**
-   Do not dispatch past an unanswered decision; proceeding is deciding.
+   Do not dispatch past an unanswered decision; proceeding is deciding. The
+   one exception is an order that only asks: a `ground-truth` order or a
+   question back to the lane that wrote the artifact, dispatched at the stop
+   so the human is asked about decisions rather than facts. Such an order
+   settles nothing the human was going to rule on.
 5. **Write the ledger before you spend** — `phase:`, `next:`, and the dispatch
    you are about to make.
 6. **Dispatch exactly one order.**
@@ -648,8 +665,8 @@ So: **an `inputs` line names a path, never a quotation.**
 
 ```
 inputs:
-  - projects/portfolio/runs/2026-08-20-sector-drawdown/03-technical-plan.md   § contract
-  - projects/portfolio/runs/2026-08-20-sector-drawdown/cr/CR-2.md
+  - <project_dir>/runs/2026-08-20-sector-drawdown/03-technical-plan.md   § contract
+  - <project_dir>/runs/2026-08-20-sector-drawdown/cr/CR-2.md
 ```
 
 Not `inputs: - "the tech lead said the field should be nullable"`. The receiving

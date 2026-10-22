@@ -58,11 +58,12 @@ class Usage(Exception):
 
 # The ledger header, in the order `protocol/orchestrator.md` section 1 writes
 # it. Used to place a field that is not in the file yet.
-HEADER_ORDER = ["request", "agentic_root", "project", "story", "status",
-                "phase", "plan", "budget", "spent", "blocked_on", "next",
-                "gates"]
-# `request` and `agentic_root` are written once at intake and never edited -
-# `agentic_root` in particular is the string every later path is built from.
+HEADER_ORDER = ["request", "agentic_root", "project", "project_dir", "story",
+                "status", "phase", "plan", "budget", "spent", "blocked_on",
+                "next", "gates"]
+# `request`, `agentic_root` and `project_dir` are written once at intake and
+# never edited - `project_dir` in particular is the string every run path is
+# built from, as `agentic_root` is for the network's own files.
 # `spent` is derived. Everything else is a field a dispatch can legitimately
 # move.
 SETTABLE = {"status", "phase", "plan", "budget", "story", "blocked_on",

@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-runs-gitignored/02
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-runs-gitignored\02-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          validate passed (license/icon directory notices only); F1 resolved at designer.md:120-123; P1-P5 PASS; 0 new hits in network-wide search; anchor: authoring.md + orchestrator.md § 1/§ 8 + 01's findings
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         10
+skill_calls:     0
+risks:           4
+headline:        F1 fixed (designer.md now cites § "Closed runs are pruned"); P1-P5 pass, no new hits network-wide; run may close.

@@ -47,7 +47,6 @@ Last reviewed: 2026-10-06, at v0.8.0.
 | TD-16 | **`probe_engine`, `build_snapshot` and `reset_goldens` are tested but unused.** Only `run_tests` and `check_gates` appear in a run. | Keep until a run needs them; drop if still unused after several portfolio runs. |
 | TD-18 | **The orchestrator has no behavioural evaluation.** Scripts are pinned by tests and lanes by gates; nothing checks the orchestrator's decisions (which phases fire, the budget, where it stops for the human) against known-good answers. Anthropic recommends starting with about 20 real cases and judging the end state. | On 2026-10-06, 1 of 5 runs had closed, and it spent twice its derived budget. | Write about 10 eval cases from requests already run (request → expected phase verdicts, human stops, budget range). Run them with `claude plugin eval` before changing the skill or `orchestrator.md`. |
 | TD-19 | **`protocol/orchestrator.md` is about 750 lines, read in full at every intake.** With `PROTOCOL.md` it puts about 1,150 lines of rules and rationale in front of the first dispatch. Anthropic's guidance is the smallest high-signal context, plus examples instead of lists of edge cases. v0.8.0 cut the skill from 510 lines to about 260 and left the protocol alone. | `wc -l`, 2026-10-06. | Condense to 400 lines or fewer: keep every rule, and move each war story to `ARCHITECTURE.md` or `git log`. It goes through a `protocol-lint` run. |
-| TD-17 | **The authoring gate fires where its remedy cannot be run.** `network_edit_gate.py` is installed in `.agentic`, which is the only session that edits network files — and `.agentic` carries no `.agentic.json`, so a `protocol-linter` dispatched from there reports `BLOCKED` at its bind step. The lint has to be dispatched from a bound repo instead. | Found 2026-10-02 by the hook's first live firing, on an edit to `authoring.md` and `protocol-linter.md`. Both messages now name the bound-repo remedy, so nobody else loses the turn to it. | Either `.agentic` gets its own binding, or lint dispatch stays a bound-repo job and that stays documented. ROADMAP item 5's pre-commit hook has the same constraint. |
 
 ---
 
@@ -67,10 +66,9 @@ worse than one you know is on trust.
 | `spent` equals the dispatches made | script — close-out sweep |
 | A human ruling is written down | script — `decisions.md` required past a declared human stop |
 | The ledger header is coherent; `Open` holds only what is open | script — close-out sweep |
-| A run that edited network files accounts for `protocol-lint` | script — when `pack-corrections.md` is non-empty |
 | Planning artifacts carry a brief | script — `check_report.py`; usefulness unchecked |
 | Agent frontmatter parses; model and effort pinned | command + script — `claude plugin validate`, `check_agents` |
-| The validator, hooks and checks are correct | tests — `test_check_report.py` 211, `test_hooks.py` 31, `test_ledger.py` 43, `test_check_network_edit.py` 15, `test_pine_check.py` 55 |
+| The validator, hooks and checks are correct | tests — `test_check_report.py` 220, `test_hooks.py` 34, `test_ledger.py` 43, `test_check_network_edit.py` 15, `test_pine_check.py` 55 |
 | An unfinished run is seen again | prose — intake lists every ledger not `CLOSED` and the human resumes, drops or leaves it |
 | A run survives a restart | the ledger on disk |
 | Read-only lanes don't edit | tool grant — no `Edit`; see TD-10 |

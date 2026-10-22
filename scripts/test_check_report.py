@@ -409,9 +409,33 @@ gates:        quant-audit PASS · integration skipped (none) · review skipped (
 """
 
 
+# The gates a run owes come from its project's profile, found from the run
+# dir's own path: `<projectDir>/runs/<run-id>/`. Every fixture that reaches
+# `check_gates` therefore needs one beside it - there is no fallback set.
+_GATES_PHASES = """# Project phases: `demo`
+
+## Phases
+
+| Phase | # | Lane | Fires when | Human stop |
+|---|---|---|---|---|
+| verify | 1 | quant-audit | mathematical substance changed | — |
+| verify | 2 | integration | any build lane was dispatched | — |
+| verify | 3 | review | a story was accepted | — |
+"""
+
+
+def _run_dir():
+    """An empty `<projectDir>/runs/<run-id>/` whose profile declares three gates."""
+    pdir = Path(tempfile.mkdtemp())
+    (pdir / "phases.md").write_text(_GATES_PHASES, encoding="utf-8")
+    d = pdir / "runs" / "2026-01-01-x"
+    d.mkdir(parents=True)
+    return d
+
+
 def _gates(line):
     """Problems the sweep reports for a ledger whose `gates:` line is `line`."""
-    d = Path(tempfile.mkdtemp())
+    d = _run_dir()
     body = LEDGER if line is None else LEDGER.replace(
         "quant-audit PASS · integration skipped (none) · "
         "review skipped (none)", line)
@@ -506,7 +530,7 @@ check("a ledger with no `Open` table at all is clean",
 
 # Wired into the sweep, not just importable: the close-out command is the only
 # one anybody runs, so a check reachable only from Python is a check nobody runs.
-_run = Path(tempfile.mkdtemp())
+_run = _run_dir()
 (_run / "01-lane.md").write_text(BLOCK, encoding="utf-8")
 (_run / "01-head.txt").write_text(_HEAD_OK, encoding="utf-8")
 (_run / "run.md").write_text(LEDGER, encoding="utf-8")
@@ -516,49 +540,6 @@ _proc = subprocess.run(
 check("a clean run.md passes the close-out sweep", _proc.returncode == 0, _proc.stdout)
 check("and the sweep says which ledger checks it ran",
       f"({cr.LEDGER_CHECKS})" in _proc.stdout, _proc.stdout)
-
-# The authoring gate. `protocol-lint` is out of LEDGER_GATES on purpose, but the
-# close-out pack-corrections dispatch is an authoring order - the only order in
-# which a lane writes inside <agenticRoot> - and arriving inside a delivery run
-# is what excused it from the one gate that judges what it wrote.
-
-
-def _authoring(corrections, gates_line=None):
-    """Problems reported for a run dir holding this `pack-corrections.md`."""
-    d = Path(tempfile.mkdtemp())
-    body = LEDGER if gates_line is None else LEDGER.replace(
-        "quant-audit PASS · integration skipped (none) · "
-        "review skipped (none)", gates_line)
-    (d / "run.md").write_text(body, encoding="utf-8")
-    if corrections is not None:
-        (d / "pack-corrections.md").write_text(corrections, encoding="utf-8")
-    return cr.check_authoring_gate(d)
-
-
-check("no pack-corrections.md means no authoring gate is owed",
-      _authoring(None) == [], str(_authoring(None)))
-_BLANK = "\n \n"
-check("an empty pack-corrections.md owes nothing either",
-      _authoring(_BLANK) == [], str(_authoring(_BLANK)))
-
-_ENTRY = "- capabilities/product.md - the plan section is false\n"
-_unlinted = _authoring(_ENTRY)
-check("corrections with no protocol-lint in `gates:` is caught",
-      any("does not account for protocol-lint" in x for x in _unlinted),
-      str(_unlinted))
-
-_linted = _authoring(
-    _ENTRY,
-    "quant-audit PASS · integration skipped (none) · review skipped (none) · "
-    "protocol-lint PASS")
-check("naming the gate with a verdict satisfies it", _linted == [], str(_linted))
-
-_skipped = _authoring(
-    _ENTRY,
-    "quant-audit PASS · integration skipped (none) · review skipped (none) · "
-    "protocol-lint skipped (human reviewed the two-line edit directly)")
-check("deciding to skip it satisfies it too - a human decided",
-      _skipped == [], str(_skipped))
 
 (_run / "run.md").write_text(
     LEDGER.replace(" · review skipped (none)", ""), encoding="utf-8")
@@ -879,10 +860,17 @@ check("and a request the cap cannot see",
 # `PROTOCOL.md` § 5: SHOULD_FIX reaches the human through `Open` or not at all.
 _sf = _cr(body=_CR.replace("BLOCKING", "SHOULD_FIX"))
 check("a non-blocking request that left the run silently is caught",
-      any("no `## Open` row naming it" in x for x in _sf), str(_sf))
+      any("no `## Open` or `## Closed` row naming it" in x for x in _sf), str(_sf))
 _sfok = _cr(body=_CR.replace("BLOCKING", "SHOULD_FIX"),
             open_rows="| should_fix | CR-1 | cr/CR-1.md | the badge nit | CARRIED |")
 check("and carried in that table, it passes", _sfok == [], str(_sfok))
+_sffixed = _cr(body=_CR.replace("BLOCKING", "SHOULD_FIX"),
+               open_rows=NL + "## Closed" + NL
+               + "| kind | from | ref | one-line | absorbed by |" + NL
+               + "|---|---|---|---|---|" + NL
+               + "| should_fix | CR-1 | cr/CR-1.md | the badge nit | 07 |")
+check("and fixed, then moved to Closed, it passes too",
+      _sffixed == [], str(_sffixed))
 
 _dangling = _cr(source=None)
 check("a `raised by:` naming an artifact that is not there is caught",
@@ -917,9 +905,9 @@ _STOP_TABLE = """
 def _decisions(table=_STOP_TABLE, decisions=None, profile=_STOP_PROFILE):
     """Problems for a run whose profile declares a human stop on `product`."""
     droot = Path(tempfile.mkdtemp())
-    ddir = droot / "projects" / "demo" / "runs" / "2026-01-01-x"
+    ddir = droot / "agentic" / "runs" / "2026-01-01-x"
     ddir.mkdir(parents=True)
-    (droot / "projects" / "demo" / "project.md").write_text(
+    (droot / "agentic" / "project.md").write_text(
         profile, encoding="utf-8")
     body = LEDGER.replace("route:        full",
                           "route:        full\nproject:      demo") + table
@@ -970,30 +958,52 @@ check("verify rows become the gate set",
 check("and a table below it is not swept in",
       "review" not in cr._verify_lanes(_PROFILE))
 
+# `project_dir:` is the explicit route; the run dir's own path is the second.
+# A run dir somewhere else entirely - copied out, or written before the move -
+# resolves through the field or not at all.
 _proot = Path(tempfile.mkdtemp())
-_pdir = _proot / "projects" / "demo"
-(_pdir / "runs" / "2026-01-01-x").mkdir(parents=True)
+_pdir = _proot / "agentic"
+_pdir.mkdir()
 (_pdir / "project.md").write_text(_PROFILE, encoding="utf-8")
-_pledger = _pdir / "runs" / "2026-01-01-x" / "run.md"
-_pledger.write_text(
+_elsewhere = Path(tempfile.mkdtemp()) / "runs" / "2026-01-01-x"
+_elsewhere.mkdir(parents=True)
+_xledger = _elsewhere / "run.md"
+_xledger.write_text(
     LEDGER.replace("route:        full",
                    f"route:        full\nproject:      demo\n"
-                   f"agentic_root: {_proot}"),
+                   f"project_dir:  {_pdir}"),
     encoding="utf-8")
-check("a ledger naming its project resolves that project's gates",
-      cr.profile_gates(_pledger) == ("lint-gate", "integration"),
-      str(cr.profile_gates(_pledger)))
+check("a ledger's `project_dir:` resolves that project's gates",
+      cr.profile_gates(_xledger) == ("lint-gate", "integration"),
+      str(cr.profile_gates(_xledger)))
+(_pdir / "runs" / "2026-01-01-x").mkdir(parents=True)
+_pledger = _pdir / "runs" / "2026-01-01-x" / "run.md"
 _pledger.write_text(LEDGER, encoding="utf-8")
-check("and a run dir under projects/<name>/runs/ resolves them from its path",
+check("and a run dir under <projectDir>/runs/ resolves them from its path",
       cr.profile_gates(_pledger) == ("lint-gate", "integration"),
       str(cr.profile_gates(_pledger)))
-check("an unresolvable profile falls back rather than refusing to run",
-      cr.profile_gates(_d2 / "run.md") == cr.DEFAULT_LEDGER_GATES)
+check("an unresolvable profile yields no gate set",
+      cr.profile_gates(_d2 / "run.md") == ())
+_nogates = cr.check_gates(_d2 / "run.md")
+check("and check_gates reports it rather than judging another project's set",
+      any("no project profile" in x for x in _nogates), str(_nogates))
 _pgates = cr.check_gates(_pledger)
 check("and the gates a project does not declare are not demanded of it",
       not any("review" in x for x in _pgates), str(_pgates))
 check("while the ones it does declare are",
       any("lint-gate" in x for x in _pgates), str(_pgates))
+
+# A lint run in `<agenticRoot>/runs/` has no project and no profile. The
+# network's own rule supplies its one gate: the folder above `runs/` holds
+# PROTOCOL.md, and that is what marks it.
+_nroot = Path(tempfile.mkdtemp())
+(_nroot / "PROTOCOL.md").write_text("# core\n", encoding="utf-8")
+(_nroot / "runs" / "2026-01-01-lint").mkdir(parents=True)
+_nledger = _nroot / "runs" / "2026-01-01-lint" / "run.md"
+_nledger.write_text(LEDGER, encoding="utf-8")
+check("a lint run in <agenticRoot>/runs/ owes protocol-lint and nothing else",
+      cr.profile_gates(_nledger) == ("protocol-lint",),
+      str(cr.profile_gates(_nledger)))
 
 print("the profile may be split across project.md and phases.md")
 
@@ -1022,7 +1032,7 @@ _PHASES_ONLY = """# Project phases: `demo`
 """
 
 _sroot = Path(tempfile.mkdtemp())
-_sdir = _sroot / "projects" / "demo"
+_sdir = _sroot / "agentic"
 (_sdir / "runs" / "2026-01-01-x").mkdir(parents=True)
 (_sdir / "project.md").write_text(_LANE_FACING, encoding="utf-8")
 (_sdir / "phases.md").write_text(_PHASES_ONLY, encoding="utf-8")
@@ -1044,7 +1054,7 @@ check("and a human stop declared in phases.md is still found",
 # The split is optional: a project that keeps everything in project.md is
 # unchanged, which is what lets one project split without forcing the others.
 _uroot = Path(tempfile.mkdtemp())
-_udir = _uroot / "projects" / "demo"
+_udir = _uroot / "agentic"
 (_udir / "runs" / "2026-01-01-x").mkdir(parents=True)
 (_udir / "project.md").write_text(_PROFILE, encoding="utf-8")
 _uledger = _udir / "runs" / "2026-01-01-x" / "run.md"
@@ -1138,7 +1148,7 @@ check("an em-dash in the model cell claims nothing, so it is not judged",
       str(cr.check_models(_mled, _adir)))
 
 print("F15 - the ledger is not a lane report, and a sweep says what it skipped")
-_lroot = Path(tempfile.mkdtemp())
+_lroot = _run_dir()
 (_lroot / "run.md").write_text(LEDGER, encoding="utf-8")
 check("run.md is recognised by name", cr._is_ledger(_lroot / "run.md"))
 (_lroot / "ledger-copy.md").write_text(LEDGER, encoding="utf-8")

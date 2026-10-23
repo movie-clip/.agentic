@@ -107,6 +107,17 @@ _base = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
                           PASS_ART + "\n`authoring.md:349` is fine\n")]))
 check("the basename spelling counts too", _base[0][1] is not None, str(_base))
 
+_skill = "plugins/agentic-core/skills/brand-new/SKILL.md"
+_bare = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
+                          PASS_ART + "\n`orchestrate-feature/SKILL.md:12` is fine\n")]),
+                  _skill)
+check("a bare SKILL.md naming another skill is not coverage",
+      _bare[0][1] is None, str(_bare))
+_dir = _unlinted(_tree([("runs/2026-01-02-lint/01-protocol-lint.md",
+                         PASS_ART + "\n`brand-new/SKILL.md:12` is fine\n")]),
+                 _skill)
+check("the skill folder plus SKILL.md counts", _dir[0][1] is not None, str(_dir))
+
 print("and these three are not")
 
 _none = _unlinted(_tree([]))

@@ -116,6 +116,19 @@ def lint_artifacts() -> list[tuple[Path, str, float]]:
     return passed
 
 
+def short_name(path: str) -> str:
+    """The shortest spelling of `path` that still names one file.
+
+    Usually the basename. Every skill is `SKILL.md`, so a bare basename would
+    let any lint that mentions one skill cover every skill; for those the
+    skill's folder is part of the name: `orchestrate-feature/SKILL.md`.
+    """
+    parts = path.split("/")
+    if parts[-1] == "SKILL.md" and len(parts) >= 2:
+        return "/".join(parts[-2:])
+    return parts[-1]
+
+
 def unlinted(paths: list[str]) -> list[tuple[str, str | None]]:
     """Each path, with the artifact that covers it or None.
 
@@ -128,7 +141,7 @@ def unlinted(paths: list[str]) -> list[tuple[str, str | None]]:
     arts = lint_artifacts()
     out = []
     for path in paths:
-        base = path.rsplit("/", 1)[-1]
+        base = short_name(path)
         try:
             edited = (ROOT / path).stat().st_mtime
         except OSError:

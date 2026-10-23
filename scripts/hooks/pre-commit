@@ -1,0 +1,5 @@
+#!/bin/sh
+# Blocks a commit that stages a network file no passing protocol-lint names.
+# The Stop hook only sees uncommitted edits, so a commit is where this has to hold.
+# Install: cp scripts/hooks/pre-commit .git/hooks/pre-commit
+exec python "$(git rev-parse --show-toplevel)/scripts/check_network_edit.py" --strict

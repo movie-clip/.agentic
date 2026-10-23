@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-23-profile-check-routing/02
+artifact:        C:\projects\investments\.agentic\runs\2026-10-23-profile-check-routing\02-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          Anchor: los-tres testing.md as a whole plus the committed core lane table. 0 BLOCKING, 0 SHOULD_FIX. The 01 finding is resolved. The diff is unchanged since 01 apart from the DoD wording. 2 UNVERIFIED
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           2
+headline:        PASS: the globalSetup carve-out resolves the 01 rule 9 finding; nothing else changed in the six files.

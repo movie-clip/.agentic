@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-23-profile-check-routing/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-23-profile-check-routing\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          check_network_edit exit 0 (no network-layer file changed). Anchor: committed core lane table (ARCHITECTURE.md:206), reviewer.md CHECK mode, test-engineer tools line, los-tres testing.md as a whole. 1 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           3
+headline:        FAIL: the five recon rows are consistent with core; the los-tres testing.md DoD carve-out contradicts its globalSetup feed import (rule 9).

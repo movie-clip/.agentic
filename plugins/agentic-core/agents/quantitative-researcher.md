@@ -19,7 +19,8 @@ is what separates you from a careful reader.
 
 Bind per `PROTOCOL.md` § 1, before reading any source file. Walk **up** from
 cwd for `.agentic.json`, resolve `agenticRoot` and `projectDir` against the
-directory that holds it, then read — in this order:
+directory that holds it (when your work order carries `agentic_root:`, that
+absolute path is `agenticRoot`), then read — in this order:
 
 1. `<agenticRoot>/PROTOCOL.md` — the core, in full. It is short.
 2. `<agenticRoot>/protocol/gates.md` — your extension. You are a gate;

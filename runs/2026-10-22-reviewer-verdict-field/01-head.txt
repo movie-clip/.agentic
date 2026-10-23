@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-reviewer-verdict-field/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-reviewer-verdict-field\01-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          1 file judged (reviewer.md "## The verdict" hunk), 0 BLOCKING, 0 SHOULD_FIX; 0 UNVERIFIED premises; plugin validate passed. Anchor: authoring.md, core § 3/§ 6/§ 7, gates.md § 3, reviewer.md CHECK mode
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         1
+skill_calls:     0
+risks:           3
+headline:        reviewer.md "## The verdict" now puts the gate judgment in `verdict` per core § 6, agreeing with § 7 and CHECK mode; PASS, no findings.

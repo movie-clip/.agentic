@@ -33,6 +33,8 @@ Every specialist agent, as its **first action**, before reading any source file:
    ```
    `agenticRoot` and `projectDir` are relative **to the directory containing
    `.agentic.json`**. Resolve both against that directory, not against cwd.
+   When your work order carries `agentic_root:`, that absolute path is
+   `agenticRoot`; use it rather than resolving one.
    `agenticRoot` is the network: protocol, agents, scripts. `projectDir` is
    this project's own folder, inside its repo: profile, packs and runs.
    `.agentic` itself carries an `.agentic.json` naming only `agenticRoot`.
@@ -69,7 +71,8 @@ richer on the code itself. Read the pack first, and when they disagree on a
 ```
 WORK ORDER <run-id>/<nn>
 lane:        product | quant | recon | story | ux | design | backend | frontend | test | docs | quant-audit | integration | ux-review | review | protocol-lint
-mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW>
+mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW; reviewer: CHECK>
+agentic_root: <absolute path of agenticRoot>
 run_dir:     <projectDir>/runs/<run-id>
 report_to:   <projectDir>/runs/<run-id>/<nn>-<lane>.md
 story:       <path to story file, or NONE>
@@ -145,7 +148,8 @@ the `run_dir` your order names. Read-only lanes (`scout`, `producer`,
 `quantitative-researcher`, `tech-lead`, `designer`, `reviewer`,
 `protocol-linter`) writing
 anywhere else — including any other file in the bound repo — is a protocol
-violation, not a judgment call.
+violation, not a judgment call. One exception: `reviewer` in `CHECK` mode may
+write throwaway files in the OS temp directory to run the claims it was sent.
 
 ### Bullet discipline
 

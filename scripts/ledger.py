@@ -11,11 +11,12 @@ has, so there is no second vocabulary to learn - the cells are the cells.
     --set    <field>=<value>   status phase plan budget story blocked_on gates
     --phase  "<phase> | <lane> | <state>"
     --open   "<kind> | <from> | <ref> | <one-line> | <state>"
-    --close  "<ref> | <absorbed by>"
+    --close  "<ref> | <absorbed by>"  or  "<ref> | <absorbed by> | <from>"
 
 Exit 0 = written and the ledger is consistent. 1 = written, and the ledger now
 says something inconsistent (the problems are printed; fix them on the next
-call). 2 = nothing written, usage error.
+call). 2 = nothing written, usage error. A refusal drops the whole call, not
+just the op it names, so every op in it has to be sent again.
 
 Why this exists, measured rather than assumed. Across the four runs closed on
 2026-09-12 the orchestrator made 107 separate edits to four `run.md` files -
@@ -260,25 +261,39 @@ def put_open(lines: list[str], cells: list[str]) -> None:
     append_row(lines, "Open", cells)
 
 
-def close_open(lines: list[str], ref: str, absorbed: str) -> None:
+def close_open(lines: list[str], ref: str, absorbed: str,
+               src: str | None = None) -> None:
     """Move an `Open` row to `## Closed`, dropping its `state` column.
 
     Section 1: a row leaves `Open` by being absorbed or dismissed, and being in
     `Closed` *is* the state - so the column does not travel with it.
+
+    `src` is the row's `from` cell. `put_open` keys a row on (`from`, `ref`),
+    so two lanes can each hold a row on one path; only `src` tells the pair
+    apart. Without it the los-tres run 2026-10-22-admin-sign-in could not
+    close such a pair at all.
     """
-    found = [(i, c) for i, c in rows(lines, "Open")
-             if len(c) >= 4 and c[2] == ref]
+    open_rows = [(i, c) for i, c in rows(lines, "Open") if len(c) >= 4]
+    if src is not None:
+        open_rows = [(i, c) for i, c in open_rows if c[1] == src]
+    found = [(i, c) for i, c in open_rows if c[2] == ref]
     if not found:
-        found = [(i, c) for i, c in rows(lines, "Open")
-                 if len(c) >= 4 and ref in c[2]]
+        found = [(i, c) for i, c in open_rows if ref in c[2]]
     if not found:
-        have = "; ".join(c[2] for _, c in rows(lines, "Open") if len(c) >= 3)
-        raise Usage(f"no `Open` row whose ref is or contains {ref!r}\n"
+        have = "; ".join(f"{c[2]} (from {c[1]})"
+                         for _, c in rows(lines, "Open") if len(c) >= 3)
+        where = f" from {src!r}" if src is not None else ""
+        raise Usage(f"no `Open` row{where} whose ref is or contains {ref!r}\n"
                     f"    refs: {have or 'the table is empty'}")
     if len(found) > 1:
-        raise Usage(f"{ref!r} matches {len(found)} `Open` rows - name the ref "
-                    f"exactly:\n    "
-                    + "\n    ".join(c[2] for _, c in found))
+        if src is None and len({c[2] for _, c in found}) == 1:
+            hint = (f"add the row's `from` as a third cell: "
+                    f"\"{ref} | {absorbed} | <from>\"")
+        else:
+            hint = "name the ref exactly"
+        raise Usage(f"{ref!r} matches {len(found)} `Open` rows - {hint}:\n    "
+                    + "\n    ".join(f"{c[2]}  (from {c[1]})"
+                                    for _, c in found))
     i, cells = found[0]
     lines.pop(i)
     append_row(lines, "Closed", [cells[0], cells[1], absorbed, cells[3]])
@@ -330,7 +345,8 @@ def apply(lines: list[str], ops: list[tuple[str, str]]) -> None:
         elif op == "open":
             put_open(lines, cells_of(value, 5, "open"))
         elif op == "close":
-            close_open(lines, *cells_of(value, 2, "close"))
+            n = 3 if value.strip().strip("|").count("|") == 2 else 2
+            close_open(lines, *cells_of(value, n, "close"))
     derive_spent(lines)
     for op, value in ops:
         if op == "next":
@@ -397,6 +413,12 @@ def main(argv: list[str]) -> int:
         apply(lines, ops)
     except Usage as e:
         print(e)
+        if len(ops) > 1:
+            print(f"nothing written: the whole call was dropped, so the other "
+                  f"{len(ops) - 1} op(s) in it did not land either - fix this "
+                  f"one and send them all again")
+        else:
+            print("nothing written")
         return 2
     with open(ledger, "w", encoding="utf-8", newline="") as fh:
         fh.write(nl.join(lines))

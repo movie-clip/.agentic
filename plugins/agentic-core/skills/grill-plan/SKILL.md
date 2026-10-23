@@ -1,6 +1,6 @@
 ---
 name: grill-plan
-description: Use this at every human stop of an orchestrate-feature run that hands the human a planning artifact - the producer's delivery brief at framing, the story draft at specification, a UX spec whose direction is new or changed, and the design phase's plan at the build go when design fired. Maps the artifact's decisions as a tree, sends unsourced claims and silent assumptions back to the lane that made them, settles fact questions through the ground-truth phase, and only then puts the remaining decisions to the human in numbered rounds with a recommended answer each, writing every ruling to decisions.md.
+description: Use this at every human stop of an orchestrate-feature run that hands the human a planning artifact - the producer's delivery brief at framing, the story draft at specification, a UX spec whose direction is new or changed, and the design phase's plan at the build go when design fired. Maps the artifact's decisions as a tree, sends unsourced claims and silent assumptions back to the lane that made them, settles fact questions through the ground-truth phase, and only then puts the remaining decisions to the human in numbered rounds with a recommended answer each, alongside a list of reversible lane recommendations the human can object to, writing every ruling to decisions.md.
 argument-hint: the planning artifact to grill, by run-dir path
 ---
 
@@ -32,9 +32,11 @@ not asked yet.
 | The node is | Because | It goes to |
 |---|---|---|
 | **settled** | the artifact cites a path, a test result or a `decisions.md` entry for it | nowhere; leave it |
+| **settled by a repo doc** | `CLAUDE.md`, or a product spec or decision record the profile names, already answers it, and the lane offered it as open anyway | § 4's assumed list, citing the doc |
 | **a fact** | the run needs a claim about the repo and nothing read this turn or named in `inputs` sources it | the `ground-truth` phase (`orchestrator.md` § 6), filled by the lane the profile's `phases.md` names |
-| **a lane gap** | the artifact asserts it without a source, or chose silently where its own role says to escalate | the same lane, re-dispatched as the next slot, with the numbered questions in the order's request |
-| **a human decision** | it is placement, priority, scope, a trade-off, or anything the lane escalated | the human, in § 4's rounds |
+| **a lane gap** | the artifact asserts it without a source, chose silently where its own role says to escalate, or two of its decisions contradict each other (one rules out an option of another) | the same lane, as the next slot, with the numbered questions in the order's request |
+| **a human decision** | it is placement, priority, scope, a stack choice or new dependency, a guardrail, a security or privacy value, deploy, a departure from a repo doc, or anything the lane escalated | the human, in § 4's questions |
+| **an assumed default** | the lane recommends an answer, it stays inside the approved scope, editing this slice's own files undoes it, and no human-decision class applies | § 4's assumed list |
 
 A fact node turns a `ground-truth` row recorded `not triggered` into a
 triggered one, which is a re-plan (`orchestrator.md` § 3).
@@ -43,8 +45,8 @@ A node settled by an earlier `decisions.md` entry stays settled. If a lane's
 answer contradicts it, that is a re-plan (`orchestrator.md` § 3), and the human
 hears about it; you do not reopen the ruling yourself.
 
-When you are unsure whether a node is a lane gap or a human decision, it is a
-human decision.
+When you are unsure whether a node is a human decision or anything else, it is
+a human decision.
 
 ## 3. Facts and lane gaps first
 
@@ -53,8 +55,9 @@ them; `orchestrator.md` § 3, step 4, permits these at the stop. Each one is
 dispatched and recorded as `orchestrator.md` § 1 and § 3 say.
 
 A lane-gap order asks; it does not answer. Quote no preferred answer, and name
-the artifact section each question came from in `inputs`. The lane returns a
-revised artifact as a new slot. Build the tree again from it (§ 1): nodes the
+the artifact section each question came from in `inputs`. Send it to the lane's own agent
+by `SendMessage` when it can still be resumed (`orchestrator.md` § 3, "A gate
+that fails routes", step 2). The lane returns a revised artifact. Build the tree again from it (§ 1): nodes the
 revision settled drop out, nodes it raised join, and nodes a `decisions.md`
 entry settled stay settled (§ 2). The revision gets no lane-gap round of its
 own: a lane gap it leaves open or raises is handled as the gaps below are, and
@@ -79,14 +82,29 @@ one message:
 ➡️ <recommended answer> — <whose: the lane's, or yours, with one line of why>
 ```
 
+Below the questions, in the same message, the assumed list: every assumed
+default and every node settled by a repo doc whose parents are settled.
+
+```
+Assumed unless you object:
+- **A1** - <the decision, as the lane recommends it, or as the doc settles it>
+  raised by: <artifact> § <section>  ·  <the lane's recommendation, or the doc path>
+```
+
 - Word each question so "yes" accepts the recommendation.
+- The stop's own go (approve the story, the build go) is always a question,
+  never an assumed item.
+- A reply that names an `A<n>` turns it into a question for the next round. A
+  reply that names none accepts the list.
 - Recommend the lane's answer when it gave one. If you recommend against it,
   say so and cite why.
 - A question that depends on another one still open in this round waits for
   the next round.
 
 After each round, write one `decisions.md` entry per decision the human
-resolved, in their words, before anything else (`orchestrator.md` § 5).
+resolved, in their words, before anything else (`orchestrator.md` § 5). An
+assumed item they let stand gets the not-objected entry `orchestrator.md` § 5
+defines.
 Recompute the frontier and ask again.
 
 ## 5. Done

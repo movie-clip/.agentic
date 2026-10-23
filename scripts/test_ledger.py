@@ -177,6 +177,29 @@ check("closing a ref no row holds is refused", code == 2)
 check("and the refusal lists the refs that are open",
       "cards/Foo.tsx" in out, out)
 
+d = fixture()
+run(d, "--open", "risk | 03-design | src/auth.ts | origin check | OPEN")
+run(d, "--open", "risk | 07-backend | src/auth.ts | sign-out swallow | OPEN")
+check("two lanes on one path are two rows",
+      raw(d).split("## Open")[1].count("src/auth.ts") == 2, raw(d))
+before = raw(d)
+code, out = run(d, "--next", "x", "--close", "src/auth.ts | 08-test")
+check("closing a ref two rows share is refused", code == 2, out)
+check("and the refusal names each row's `from`",
+      "03-design" in out and "07-backend" in out, out)
+check("and says how to pick one", "third cell" in out, out)
+check("and that the other ops in the call were dropped too",
+      "did not land either" in out and raw(d) == before, out)
+code, out = run(d, "--close", "src/auth.ts | 08-test | 07-backend")
+after = raw(d)
+check("a third `from` cell picks the row", code == 0, out)
+check("only that row moves",
+      "sign-out swallow" in after.split("## Closed")[1]
+      and "origin check" in after.split("## Closed")[0], after)
+code, out = run(d, "--close", "src/auth.ts | 08-test | 99-nobody")
+check("a `from` no open row has is refused",
+      code == 2 and "from '99-nobody'" in out, out)
+
 print("F - the post-write battery is check_report's, not a copy of it")
 d = fixture()
 code, out = run(d, "--set", "status=BLOCKED")

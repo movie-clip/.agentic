@@ -197,13 +197,13 @@ the repo docs do not record.
 
 ## 5. Roster — 12 agents, 15 lanes
 
-The lane is the unit of dispatch; three agents fill two lanes each, because a
+The lane is the unit of dispatch; four agents fill two lanes each, because a
 design pass and an integration gate are different jobs with different inputs
 even when the same role does them.
 
 | Lane | Agent | Pack | Owns |
 |---|---|---|---|
-| `recon` | `scout` | — | read-only exploration: where does this live, what already exists, what will this touch |
+| `recon` | `scout`; `reviewer` (CHECK) | — | read-only exploration: where does this live, what already exists, what will this touch. `reviewer` in CHECK mode when a claim can only be settled by running something |
 | `product` | `producer` | `product.md` | **the front door.** Roadmap placement, epic/story shaping, sequencing — and where "no" lives |
 | `quant` | `quantitative-researcher` (RESEARCH) | `quant.md` | formulas, academic grounding, trust-class analysis, metrics inventory, before a story exists |
 | `story` | `story-author` | `story.md` | drafts the ticketed story. Decides nothing — not placement, not the contract |

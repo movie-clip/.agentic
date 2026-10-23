@@ -489,8 +489,10 @@ The route is one shape for all five of them:
    the CR path in `inputs`. Not the lane that raised it, and not a lane that
    merely touches the area. If the agent that did the original work can still
    be resumed (`SendMessage` to its id), prefer that to a cold dispatch: it
-   keeps the context the fix needs and does not re-bind. It is still a new slot
-   with its own `report_to`, Artifacts row and head.
+   keeps the context the fix needs and does not re-bind. The same holds for any
+   order sent back to the lane that wrote an artifact, such as a `grill-plan`
+   lane-gap order. It is still a new slot with its own `report_to`, Artifacts
+   row and head.
 3. **Write the `## Rounds` row before dispatching, not after** — the count is
    the cap, and a count written afterwards is a count that reflects what
    happened rather than what was allowed. A fix that arrives through a re-plan
@@ -706,7 +708,11 @@ by:             the human, in session
 ```
 
 One entry per decision the human actually resolved, the ruling in **their
-words**, and the artifact and section that raised it. Then every downstream
+words**, and the artifact and section that raised it. An item from
+`grill-plan`'s assumed list that the human let stand is resolved too, by not
+objecting: its entry reads `ruling: not objected (assumed list, round <n>)`
+and `by: the human`, and carries the recommendation it accepted in
+`open decision:`. Then every downstream
 order names `decisions.md § D-1` in `inputs`, the same as any other input.
 
 This costs a paragraph per stop and closes the last place where a lane works
@@ -728,6 +734,9 @@ one:
   scope creep, and the one people skip.
 - **One lane per order.** If an order needs both a schema and a component, it is
   two orders with a dependency.
+- **`agentic_root:` is the absolute path**, copied from the ledger header.
+  Lanes that resolved a relative one went looking for `PROTOCOL.md` inside the
+  project repo.
 - **Name `inputs` by path and section**, per the relay rule above. You may name
   a section of a document you have only read the brief of.
 - **Every factual claim in the order is sourced.** An order asserts things about
@@ -746,6 +755,13 @@ wrong; three lanes pay for one sentence. An unverified claim reads exactly like
 a verified one,
 which is why it has to be sourced where it is written rather than caught where
 it hurts.
+
+**A claim that only running something can settle** (what a package really
+does, a scratch script) is a `recon` order to `reviewer` in `CHECK` mode,
+because `scout` cannot run anything. This holds whatever agent the profile's
+lane map names for `recon`: the map names the default, and this is the one
+case it does not cover. Never a `general-purpose` agent: it has no definition,
+so it binds to nothing and the ledger cannot check its model.
 
 ---
 

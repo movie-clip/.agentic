@@ -127,7 +127,8 @@ disagrees with the plan.
 - Within `build`, contracts go before consumers, implementation before tests,
   and docs last.
 - **Before `build`, present the plan and wait for a go**: the lane list, one
-  line of intent for each, the dispatch count and the budget.
+  line of intent for each, the dispatch count, the budget, and the design
+  plan's `human_setup` items, which the human does before the build starts.
 
 ### After each head
 
@@ -138,6 +139,7 @@ Head <nn>:
 - [ ] status and detail read against what the order asked
 - [ ] only the sections the counts point at are opened
 - [ ] contract_notes / handoff -> Open rows, routed as inputs downstream (no order to absorb one? create it)
+- [ ] each risks bullet that names a repo path -> an Open risk row, or Closed as dismissed with its reason
 - [ ] pack_corrections appended to pack-corrections.md (create it only if > 0)
 - [ ] ruled-out phases re-checked; a clause that turned true is a re-plan
 ```

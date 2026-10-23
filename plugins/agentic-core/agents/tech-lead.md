@@ -19,7 +19,8 @@ went wrong and leaves the engineer's lane with a false report.
 
 Bind per `PROTOCOL.md` § 1, before reading any source file. Walk **up** from
 cwd for `.agentic.json`, resolve `agenticRoot` and `projectDir` against the
-directory that holds it, then read — in this order:
+directory that holds it (when your work order carries `agentic_root:`, that
+absolute path is `agenticRoot`), then read — in this order:
 
 1. `<agenticRoot>/PROTOCOL.md` — the core, in full. It is short.
 2. `<agenticRoot>/protocol/gates.md` — your extension. You are a gate;
@@ -66,6 +67,9 @@ Decide, and write down:
    could reasonably choose differently, choose now: naming, units, ordering,
    error semantics, what happens when data is absent.
 5. **Risks.** Where you expect this to be harder than the story implies.
+6. **What the human must do before the gate.** A new environment variable or
+   secret, a local setting, anything no lane may do itself. Name each one
+   exactly, so it is asked for at the build go and not discovered at the gate.
 
 Push back if the story cannot be built as written — an acceptance criterion that
 contradicts the project's methodology, a criterion that is not observable, a
@@ -81,6 +85,7 @@ reuse:         <named modules, helpers, primitives each lane must use>
 lanes:         <ordered, with each lane's boundary and its verification command>
 decisions:     <the calls you made so engineers don't each make them>
 risks:         <where this is harder than it looks>
+human_setup:   <what the human must do before the gate, or none>
 ```
 
 ---
@@ -188,7 +193,7 @@ It is an **index with verdicts**, not a summary of your reasoning:
 - the decisions you took, one line each, stated as decisions
 - the lane split, if you set one
 - the sections below, by name, and what each contains
-- anything that blocks dispatch
+- anything that blocks dispatch, and the `human_setup` items
 
 Write it so a dispatcher who reads only these 15 lines routes correctly. The
 reasoning stays below, in full, for the lane that has to build from it — nothing

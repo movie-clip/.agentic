@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-22-run-review-fixes/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-22-run-review-fixes\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          plugin validate passed, 0 frontmatter errors; 7 files judged against authoring.md; 6 BLOCKING, 1 SHOULD_FIX; 2 UNVERIFIED premises. Anchor: authoring.md, plus untouched PROTOCOL.md, orchestrator.md an
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         7
+skill_calls:     0
+risks:           7
+headline:        FAIL: six blocking contradictions/layer breaks (mvp.md in skill, CHECK scratch writes, SendMessage scope, not-objected entries, agentic_root reach, recon agent).

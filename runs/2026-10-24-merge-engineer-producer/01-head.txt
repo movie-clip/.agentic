@@ -1,0 +1,13 @@
+REPORT HEAD 2026-10-24-merge-engineer-producer/01
+artifact:        C:\projects\investments\.agentic\runs\2026-10-24-merge-engineer-producer\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate passed, 0 errors; 2 BLOCKING (rule 9), 2 SHOULD_FIX (rule 8); 3 UNVERIFIED. Anchor for authoring.md: the other agent files in plugins/agentic-core/agents/ (10 listed). Scope judged: C:\projec
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         4
+skill_calls:     0
+risks:           6
+headline:        Merge fails on two rule-9 contradictions: producer.md intro binds STORY mode to a brief; authoring.md rule 7 misses engineer's frontend tool ban.

@@ -206,11 +206,11 @@ even when the same role does them.
 | `recon` | `scout`; `reviewer` (CHECK) | — | read-only exploration: where does this live, what already exists, what will this touch. `reviewer` in CHECK mode when a claim can only be settled by running something |
 | `product` | `producer` | `product.md` | **the front door.** Roadmap placement, epic/story shaping, sequencing — and where "no" lives |
 | `quant` | `quantitative-researcher` (RESEARCH) | `quant.md` | formulas, academic grounding, trust-class analysis, metrics inventory, before a story exists |
-| `story` | `story-author` | `story.md` | drafts the ticketed story. Decides nothing — not placement, not the contract |
+| `story` | `producer` (STORY) | `story.md` | drafts the ticketed story. Decides nothing — not placement, not the contract |
 | `ux` | `designer` (UX) | `ux.md` | the flow, screens, states, copy and design system, settled before the tech lead plans the contract |
 | `design` | `tech-lead` (DESIGN) | `architecture.md` | the contract, reuse, and the lane split, settled before anyone codes |
-| `backend` | `backend-engineer` | `backend.md` | `services/quant-engine/app/**` (non-test). Owns the contract source of truth |
-| `frontend` | `frontend-engineer` | `frontend.md` | `apps/desktop/src/**` (non-test). Mirrors server schemas exactly |
+| `backend` | `engineer` | `backend.md` | `services/quant-engine/app/**` (non-test). Owns the contract source of truth |
+| `frontend` | `engineer` | `frontend.md` | `apps/desktop/src/**` (non-test). Mirrors server schemas exactly |
 | `test` | `test-engineer` | `testing.md` | everything under a test file — fixtures, goldens, the network guard |
 | `docs` | `docs-engineer` | `docs.md` | `docs/**`, and at close-out only, applying `pack-corrections.md` back into the project's packs |
 | `quant-audit` | `quantitative-researcher` (AUDIT) | `quant.md` | **mathematics gate.** Independently recomputes published numbers, checks trust labels |

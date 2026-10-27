@@ -71,7 +71,7 @@ richer on the code itself. Read the pack first, and when they disagree on a
 ```
 WORK ORDER <run-id>/<nn>
 lane:        product | quant | recon | story | ux | design | backend | frontend | test | docs | quant-audit | integration | ux-review | review | protocol-lint
-mode:        <tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW; reviewer: CHECK>
+mode:        <producer: FRAMING | STORY; tech-lead: DESIGN | INTEGRATION; quantitative-researcher: RESEARCH | AUDIT; designer: UX | UX-REVIEW; reviewer: CHECK>
 agentic_root: <absolute path of agenticRoot>
 run_dir:     <projectDir>/runs/<run-id>
 report_to:   <projectDir>/runs/<run-id>/<nn>-<lane>.md
@@ -144,7 +144,7 @@ risks:
 ```
 
 Every agent is granted `Write` for **exactly one purpose**: this artifact, under
-the `run_dir` your order names. Read-only lanes (`scout`, `producer`,
+the `run_dir` your order names. Read-only lanes (`scout`, `producer` in FRAMING mode,
 `quantitative-researcher`, `tech-lead`, `designer`, `reviewer`,
 `protocol-linter`) writing
 anywhere else — including any other file in the bound repo — is a protocol
@@ -260,7 +260,7 @@ A head is a count of list items and a string sliced to an exact length. Those
 are the two things a model cannot do reliably by inspection, and no wording
 fixes that. The script counts; the lane judges.
 
-Lanes with no `Bash` (`scout`, `docs-engineer`, `story-author`) cannot run this,
+Lanes with no `Bash` (`scout`, `docs-engineer`) cannot run this,
 and are not asked to. The orchestrator validates every artifact and derives
 every head before routing from it — `protocol/orchestrator.md` § "Validate
 every artifact, derive every head" — including for lanes that do have `Bash`,
@@ -404,7 +404,7 @@ Run this on your own artifact before returning — **if your `tools:` includes
 `Bash`.** Exit 0 means it is routable; non-zero prints exactly what is wrong.
 
 **If you have no `Bash`, you cannot run it, and that is expected.** `scout`,
-`story-author` and `docs-engineer` are deliberately shell-less; § 4 says what
+`docs-engineer` are deliberately shell-less; § 4 says what
 happens to your artifact and your head instead. Put your effort into the
 artifact rather than auditing it by hand, and say nothing about any of it in
 `risks`: a bullet spent apologising for a tool you were never granted is a

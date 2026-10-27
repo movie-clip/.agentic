@@ -124,7 +124,7 @@ check("malformed stdin never breaks the lane", p.returncode == 0,
 
 print("B — the stop-time gate")
 
-def payload(msg, lane="backend-engineer", agent_id=None):
+def payload(msg, lane="engineer", agent_id=None):
     return {"agent_type": lane, "agent_id": agent_id or f"t{os.getpid()}-{os.urandom(4).hex()}",
             "last_assistant_message": msg}
 
@@ -256,7 +256,7 @@ code, err = run(HEAD_GATE, _p)
 check("a corrected head on the retry is checked and saved",
       (code, err) == (0, "") and (d / "06-head.txt").is_file(), f"{code} {err}")
 
-_p = {"agent_type": "backend-engineer", "last_assistant_message": "no head",
+_p = {"agent_type": "engineer", "last_assistant_message": "no head",
       "stop_hook_active": True}
 code, err = run(HEAD_GATE, _p)
 check("with no agent_id, stop_hook_active still releases", code == 0,

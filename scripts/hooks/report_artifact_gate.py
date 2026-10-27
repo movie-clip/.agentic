@@ -9,7 +9,7 @@ exactly the file this hook exists to reject, and a first-line test skipped it.
 Exit 2 on PostToolUse feeds stderr back to the agent without undoing the write;
 the tool already ran. Exit 0 stays silent.
 
-Why this exists. `scout`, `story-author` and `docs-engineer` are granted no
+Why this exists. `scout` and `docs-engineer` are granted no
 Bash, so the "check your own artifact" line in every agent definition is one
 they cannot follow. Their reports were first validated by the orchestrator,
 after the only session that could cheaply fix them had ended -- run

@@ -98,7 +98,7 @@ check("an LF ledger is not converted to CRLF", "\r" not in raw(d))
 print("B - `spent` is derived from the Artifacts rows, never typed")
 d = fixture()
 code, out = run(d, "--row",
-                "02 | backend | - | backend-engineer | sonnet | "
+                "02 | backend | - | engineer | sonnet | "
                 "02-backend.md | DONE | -")
 after = raw(d)
 check("a new row lands in the Artifacts table",
@@ -214,7 +214,7 @@ check("an empty --set value removes the line, so a stale block can be cleared",
       code == 0 and "blocked_on" not in raw(d), out)
 
 print("G - the budget trip-wire fires at the dispatch that spends it")
-rows = ["| 0%d | backend | - | backend-engineer | sonnet | 0%d-backend.md | "
+rows = ["| 0%d | backend | - | engineer | sonnet | 0%d-backend.md | "
         "DONE | - |" % (n, n) for n in range(2, 5)]
 d = fixture(MID[:-1] + rows + [""])
 code, out = run(d, "--next", "decide whether to spend another")

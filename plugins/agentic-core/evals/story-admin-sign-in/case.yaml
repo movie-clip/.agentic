@@ -1,0 +1,118 @@
+schema_version: "1.1"
+name: story-admin-sign-in
+description: >
+  Story drafting from an approved brief. Source: los-tres run
+  2026-10-22-admin-sign-in, slot 03. The graders are what the run later had to
+  fix in the story (AC 1 amended at slot 20) or what a gate leaned on.
+tags: [story, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 40
+  timeout_seconds: 1800
+  allowed_tools: [Agent, Read, Glob, Grep]
+  prompt: |
+    You are the orchestrator of a .agentic run in this repository. Do one thing:
+    read `agentic/project.md` § the lane table, find the agent it names for the
+    `story` lane, and dispatch it (as `agentic-core:<that agent>`) with exactly
+    the work order below. Do not draft anything yourself and do not edit files.
+    When it returns, reply with its REPORT HEAD and nothing else.
+
+    WORK ORDER eval-2026-10-22-admin-sign-in/03
+    lane:        story
+    mode:        STORY
+    agentic_root: .agentic-root (relative to the repo root)
+    run_dir:     agentic/runs/eval-2026-10-22-admin-sign-in
+    report_to:   agentic/runs/eval-2026-10-22-admin-sign-in/03-story.md
+    story:       docs/product/stories/US-2.1-admin-sign-in.md
+    tickets:     NONE
+
+    goal:        a ticketed draft of S2.1 "Admin signs in with email and password" that the human can approve
+
+    scope:
+      - docs/product/stories/US-2.1-admin-sign-in.md
+      - agentic/runs/eval-2026-10-22-admin-sign-in/03-story.md
+
+    inputs:
+      - agentic/runs/eval-2026-10-22-admin-sign-in/02-delivery-brief.md
+      - agentic/runs/eval-2026-10-22-admin-sign-in/01-recon.md
+      - agentic/runs/eval-2026-10-22-admin-sign-in/decisions.md
+
+    definition_of_done:
+      - the story file has a story statement, numbered acceptance criteria, a test plan and ordered tickets
+      - every ruling in decisions.md is applied, none reopened
+      - anything the brief left open and no ruling settles is an open decision in the report, not a choice made in the story
+
+    non_goals:
+      - choosing an auth library, a schema or a route shape — that is the design phase
+      - editing the roadmap, the story index or any code
+
+    verification:  NONE
+graders:
+  - name: report-written
+    type: regex
+    pattern: '^REPORT (eval-)?2026-10-22-admin-sign-in/03'
+    flags: m
+    target: { source: file, path: agentic/runs/eval-2026-10-22-admin-sign-in/03-story.md }
+  - name: story-shape
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    criteria: |
+      PASS if the file has a user story statement, numbered acceptance criteria
+      each of which a tester could check with a yes/no observation, a test plan,
+      and tickets in a dependency order.
+      FAIL if any of the four is missing, or more than two criteria are
+      unobservable ("works well", "is secure", "is fast").
+  - name: anonymous-admin-paths
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    weight: 2
+    criteria: |
+      The real run had to amend this later. PASS if an acceptance criterion
+      states what an anonymous visitor gets for EVERY /admin path, including a
+      path that matches no admin page (a redirect to sign-in, or a 404 — either
+      is fine, but it must be stated and must not reveal admin content).
+      FAIL if only known admin pages are covered, or unmatched /admin paths are
+      not mentioned.
+  - name: guard-every-entry-point
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    weight: 2
+    criteria: |
+      The integration gate leaned on this. PASS if an acceptance criterion
+      requires that an anonymous request to an admin page shows nothing from
+      the admin area, and that this holds for admin pages added later — not
+      only the pages this story builds.
+      FAIL otherwise.
+  - name: no-cookie-before-sign-in
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    criteria: |
+      PASS if a criterion says no cookie is set before a successful sign-in
+      (the site's privacy text promises an admin-only session cookie).
+      FAIL otherwise.
+  - name: stays-out-of-design
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    weight: 2
+    criteria: |
+      PASS if the story names no auth library, no table or column, and no
+      route-handler or function signature as a requirement (naming the URL a
+      user visits is fine).
+      FAIL if it commits to any of those — that is the tech lead's call.
+  - name: rulings-applied
+    type: llm
+    focus: { source: file, path: docs/product/stories/US-2.1-admin-sign-in.md }
+    weight: 2
+    criteria: |
+      The framing rulings were (later ones supersede earlier): admin copy is
+      Spanish, in its own admin section of the message files (D-8 over D-2);
+      an auth framework may be added and the tech lead picks it (D-1, D-6,
+      D-7); S2.1 is password-only and never deployed alone before S2.2 (D-4);
+      recovery is by re-running the create-admin command, and the session has
+      a limited lifetime whose value the story proposes (D-5).
+      PASS if the story is consistent with every one of these and proposes a
+      session lifetime (as a value or as an open decision for the human).
+      FAIL if it contradicts any — e.g. English admin copy, no dependency
+      allowed, a named framework, or an unlimited session.

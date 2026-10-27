@@ -128,7 +128,7 @@ frequency is the profile that earns Opus.
 | Model | Lanes | Why |
 |---|---|---|
 | `opus` | `quantitative-researcher`, `protocol-linter`, `tech-lead` | **The first two have no downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. `tech-lead` fails the test, since `integration` is followed by `review`, and is on Opus by the owner's ruling: its design pass fixes the contract every build lane then follows, and it pairs Opus with `low` effort so the tier, not the dial, carries the judgment. |
-| `sonnet` | `producer`, `story-author`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
+| `sonnet` | `producer`, `designer`, `reviewer`, `engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
 **A report is not only its claims**, which is the half that is easy to miss when
@@ -152,9 +152,9 @@ the top of the range.
 
 | Effort | Lanes | Why |
 |---|---|---|
-| `high` | `producer`, `designer`, `reviewer`, `backend-engineer`, `frontend-engineer` | The lanes that **decide** something: where work belongs, what the user sees, whether it is acceptable, and the two that write the code the contract describes. |
+| `high` | `producer`, `designer`, `reviewer`, `engineer` | The lanes that **decide** something: where work belongs, what the user sees, whether it is acceptable, and the one that writes the code the contract describes. |
 | `low` | `tech-lead` | Opus at the lowest dial: the model tier buys the design and review judgment, and `low` keeps the report terse and the tool calls few. |
-| `medium` | `quantitative-researcher`, `protocol-linter`, `story-author`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Drafting, applying, testing and retrieval all work against something another lane already fixed; the two no-downstream-check Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
+| `medium` | `quantitative-researcher`, `protocol-linter`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Applying, testing and retrieval all work against something another lane already fixed; the two no-downstream-check Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
 
 `quantitative-researcher` and `protocol-linter` sit at `medium` **on the model
 tier, not on the effort dial**: they are the two lanes with no downstream
@@ -311,15 +311,20 @@ passes every gate.
 ## A pack may not instruct a tool the lane does not have
 
 Before writing a command into a capability pack, open the agent file and read
-its `tools:` line. `scout`, `story-author` and `docs-engineer` have no `Bash`;
+its `tools:` line. `scout` and `docs-engineer` have no `Bash`;
 a pack telling one of them to run `git diff` is a false premise about the lane
 itself, and it will be silently worked around rather than reported.
 
 The same applies to the project tool server below, and bites harder: the grants
-are **per lane, not blanket**. A pack section telling `frontend-engineer` to call
-`probe_engine` names a tool that lane was deliberately not given, and the failure
+are **per lane, not blanket**. A pack section telling `reviewer` to call
+`reset_goldens` names a tool that lane was deliberately not given, and the failure
 looks like an agent ignoring its pack rather than a pack naming a tool that is
 not there.
+
+Where one agent serves several lanes, its per-lane working rules narrow its
+`tools:` line: a pack may not instruct a tool its agent forbids for that lane.
+Today that is `engineer` on `frontend`, which holds `probe_engine` and
+`build_snapshot` for the backend lane and is told not to call them.
 
 This is the one false premise `pack_corrections` does not catch. That loop is
 aimed at facts about the *code* — a path that moved, a fixture that was renamed
@@ -360,16 +365,14 @@ open the one you need, per the section above. What belongs here is why each gran
 is the shape it is, because that is what tells you whether a pack section you are
 about to write has a tool to stand on:
 
-- `backend-engineer` and `test-engineer` hold all five. They are the two lanes
-  that write engine code and its fixtures, which is the work `probe_engine` and
-  `build_snapshot` exist for.
+- `engineer` and `test-engineer` hold all five. They are the lanes that write
+  engine code and its fixtures, which is the work `probe_engine` and
+  `build_snapshot` exist for. `engineer` holds them for its backend lane; its
+  frontend rules tell it not to call them, because a frontend order writes no
+  engine code and a probe it needs is a backend report it should be reading.
 - `quantitative-researcher` holds the three probing tools, because AUDIT
   recomputes independently and must be able to call the engine it is judging
   rather than read the code and infer.
-- `frontend-engineer` holds `run_tests`, `check_gates` and `reset_goldens`,
-  and deliberately **not** `probe_engine` or `build_snapshot`: it writes no
-  engine code, so a probe it needs is a backend report it should be reading
-  instead.
 - `reviewer` and `tech-lead` hold `run_tests` and `check_gates` and no mutating
   tool, because a gate that verifies must not also change the tree it is
   verifying. Goldens drift the integration gate finds goes to a build lane.

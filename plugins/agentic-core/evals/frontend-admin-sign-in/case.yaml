@@ -1,0 +1,103 @@
+schema_version: "1.1"
+name: frontend-admin-sign-in
+description: >
+  A frontend build order. Source: los-tres run 2026-10-22-admin-sign-in,
+  slot 09, rebuilt from the design's Frontend lane. The graders are the
+  defects the gates caught afterwards: CR-1 (12-integration R1), CR-3
+  (16-ux-review check 22) and R6. No shell in evals on this machine, so the
+  lane writes code without running it; both arms share that handicap.
+tags: [build, frontend, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 80
+  timeout_seconds: 2400
+  allowed_tools: [Agent, Read, Glob, Grep]
+  prompt: |
+    You are the orchestrator of a .agentic run in this repository. Do one thing:
+    read `agentic/project.md` § the lane table, find the agent it names for the
+    `frontend` lane, and dispatch it (as `agentic-core:<that agent>`) with
+    exactly the work order below. Do not write code yourself.
+    When it returns, reply with its REPORT HEAD and nothing else.
+
+    WORK ORDER eval-2026-10-22-admin-sign-in/09
+    lane:        frontend
+    mode:        NONE
+    agentic_root: .agentic-root (relative to the repo root)
+    run_dir:     agentic/runs/eval-2026-10-22-admin-sign-in
+    report_to:   agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md
+    story:       docs/product/stories/US-2.1-admin-sign-in.md
+    tickets:     T2.1.5
+
+    goal:        the admin sign-in page, the guarded admin shell and its error screens render as 05-ux specifies, on the backend 08 built
+
+    scope:
+      - src/app/layout.tsx
+      - src/app/(public)/layout.tsx
+      - src/app/not-found.tsx
+      - src/app/admin/**
+      - src/components/admin/**
+      - messages/es-ES.json (the Admin namespace only)
+      - agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md
+
+    inputs:
+      - agentic/runs/eval-2026-10-22-admin-sign-in/06-design.md (§ Layout split, § Lanes › Frontend, § Decisions)
+      - agentic/runs/eval-2026-10-22-admin-sign-in/05-ux.md
+      - agentic/runs/eval-2026-10-22-admin-sign-in/08-backend.md
+      - agentic/runs/eval-2026-10-22-admin-sign-in/decisions.md
+
+    definition_of_done:
+      - every screen and state in 05-ux exists, with its copy exactly as 05-ux § Copy
+      - the public pages render as before, with the header and footer moved to (public)/layout.tsx
+      - no file in scope imports @/db or better-auth
+
+    non_goals:
+      - tests (the test lane owns them)
+      - any file under src/server/ or src/db/
+
+    verification:  NONE — this environment has no shell; say in risks what you would have run
+graders:
+  - name: report-written
+    type: regex
+    pattern: '^REPORT (eval-)?2026-10-22-admin-sign-in/09'
+    flags: m
+    target: { source: file, path: agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md }
+  - name: metadata-behind-guard
+    type: llm
+    weight: 2
+    focus: { source: file, path: src/app/admin/(shell)/page.tsx }
+    criteria: |
+      CR-1 in the real run. This is src/app/admin/(shell)/page.tsx.
+      PASS if no guarded admin page exports generateMetadata, or every one
+      that does calls the admin guard (requireAdminPage or equivalent) as its
+      first statement — so an anonymous request never runs admin code.
+      FAIL if a guarded page exports generateMetadata without the guard.
+  - name: signed-in-admin-404
+    type: llm
+    focus: { source: file, path: agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md }
+    criteria: |
+      CR-3 in the real run. You see the lane's report; judge from its
+      `changed` list and handoff. PASS if a signed-in admin who opens an unmatched
+      /admin/... URL sees an admin "page not found" screen inside the admin
+      shell (admin header and nav), while anonymous visitors still get no
+      admin content. FAIL if every unmatched /admin URL renders the public
+      404 with the public header and footer, or this case is not handled.
+  - name: error-copy-reachable
+    type: llm
+    focus: { source: file, path: agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md }
+    criteria: |
+      R6 in the real run. You see the lane's report. PASS if every Admin message key the lane added is
+      rendered by some screen (in particular the Admin.Error copy is shown for
+      an unexpected error, distinct from the Unavailable screen), or the report
+      lists unused keys as a deviation. FAIL if keys were added that no screen
+      renders and the report does not say so.
+  - name: stays-in-scope
+    type: regex
+    weight: 2
+    # Fails when any line of the report's changed list falls outside the
+    # order's scope, or is a test file, or is an API route.
+    pattern: '^changed:\n(?:  - .*\n)*?  - (?:(?!src/app/|src/components/admin/|messages/es-ES\.json|agentic/runs/)|\S*\.(?:test|spec)\.|src/app/api/)'
+    flags: m
+    match: not_contains
+    target: { source: file, path: agentic/runs/eval-2026-10-22-admin-sign-in/09-frontend.md }

@@ -34,13 +34,11 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 │  │  ├─ grill-plan/SKILL.md              ← human stops: questions to the lane, facts checked, then you
 │  │  └─ agentic-protocol/SKILL.md        ← a stub that points at PROTOCOL.md
 │  └─ agents/
-│     ├─ producer.md                sonnet/high    roadmap · epics · stories · sequencing
+│     ├─ producer.md                sonnet/high    roadmap · epics · sequencing; drafts the story (STORY mode)
 │     ├─ quantitative-researcher.md opus/medium    formulas · trust classes · financial gate
-│     ├─ story-author.md            sonnet/medium  drafts the ticketed story (human approves)
 │     ├─ scout.md                   sonnet/medium  read-only recon
 │     ├─ tech-lead.md               opus/low       design pass + integration gate
-│     ├─ backend-engineer.md        sonnet/high
-│     ├─ frontend-engineer.md       sonnet/high
+│     ├─ engineer.md                sonnet/high    backend and frontend lanes
 │     ├─ test-engineer.md           sonnet/medium
 │     ├─ docs-engineer.md           sonnet/medium
 │     ├─ designer.md                sonnet/high    UX spec + design gate (screenshots)
@@ -147,8 +145,8 @@ What happens:
 1. The orchestrator binds to the project via `.agentic.json`.
 2. **Producer** reads the roadmap and returns a delivery brief: already shipped,
    fits an active story, new story, new epic, or decline. You approve it.
-3. If new stories are needed, you run the repo's story-authoring skill. This is
-   a deliberate human gate — acceptance criteria are the contract everything
+3. If a story is needed, the **producer** drafts it in STORY mode and you
+   approve it. This is a deliberate human gate — acceptance criteria are the contract everything
    downstream is measured against.
 4. **Quant analyst (research)**, if the substance is mathematical, establishes
    the formulas, trust classes and metrics inventory *before* the story is

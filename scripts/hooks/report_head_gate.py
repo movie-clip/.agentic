@@ -34,7 +34,7 @@ through -- a missing head file fails it, and so does an artifact whose block
 is not on its first line.
 
 Advisories ride along, and never cause a hold. This is the only place the `~`
-half of check_report.py reaches the three lanes with no Bash: the CLI is one
+half of check_report.py reaches the two lanes with no Bash: the CLI is one
 they cannot run and report_artifact_gate.py drops the notes on purpose. A lane
 already being held is already editing, so the notes cost it nothing there. A
 clean artifact is still a clean stop.
@@ -173,8 +173,8 @@ def main() -> None:
     # differs: a malformed artifact is the lane's own writing, a wrong head is
     # arithmetic it should not have been doing by hand in the first place.
     lane_of = cr.lane_from_name(artifact)
-    # Advisories ride along with a hold, and never cause one. `scout`,
-    # `story-author` and `docs-engineer` have no Bash, so the only half of
+    # Advisories ride along with a hold, and never cause one. `scout`
+    # and `docs-engineer` have no Bash, so the only half of
     # check_report.py that has ever reached them is the blocking half -- both
     # hooks drop the `~` notes, and the CLI is one they cannot run. A lane
     # already being held is already editing, which is the one moment the notes
@@ -194,7 +194,7 @@ def main() -> None:
         # Hand over the derived head rather than only the diffs. A head is a
         # count of list items and a string sliced to an exact length - the two
         # things PROTOCOL.md section 4 records a model getting wrong in 26 of
-        # 59 closed heads - and the three lanes with no Bash cannot run
+        # 59 closed heads - and the two lanes with no Bash cannot run
         # --emit-head to get it. Telling them what is wrong without telling
         # them the answer just buys another guess.
         _hold(agent_id, retry,

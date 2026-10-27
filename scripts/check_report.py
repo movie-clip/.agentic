@@ -596,10 +596,23 @@ def _check_head(head: str, text: str) -> list[str]:
     return bad
 
 
-def _ledger_field(text: str, name: str) -> str | None:
-    """A `name:  value` line from the ledger header, or None."""
+def _ledger_field(text: str, name: str, wrapped: bool = False) -> str | None:
+    """A `name:  value` line from the ledger header, or None.
+
+    `wrapped` joins the indented lines that follow, for a value written across
+    lines - orchestrator.md shows `gates:` that way, and reading only its first
+    line reported every gate on the second as unaccounted for.
+    """
     m = re.search(rf"^{re.escape(name)}:[ 	]*(.*)$", text, re.M)
-    return m.group(1).strip() if m else None
+    if not m:
+        return None
+    value = m.group(1).strip()
+    if wrapped:
+        for ln in text[m.end():].splitlines()[1:]:
+            if not ln[:1].isspace() or not ln.strip():
+                break
+            value += " " + ln.strip()
+    return value
 
 
 def _ledger_table(text: str, heading: str) -> list[list[str]]:
@@ -694,7 +707,7 @@ def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]
         gates = profile_gates(ledger)
         if not gates:
             return [_NO_PROFILE]
-    stated = _ledger_field(text, "gates")
+    stated = _ledger_field(text, "gates", wrapped=True)
     ran = _gate_rows(_ledger_table(text, "Artifacts"), gates)
     if stated is None:
         return ["no `gates:` line - the ledger cannot say which gates ran and "
@@ -702,13 +715,17 @@ def check_gates(ledger: Path, gates: tuple[str, ...] | None = None) -> list[str]
     low = stated.lower()
     problems = []
     for g in gates:
-        if g not in low:
+        # Whole-name match: `review` must not match inside `ux-review`. The
+        # gate's entry runs from its name to the next `·`.
+        m = re.search(rf"(?<![\w-]){re.escape(g)}(?![\w-])", low)
+        entry = low[m.end():].split("·")[0] if m else ""
+        if not m:
             problems.append(f"`gates:` does not account for {g} - name it with "
                             f"its verdict, or `skipped` and why")
-        elif g in ran and ran[g].lower() not in low:
+        elif g in ran and entry.split()[:1] != [ran[g].lower()]:
             problems.append(f"`gates:` disagrees with the rows on {g}: rows "
                             f"recorded {ran[g]}")
-        elif g not in ran and "skip" not in low.split(g, 1)[1].split("·")[0]:
+        elif g not in ran and "skip" not in entry:
             problems.append(f"{g} has no verdict row, and `gates:` does not "
                             f"mark it skipped - a gate that quietly did not "
                             f"run is the one failure close-out cannot see")
@@ -1177,7 +1194,8 @@ def check_cr(run_dir: Path) -> list[str]:
             if lane and table_lane and lane != table_lane:
                 problems.append(f"{path.name} names lane {lane!r} and its "
                                 f"`## Rounds` row names {table_lane!r}")
-        if sev == "SHOULD_FIX" and ident not in open_text:
+        if sev == "SHOULD_FIX" and not re.search(
+                rf"(?<![\w-]){re.escape(ident)}(?!\d)", open_text, re.I):
             problems.append(f"{path.name} is SHOULD_FIX with no `## Open` or "
                             f"`## Closed` row naming it - a request that does "
                             f"not hold the slice is carried to the human or "
@@ -1370,7 +1388,7 @@ def check_budget(ledger: Path) -> list[str]:
     if original is None:
         original = budget
     if original and spent >= 2 * original:
-        if not _budget_ruling(ledger.parent):
+        if not _budget_ruling(ledger.parent, 2 * original):
             problems.append(
                 f"`spent: {spent}` has reached twice the original "
                 f"`budget: {original}` - that is the hard stop. The run stops "
@@ -1424,19 +1442,25 @@ def _budget_chain(replans: list[list[str]]) -> tuple[int | None, list[str]]:
     return (steps[0][1] if steps else None), problems
 
 
-def _budget_ruling(run_dir: Path) -> bool:
+def _budget_ruling(run_dir: Path, ceiling: int) -> bool:
     """Did the human rule on this run passing its hard stop, on disk?
 
     `decisions.md` is already where a human stop leaves its ruling, so the
     hard stop needs no mechanism of its own - only the ruling to actually be
     about the budget. A framing decision sitting in the file is not consent to
-    a run twice its size.
+    a run twice its size, and neither is any line that merely says "budget":
+    the ruling's line names the hard stop, or a budget at or past the ceiling
+    it lifts (`budget 14 -> 20`).
     """
     try:
         text = (run_dir / "decisions.md").read_text(encoding="utf-8")
     except OSError:
         return False
-    return "budget" in text.lower()
+    for ln in text.lower().splitlines():
+        if "budget" in ln and ("hard stop" in ln or any(
+                int(n) >= ceiling for n in re.findall(r"\d+", ln))):
+            return True
+    return False
 
 
 def _leading_int(value: str | None) -> int | None:

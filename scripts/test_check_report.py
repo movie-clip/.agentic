@@ -1197,6 +1197,63 @@ check("and a decisions.md entry satisfies it",
                  decisions="# Decisions\n\n## D-1 · build\nruling: go\n") == [])
 
 
+# --- 2026-10-27: four places the checker matched a fragment, not the thing ---
+import tempfile as _tf
+_GART = ("\n## Artifacts\n\n| # | lane | mode | agent | model | artifact | status "
+         "| verdict |\n|---|---|---|---|---|---|---|---|\n"
+         "| 01 | integration | X | tech-lead | sonnet | a | DONE | {v} |\n"
+         "| 02 | ux-review | X | designer | sonnet | b | DONE | PASS |\n")
+_G3 = ("integration", "ux-review", "review")
+
+
+def _gates(line, v="PASS"):
+    d = Path(_tf.mkdtemp())
+    (d / "run.md").write_text("gates:        " + line + "\n" + _GART.format(v=v),
+                              encoding="utf-8")
+    return cr.check_gates(d / "run.md", _G3)
+
+
+_r = _gates("integration PASS · ux-review PASS · review skipped (no story)")
+check("a skipped review after ux-review is recognised", _r == [], str(_r))
+_r = _gates("integration PASS · ux-review PASS")
+check("and ux-review on the line does not stand in for review",
+      any("account for review" in x for x in _r), str(_r))
+_r = _gates("integration PASS · review skipped (no story to\n"
+            "              accept) · ux-review PASS")
+check("a gates: line wrapped as orchestrator.md shows it is read whole",
+      _r == [], str(_r))
+_r = _gates("integration PASS (01 FAIL) · ux-review PASS · review skipped (x)",
+            v="FAIL")
+check("a gate's verdict is the word after its name, not one in its note",
+      any("disagrees with the rows on integration" in x for x in _r), str(_r))
+
+_crd = Path(_tf.mkdtemp())
+(_crd / "cr").mkdir()
+(_crd / "01-x.md").write_text("x", encoding="utf-8")
+(_crd / "cr" / "CR-1.md").write_text(
+    "lane: frontend\nseverity: SHOULD_FIX\nround: 1\nraised by: 01-x.md\n"
+    "scope fence: a\n", encoding="utf-8")
+_ROUNDS = ("## Rounds\n\n| finding | lane | round | of | caused by |\n"
+           "|---|---|---|---|---|\n| CR-1 | frontend | 1 | 2 | independent |\n")
+_OPEN = ("\n## Open\n\n| a | b | c | d | e |\n|---|---|---|---|---|\n"
+         "| 1 | x | {i} | y | OPEN |\n")
+(_crd / "run.md").write_text(_ROUNDS + _OPEN.format(i="CR-10"), encoding="utf-8")
+_r = cr.check_cr(_crd)
+check("CR-10 in Open does not carry a SHOULD_FIX CR-1",
+      any("CR-1.md is SHOULD_FIX" in x for x in _r), str(_r))
+(_crd / "run.md").write_text(_ROUNDS + _OPEN.format(i="CR-1"), encoding="utf-8")
+check("and CR-1 itself does", cr.check_cr(_crd) == [], str(cr.check_cr(_crd)))
+
+_r = cr.check_budget(_ledger(
+    14, 14, _CHAIN,
+    decisions="D-1: keep the budget page out of scope." + NL) / "run.md")
+check("a ruling that merely says 'budget' does not lift the hard stop",
+      any("hard stop" in x for x in _r), str(_r))
+_r = cr.check_budget(_ledger(
+    14, 14, _CHAIN, decisions="D-3: go on, budget 14 -> 20." + NL) / "run.md")
+check("a ruling naming a budget past the ceiling does", _r == [], str(_r))
+
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

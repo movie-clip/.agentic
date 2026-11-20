@@ -19,6 +19,7 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 ├─ scripts/check_report.py                ← validates an artifact, its head, and the run ledger
 ├─ scripts/ledger.py                      ← applies one head's worth of ledger updates in a call
 ├─ scripts/check_network_edit.py          ← a network-layer edit with no passing protocol-lint
+├─ scripts/replay_corpus.py              ← replays check_report.py over corpus/, the local copy of real closed runs
 ├─ scripts/pine_check.py                  ← tradingview's Pine linter
 ├─ scripts/test_*.py                      ← pins each of the four above
 ├─ scripts/hooks/report_artifact_gate.py  ← PostToolUse: checks an artifact as it is written

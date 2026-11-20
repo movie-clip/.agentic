@@ -13,38 +13,88 @@ How the network gets better from here. Problems live in
   `next` and `blocked_on`, and that is the authority; a copy in this file is a
   second place to go stale. This file is for changes to the network itself.
 
-Last reviewed: 2026-10-06, at v0.8.0.
+Last reviewed: 2026-11-20, at v0.10.0.
 
 ---
 
-## Now — harden the orchestrator, finish the authoring gate, prove the entry point
+## The order, and why
+
+v0.10.0 does its job, and is tagged as the baseline. So the order is: measure
+before changing, build the cases that can score a change before making it, and
+leave the changes that touch behaviour for last.
+
+## How every change below ships
+
+A change to an agent, a skill, the protocol or a script follows these steps.
+They exist so that a change which makes the network worse is seen at once and
+undone in one command.
+
+1. No network edit while any run is open (`check_report.py` compares ledger
+   cells to the current agent files).
+2. One change, one version bump in `plugin.json`, one tag.
+3. The script tests pass, and `replay_corpus.py` reports every real run
+   replaying as the baseline.
+4. A `protocol-lint` run passes for an edit to an agent, a skill or the
+   protocol.
+5. The eval cases that cover the changed file run before and after: one case,
+   one run by default; anything larger is costed and agreed first.
+6. One real run is watched, and its numbers compared with the stats of the
+   runs before it.
+7. Worse means back to the previous tag.
+
+## 1 — Measure
+
+No behaviour changes. Everything here reads ledgers or adds a field.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 0a | Orchestrator eval set from requests already run, run with `claude plugin eval` | TD-18 | a change to the skill or `orchestrator.md` can be scored before it ships |
-| 0b | Condense `protocol/orchestrator.md` to 400 lines or fewer, every rule kept | TD-19 | intake reads under 900 lines of rules, and lint passes |
-| 1 | Live-test the entry guard: send "this number looks wrong" in `portfolio`, `budget` or `impact` and see which skill loads | TD-11 | the request opens a run, not `diagnosing-bugs` |
-| 2 | `scripts/check_pack.py` — index rows ↔ headings, and one section per index row | TD-08, TD-03 | an index row naming a heading that does not exist fails a check instead of an Opus read |
-| 3 | Decide `frontend-design` in `portfolio`: write its trigger into `frontend.md`, or disable it | TD-12 | no enabled skill without a pack trigger |
+| 1a | `scripts/run_stats.py`, read-only over ledgers: intake budget against spent, re-plans, rulings asked against assumed, change requests, gate FAILs, `PARTIAL`, `BLOCKED` and `LOST` slots, per run and in total | TD-20, TD-21 | one command prints the table for the corpus and for a live project |
+| 1b | Network version and intake budget as their own ledger header fields, written by `ledger.py` | TD-20, TD-21 | a run can be attributed to a version, and `spent` read against what intake derived |
+| 1c | Tokens and duration per dispatch, from a source that is derived rather than typed | TD-20 | confirmed where the numbers come from; built only then |
 
-Item 2 is the half of the authoring gate worth mechanising: an index row pointing
-at a heading that is not there means a lane never reads that section, silently.
-Bullet length is the other half and is deliberately not in it — v0.7.16 already
-ruled that non-blocking, so a script for it buys cheaper lint rounds, not
-correctness.
-
-## Later — coverage and cross-checks
+## 2 — Evals
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 4 | Clear the four rule-8 bullets run 2026-10-01-lint-v0.7.16-network-edit left open in `authoring.md` — `:357-360`, `:220`, `:223`, `:230` | TD-03 | a reader stops meeting a 298-character bullet in the file that sets the limit at 200 |
-| 5 | Wire `check_network_edit.py --strict` as a pre-commit hook in this repo | TD-05 | an unlinted network edit cannot be committed, rather than being mentioned once at `Stop` |
-| 6 | First `datoro` run on a small real request | TD-15 | a closed datoro run |
-| 7 | Cross-check the tech lead's own `skill_calls:` (reviewer, or the close-out sweep) | TD-02 | some reader other than the author judges it |
+| 2a | Intake cases from the corpus: request → which phases fire, where the human stops | TD-18 | four cases, each stopping before the first dispatch |
+| 2b | Grill cases from the corpus: planning artifact → which decisions reach the human, which are assumed | TD-18 | four cases, including one artifact with nothing open |
+| 2c | Gate cases from the recorded FAILs: the work a gate failed, and the same work fixed | TD-18 | a gate change can be scored on a case it should fail and one it should pass |
+
+## 3 — Enforce
+
+Each item is one version.
+
+| # | Item | Closes | Done when |
+|---|---|---|---|
+| 3a | Ship the two report hooks in the plugin's `hooks/hooks.json`, silent where no `.agentic.json` is found; the owner then removes the per-repo lines | TD-14 | a newly bound repo has the hooks with no settings edit |
+| 3b | CI running the gate command in `los-tres`, `los-tres-collector` and `tradingview`, as a work order in each | TD-26 | a red gate blocks the pull request |
+| 3c | A readiness command in the profile, run at intake before the first build dispatch | TD-23 | Docker being down costs a sentence, not a dispatch |
+| 3d | Wire `check_network_edit.py --strict` as this repo's pre-commit hook | TD-05 | an unlinted network edit cannot be committed |
+| 3e | The entry-point paragraph in `los-tres` and `los-tres-collector`, then one live test | TD-11 | a matching request opens a run, not `diagnosing-bugs` |
+
+## 4 — Optimise
+
+Only with the numbers from 1 and the cases from 2. Each item is one version and
+is undone if the watched run is worse.
+
+| # | Item | Closes | Done when |
+|---|---|---|---|
+| 4a | Move the decision classes the owner accepted as recommended every time to the grill's assumed list, one class at a time | TD-22 | fewer active rulings a run, and no ruling reversed after the fact |
+| 4b | Derive the build budget after `design` returns, not at intake | TD-21 | re-plans caused by the build split stop |
+| 4c | Condense `protocol/orchestrator.md` to 400 lines or fewer, every rule kept | TD-19 | intake reads under 1,100 lines, lint passes, the intake and grill cases score as before |
+| 4d | `scripts/check_pack.py` — index rows ↔ headings | TD-08, TD-03 | an index row naming a missing heading fails a check instead of an Opus read |
+
+## Later
+
+| # | Item | Closes | Done when |
+|---|---|---|---|
+| 5 | Decide `frontend-design` in `portfolio`: write its trigger into `frontend.md`, or disable it | TD-12 | no enabled skill without a pack trigger |
+| 6 | First `datoro` run on a small real request | TD-15 | a closed datoro run in the corpus |
+| 7 | Cross-check the tech lead's own `skill_calls:` | TD-02 | some reader other than the author judges it |
 | 8 | Delete `build-story` from portfolio through a portfolio run | TD-13 | the skill is gone from the repo |
-| 9 | Review skill-call honesty across the next 5 runs with a technique trigger | TD-01 | a decision: keep the field as is, or strengthen it |
+| 9 | Review skill-call honesty across 5 runs with a technique trigger | TD-01 | a decision: keep the field as is, or strengthen it |
 | 10 | Use or drop the unused tool-server tools | TD-16 | each tool appears in a run, or is removed |
-| 11 | Bind-time check that each repo's hooks are installed, including this repo's own `Stop` hook | TD-14, TD-05 | a missing hook is reported at intake instead of being silent |
+| 11 | Clear the four over-length bullets left in `authoring.md` (`:357-360`, `:220`, `:223`, `:230` when filed) | TD-03 | the file that sets the bullet limit no longer breaks it |
 
 ## Watching — reopen only on evidence
 
@@ -53,3 +103,5 @@ correctness.
 | First recorded scope-fence breach | enforce the fence mechanically, and bound `Bash` writes with it | TD-09, TD-10 |
 | A gate finding traced to an unsourced work-order claim | add a sourcing check to the ledger script | TD-06 |
 | A run that should have re-opened a skipped phase and did not | make the re-read a ledger step | TD-07 |
+| A second Artifacts row naming the orchestrator as the agent | an eval case, and a check in `ledger.py` | TD-24 |
+| The integration gate passes work a later gate or the owner rejects | calibrate it against that case | TD-18 |

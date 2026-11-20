@@ -11,7 +11,7 @@ What is wrong or missing in the network **right now**. Each item has an ID;
 - A gap kept on purpose stays listed, marked **by choice**, with the
   condition that would reopen it.
 
-Last reviewed: 2026-10-06, at v0.8.0.
+Last reviewed: 2026-11-20, at v0.10.0 (tagged as the known-good baseline).
 
 ---
 
@@ -34,19 +34,34 @@ Last reviewed: 2026-10-06, at v0.8.0.
 
 | ID | Problem | Evidence | Fix direction |
 |---|---|---|---|
-| TD-11 | **The entry-point guard has never been tested live.** All three repos that enable `mattpocock-skills` — `portfolio`, `budget`, `impact` — now carry the paragraph, each naming its own consequence. Whether a main session actually obeys it over `diagnosing-bugs` is unmeasured. | `tradingview` and `datoro` enable no competing skill, so there is nothing there to guard. | Send a matching request in one of the three and see which skill loads. Prose is all this can ever be — nothing can intercept the main session's own skill choice. |
+| TD-11 | **The entry-point guard has never been tested live, and two repos lack it.** `portfolio` and `budget` carry the paragraph. `los-tres` and `los-tres-collector` enable `mattpocock-skills` too, and their `CLAUDE.md` does not name `orchestrate-feature`. Whether a main session obeys the paragraph over `diagnosing-bugs` is unmeasured. | `grep orchestrate-feature */CLAUDE.md`, 2026-11-20; `impact` was not checked. `tradingview` and `datoro` enable no competing skill. | Add the paragraph to the two repos through a run in each. Then send a matching request and see which skill loads. Prose is all this can ever be — nothing can intercept the main session's own skill choice. |
 | TD-12 | **`frontend-design` is enabled in `portfolio` with no pack guidance.** The frontend lane can call it and nothing says when; it may compete with the mandatory `ui-polish`. | `portfolio/.claude/settings.json`. | Either write the trigger into `frontend.md` or disable it there. |
 | TD-13 | **`build-story` is superseded, not deleted.** It still sits in `portfolio/.claude/skills/`, now routing to `orchestrate-feature`. | — | Delete it through a portfolio run (repo file, not network wiring). |
-| TD-14 | **Hook installation is unverifiable from here.** The hooks live in each bound repo's `.claude/settings.json`; an uninstalled hook is silent. | `test_hooks.py` pins behaviour, not installation. | The close-out sweep is the backstop; a bind-time check could confirm it. |
+| TD-14 | **Hooks are wired by hand in each bound repo, and unevenly.** They live in each repo's `.claude/settings.json`; an uninstalled hook is silent. The plugin ships no `hooks/hooks.json`, which is where Claude Code's docs say a plugin's hooks belong. | Only `portfolio` wires a `PreToolUse` commit gate; the other repos carry the two report hooks. `test_hooks.py` pins behaviour, not installation. | Ship the report hooks in the plugin, no-op where no `.agentic.json` is found, then remove the per-repo lines by hand. |
 
 ## Coverage — built but not exercised
 
 | ID | Problem | Fix direction |
 |---|---|---|
-| TD-15 | **`datoro` and `los-tres` are bound but have never run.** Their profiles, phases and packs are untested. `los-tres` was bound before any code existed (2026-10-12), so its packs hold constraints and empty `Layout` sections that its first slices fill. | One small real request each. For `los-tres`, the first is the MVP-scope framing run. |
+| TD-15 | **`datoro` is bound but has never run, and four projects have no run on disk.** `portfolio`, `budget`, `tradingview` and `datoro` hold an empty `runs/`, so every measurement of the network today comes from `los-tres` and `los-tres-collector`. | One small real request in `datoro`. Until another project runs, treat a conclusion drawn from the corpus as a web-app conclusion. |
 | TD-16 | **`probe_engine`, `build_snapshot` and `reset_goldens` are tested but unused.** Only `run_tests` and `check_gates` appear in a run. | Keep until a run needs them; drop if still unused after several portfolio runs. |
-| TD-18 | **The orchestrator has no behavioural evaluation.** Scripts are pinned by tests and lanes by gates; nothing checks the orchestrator's decisions (which phases fire, the budget, where it stops for the human) against known-good answers. Anthropic recommends starting with about 20 real cases and judging the end state. | On 2026-10-06, 1 of 5 runs had closed, and it spent twice its derived budget. | Write about 10 eval cases from requests already run (request → expected phase verdicts, human stops, budget range). Run them with `claude plugin eval` before changing the skill or `orchestrator.md`. |
-| TD-19 | **`protocol/orchestrator.md` is about 750 lines, read in full at every intake.** With `PROTOCOL.md` it puts about 1,150 lines of rules and rationale in front of the first dispatch. Anthropic's guidance is the smallest high-signal context, plus examples instead of lists of edge cases. v0.8.0 cut the skill from 510 lines to about 260 and left the protocol alone. | `wc -l`, 2026-10-06. | Condense to 400 lines or fewer: keep every rule, and move each war story to `ARCHITECTURE.md` or `git log`. It goes through a `protocol-lint` run. |
+| TD-18 | **The orchestrator and `grill-plan` have no behavioural evaluation.** Three lane cases exist (`story`, `backend`, `frontend`), all from one run, with no shell and no saved result. Nothing checks which phases fire, the budget, or which decisions the grill sends to the human against known-good answers. Anthropic recommends 20 to 50 cases from real failures, judged on the end state, including cases where a behaviour should not happen. | Harvest about 12 cases from the corpus: intake (request → phase verdicts), grill sorting (artifact → what reaches the human), and the recorded gate FAILs. Run the cases covering a file before changing it. |
+| TD-19 | **`protocol/orchestrator.md` is 840 lines, read in full at every intake.** With `PROTOCOL.md` (418) and the skill (282) that is about 1,540 lines of rules and rationale before the first dispatch. Anthropic's guidance is the smallest high-signal context, plus examples instead of lists of edge cases. Measured with `wc -l`, 2026-11-20. | Condense to 400 lines or fewer: keep every rule, and move each war story to `ARCHITECTURE.md` or `git log`. Only after TD-18's cases exist, so the cut can be scored. It goes through a `protocol-lint` run. |
+
+## Measurement — what the network cannot say about itself
+
+Counts are from the 24 closed runs in `corpus/` on 2026-11-20
+(22 `los-tres`, 2 `los-tres-collector`).
+
+| ID | Problem | Evidence | Fix direction |
+|---|---|---|---|
+| TD-20 | **No run records what it cost.** The ledger counts dispatches; it holds no tokens, no duration and no network version. Anthropic's harness guidance is to remove one component at a time and measure, and there is nothing to measure against. | 24 runs, 271 dispatches, zero cost fields. | A read-only stats script over ledgers first; then the network version in the ledger header; tokens and duration last, once a source that is derived rather than typed is confirmed. |
+| TD-21 | **The budget signal is erased.** Each re-plan rewrites `budget:`, so every closed run ends `spent == budget`. The intake estimate survives only in the first `## Replans` row. | 17 of 24 runs re-planned. The usual causes: design split the build into more dispatches than intake assumed, and human follow-ups after close. | Keep the intake figure in its own header field and report it beside `spent`. Then consider deriving the build budget after `design`, not at intake. |
+| TD-22 | **The grill sends the human about seven active rulings a run.** 263 rulings in 24 runs; 94 passed as assumed, and the owner reports accepting the recommendation almost every time. `grill-plan` § 2 defaults an unsure node to a human decision. | `decisions.md` across the corpus; owner, 2026-11-20. | Find the decision classes accepted as recommended every time and move those to the assumed list. One class at a time, scored by TD-18's grill cases. |
+| TD-23 | **A dispatch is spent to discover the environment is down.** Lanes return `BLOCKED` or `PARTIAL` because Docker or the database is not running, or a permission prompt refused a write. | `2026-11-16-s5-8-filter-by-car` slots 11 and 12; `2026-11-18-s3-1-admin-feeds` slots 13 and 14. | A readiness command the profile declares and intake runs before the first build dispatch. |
+| TD-24 | **The orchestrator has filed its own work as a slot.** One Artifacts row names agent `orchestrator`, mode `inline`, with no head — the failure `orchestrator.md` § 7 describes, recorded rather than hidden. | `2026-11-16-s5-8-filter-by-car` row 23; it is the one run the corpus replay fails. | Watch. A second occurrence makes it a TD-18 case. |
+| TD-25 | **Run evidence is saved only by hand.** Runs are gitignored and pruned; `replay_corpus.py --add` copies them into `corpus/`, and nothing prompts for it at close. | — | Run `--add` before pruning. Reopen if a pruned run turns out to be missing. |
+| TD-26 | **Three bound repos have no CI.** The design names the test runner, the commit hook and CI as the final authority; `los-tres`, `los-tres-collector` and `tradingview` have no workflow, so the gate command runs only when a lane runs it. | `ls <repo>/.github/workflows`, 2026-11-20. Branch rules on the host were not checked. | A workflow running each repo's gate command, delivered as a work order in that repo. |
 
 ---
 
@@ -57,7 +72,7 @@ worse than one you know is on trust.
 
 | Rule | Backed by |
 |---|---|
-| No agent commits | hook — `pre_commit_gate.py` in the bound repo |
+| No lane commits | hook — `pre_commit_gate.py`, wired in `portfolio` only. A project with a tracker lets the orchestrator commit to the run's branch (`orchestrator.md` § 8); its deny list blocks merge and force-push |
 | Reports use the protocol shape | script + hook — `check_report.py`, `report_artifact_gate.py` on every write under `runs/` |
 | A report head matches its artifact | hook — `report_head_gate.py` at `SubagentStop`, bounded at two holds |
 | Bullets stay routable | script — on the four gate lanes only; advisory elsewhere by choice |
@@ -68,7 +83,8 @@ worse than one you know is on trust.
 | The ledger header is coherent; `Open` holds only what is open | script — close-out sweep |
 | Planning artifacts carry a brief | script — `check_report.py`; usefulness unchecked |
 | Agent frontmatter parses; model and effort pinned | command + script — `claude plugin validate`, `check_agents` |
-| The validator, hooks and checks are correct | tests — `test_check_report.py` 220, `test_hooks.py` 34, `test_ledger.py` 43, `test_check_network_edit.py` 15, `test_pine_check.py` 55 |
+| The validator, hooks and checks are correct | tests — `test_check_report.py` 228, `test_hooks.py` 34, `test_ledger.py` 51, `test_check_network_edit.py` 17, `test_pine_check.py` 55 |
+| A script change leaves the verdict on every real closed run unchanged | script — `replay_corpus.py` against `corpus/baseline.json`; local only, 24 runs |
 | An unfinished run is seen again | prose — intake lists every ledger not `CLOSED` and the human resumes, drops or leaves it |
 | A run survives a restart | the ledger on disk |
 | Read-only lanes don't edit | tool grant — no `Edit`; see TD-10 |
@@ -79,6 +95,7 @@ worse than one you know is on trust.
 | A work order's claims are true | prose — TD-06 |
 | A pack section is read when needed | prose + `## Index` — TD-08 |
 | `scope` fences a work order | prose, by choice — TD-09 |
-| A run's cost matches its plan | nothing, by choice — the 2x ceiling is the only stop |
+| A run's cost matches its plan | nothing — the 2x ceiling is the only stop; TD-20, TD-21 |
 | The orchestrator decides well | nothing — TD-18 |
+| The grill sends the right decisions to the human | nothing — TD-18, TD-22 |
 | A report's contents are true | nothing can — that is what the gates are for |

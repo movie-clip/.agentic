@@ -16,3 +16,6 @@ __pycache__/
 
 # Images in lint runs are not committed
 runs/**/*.png
+
+# Real closed runs replayed by scripts/replay_corpus.py - local only
+corpus/

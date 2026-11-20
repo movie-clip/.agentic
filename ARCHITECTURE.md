@@ -1,8 +1,8 @@
 # `.agentic` — agent network architecture
 
 Lives at `C:\projects\investments\.agentic`, one level above the repos it
-drives. Six projects are bound: `portfolio`, `budget`, `impact`,
-`tradingview`, `datoro` and `los-tres`. `plugins/agentic-core/.claude-plugin/plugin.json`
+drives. Seven projects are bound: `portfolio`, `budget`, `impact`,
+`tradingview`, `datoro`, `los-tres` and `los-tres-collector`. `plugins/agentic-core/.claude-plugin/plugin.json`
 is the authority on the version. Examples below use `portfolio`.
 
 **This file is the current design and the reasoning behind it.** How each rule
@@ -195,9 +195,9 @@ without a tool call. The profile carries what `CLAUDE.md` does not — the lane
 map, the numbered guardrails a lane may refuse an order over, and the friction
 the repo docs do not record.
 
-## 5. Roster — 12 agents, 15 lanes
+## 5. Roster — 10 agents, 15 lanes
 
-The lane is the unit of dispatch; four agents fill two lanes each, because a
+The lane is the unit of dispatch; six agents fill two lanes each, because a
 design pass and an integration gate are different jobs with different inputs
 even when the same role does them.
 
@@ -228,7 +228,7 @@ dir.** "Read-only" was never quite true. What actually bounds the planning and
 gate lanes is that they hold no `Edit` — though `Bash` remains a write primitive
 for the lanes that have it, and that is a real gap, not a rounding error.
 
-**Six of the twelve agents reach the bound repo's `project` MCP server** — `run_tests`,
+**Five of the ten agents reach the bound repo's `project` MCP server** — `run_tests`,
 `probe_engine`, `build_snapshot`, `check_gates`, `reset_goldens` — granted
 narrowly, with the verifying gates (`reviewer`, `tech-lead`) getting nothing
 that mutates. It exists because lanes
@@ -246,7 +246,7 @@ plugins/agentic-core` reports it by file and reason; `protocol-linter` runs that
 before it reads anything, and `authoring.md` § "The frontmatter has to parse, or
 none of it applies" is the rule it cites.
 
-**Model and effort are pinned in frontmatter on all twelve, never `inherit`.**
+**Model and effort are pinned in frontmatter on all ten, never `inherit`.**
 The policy is in `authoring.md`; the rationale is one test: *would a wrong
 answer from this lane be caught by anything downstream — a test, a gate, a
 validator, the human approval step?* If yes, Sonnet. If no, Opus. Only
@@ -255,7 +255,7 @@ engineered perfectly, tested thoroughly, satisfies every acceptance criterion
 and passes every other gate; a wrong `model:` line in an agent file bills wrong
 on every dispatch forever and shows up as nothing at all. `tech-lead` is also on
 Opus, by the owner's ruling rather than the test. `effort` is the second dial
-and is not the model — `high` for the five lanes that decide something, `low`
+and is not the model — `high` for `designer`, `engineer`, `producer` and `reviewer`, `low`
 for `tech-lead`, `medium` for the rest, because the implicit default is `xhigh` and an omission is a silent
 escalation rather than a neutral one.
 
@@ -401,7 +401,8 @@ procedural knowledge the repo owns and versions with its code (`ui-polish`,
 skills; the network's own two skills carry sequence, not rules.
 
 **Third-party technique skills are enabled per repo and fired by a pack.**
-`mattpocock-skills` is on in `budget`, `impact` and `portfolio`, through each
+`mattpocock-skills` is on in `budget`, `impact`, `portfolio`, `los-tres` and
+`los-tres-collector`, through each
 repo's `.claude/settings.json`. It supplies technique (`diagnosing-bugs`,
 `tdd`, `codebase-design`), never house style. A lane calls one only where its
 capability pack names the trigger and adapts the skill to the lane's fences.

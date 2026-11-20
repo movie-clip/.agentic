@@ -119,6 +119,54 @@ def _hold(agent_id: str, retry: bool, lines: list[str]) -> None:
     sys.exit(2)
 
 
+def _handback(payload: dict, wait: float = 4.0) -> str:
+    """The report a lane delivered through SubagentHandback, or "".
+
+    Claude Code 2.1.329 ends a subagent on a `SubagentHandback({message})`
+    tool call and sends this hook no `last_assistant_message`, so the head is
+    in the transcript and nowhere in the payload. Measured on 2026-11-20: the
+    hook fires about 70 ms after the call returns and the transcript line for
+    it lands up to a few seconds later, hence the short wait. Only a handback
+    after the lane's latest work order counts - a resumed lane's transcript
+    still holds the one that closed its earlier slot.
+    """
+    raw = payload.get("agent_transcript_path")
+    if not raw:
+        return ""
+    path = Path(raw).expanduser()
+    deadline = time.time() + wait
+    while True:
+        found = ""
+        try:
+            lines = path.read_text(encoding="utf-8",
+                                   errors="replace").splitlines()
+        except OSError:
+            lines = []
+        for line in lines:
+            try:
+                entry = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(entry, dict):
+                continue
+            if usage._order_in(entry):
+                found = ""
+                continue
+            msg = entry.get("message")
+            content = msg.get("content") if isinstance(msg, dict) else None
+            if entry.get("type") != "assistant" or not isinstance(content, list):
+                continue
+            for block in content:
+                if (isinstance(block, dict) and block.get("type") == "tool_use"
+                        and block.get("name") == "SubagentHandback"):
+                    message = (block.get("input") or {}).get("message")
+                    if isinstance(message, str):
+                        found = message
+        if found or time.time() >= deadline:
+            return found
+        time.sleep(0.25)
+
+
 def _record_usage(payload: dict, artifact: Path) -> None:
     """Write `<nn>-usage.json` for this lane's slots. Never affects the gate.
 
@@ -158,7 +206,8 @@ def main() -> None:
         sys.exit(0)
 
     agent_id = payload.get("agent_id") or ""
-    head = _head_block(payload.get("last_assistant_message") or "")
+    head = _head_block(payload.get("last_assistant_message")
+                       or _handback(payload))
     if head is None:
         _hold(agent_id, retry, [
             "NO REPORT HEAD - PROTOCOL.md section 4 requires your final message "

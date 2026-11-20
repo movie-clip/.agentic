@@ -69,7 +69,7 @@ Each item is one version.
 | 3a | Ship the two report hooks in the plugin's `hooks/hooks.json`, silent where no `.agentic.json` is found; the owner then removes the per-repo lines | TD-14 | a newly bound repo has the hooks with no settings edit |
 | 3b | CI running the gate command in `los-tres`, `los-tres-collector` and `tradingview`, as a work order in each | TD-26 | a red gate blocks the pull request |
 | 3c | A readiness command in the profile, run at intake before the first build dispatch | TD-23 | Docker being down costs a sentence, not a dispatch |
-| 3d | Wire `check_network_edit.py --strict` as this repo's pre-commit hook | TD-05 | an unlinted network edit cannot be committed |
+| 3d | Done 2026-11-20: `scripts/hooks/pre-commit` is installed in this repo's `.git/hooks` | TD-05 | an unlinted network edit cannot be committed |
 | 3e | The entry-point paragraph in `los-tres` and `los-tres-collector`, then one live test | TD-11 | a matching request opens a run, not `diagnosing-bugs` |
 
 ## 4 — Optimise

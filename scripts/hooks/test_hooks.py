@@ -348,6 +348,50 @@ code, err = run(HEAD_GATE, p)
 check("a folder with no run.md is not a run dir, so nothing is written there",
       code == 0 and not (d2 / "06-usage.json").exists(), f"{code} {err}")
 
+print("E — a head delivered through SubagentHandback is read from the transcript")
+
+def handback_row(message, ts="2026-01-01T10:02:00.000Z"):
+    return {"type": "assistant", "timestamp": ts,
+            "message": {"id": "m9", "model": "claude-sonnet-5-5",
+                        "usage": {"input_tokens": 1, "output_tokens": 7},
+                        "content": [{"type": "tool_use", "name": "SubagentHandback",
+                                     "input": {"message": message}}]}}
+
+def with_rows(t, rows):
+    t.write_text(t.read_text(encoding="utf-8") + "\n"
+                 + "\n".join(json.dumps(r) for r in rows), encoding="utf-8")
+    return t
+
+d = run_dir()
+(d / "run.md").write_text("# RUN x\nstatus: DISPATCHING\n", encoding="utf-8")
+art = d / "06-backend.md"
+art.write_text(BLOCK, encoding="utf-8")
+head_file, use_file = d / "06-head.txt", d / "06-usage.json"
+
+# What Claude Code 2.1.329 sends: no last_assistant_message at all.
+p = payload("")
+p.pop("last_assistant_message", None)
+p["agent_transcript_path"] = str(
+    with_rows(transcript(d.name, "06"), [handback_row(head_for_text(art))]))
+code, err = run(HEAD_GATE, p)
+check("the stop passes on the handed-back head", (code, err) == (0, ""),
+      f"{code} {err}")
+check("the head file is written from it", head_file.is_file())
+got = json.loads(use_file.read_text(encoding="utf-8")) if use_file.is_file() else {}
+check("and usage is recorded, the handback request included",
+      got.get("requests") == 2, str(got))
+
+# A resumed lane: the earlier slot's handback sits above the new work order.
+head_file.unlink(missing_ok=True)
+p["agent_transcript_path"] = str(with_rows(
+    with_rows(transcript(d.name, "05"), [handback_row(head_for_text(art))]),
+    [{"type": "user", "timestamp": "2026-01-01T11:00:00.000Z",
+      "message": {"content": f"WORK ORDER {d.name}/06\nlane: backend\n"}}]))
+code, err = run(HEAD_GATE, p)
+check("an earlier slot's handback is not taken for this one",
+      code == 2 and "NO REPORT HEAD" in err and not head_file.exists(),
+      f"{code} {err}")
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

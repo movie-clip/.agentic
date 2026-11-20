@@ -56,8 +56,8 @@ change below.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 2a | Intake cases from the corpus: request → which phases fire, where the human stops | TD-18 | four cases, each stopping before the first dispatch |
-| 2b | Grill cases from the corpus: planning artifact → which decisions reach the human, which are assumed | TD-18 | four cases, including one artifact with nothing open |
+| 2a | A fourth intake case, from a project that is not a web app | TD-18 | the intake set is not all `los-tres` |
+| 2b | A fourth grill case: a planning artifact with nothing open. And a fixture that carries the facts the real stop already had, so the go is asked in round one | TD-18 | the grill set covers the empty case, and a case scores what was asked, not what was held |
 | 2c | Gate cases from the recorded FAILs: the work a gate failed, and the same work fixed | TD-18 | a gate change can be scored on a case it should fail and one it should pass |
 
 ## 3 — Enforce

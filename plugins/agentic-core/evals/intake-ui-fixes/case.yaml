@@ -1,0 +1,90 @@
+schema_version: "1.1"
+name: intake-ui-fixes
+description: >
+  Intake on fixes to shipped screens. Source: los-tres run
+  2026-11-18-public-display-fixes (issue #299): a UX pass, frontend and test,
+  then integration and ux-review, with no framing, no story and no acceptance
+  review. `design/design` and `ground-truth` are left ungraded: the run ruled
+  both out on grounds a fresh session cannot share.
+tags: [intake, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 40
+  timeout_seconds: 1500
+  allowed_tools: [Read, Glob, Grep, Skill]
+  prompt: |
+    You are in a repository bound to the .agentic network. A user request
+    follows. Load the `agentic-core:orchestrate-feature` skill and do the
+    reading and deciding of its Intake: bind, read what it tells you to read,
+    give every row of the project's Phases table a verdict for this request,
+    and derive the budget.
+
+    This is an evaluation. There is no shell, no tracker and no write access:
+    create no file, dispatch no agent, ask no question. Where intake would
+    read an issue from the tracker, the issue text is given below. Decide
+    from the request, the issue text, the repository and the profile.
+
+    Request: "fix all four display findings the earlier ux-reviews carried:
+    the car dialog resizes at 1280 px, the header search field is blank, the
+    home h1 breaks at 195 px, and the last row of the fits grid is uneven."
+
+    The findings are in the handoff sections of
+    `agentic/runs/2026-10-30-s5-7-select-car/22-ux-review.md`,
+    `agentic/runs/2026-11-16-s5-7-follow-ups/05-ux-review.md` and
+    `agentic/runs/2026-11-16-s5-8-filter-by-car/15-ux-review.md`. The owner
+    has said to fix all four; there is no story file and no new issue text.
+
+    End your reply with exactly this block and nothing after it. One line per
+    row, `FIRES` or `NOT-TRIGGERED` and then the clause you judged it on:
+
+    PHASES
+    ground-truth/recon: <FIRES|NOT-TRIGGERED> - <why>
+    framing/product: <FIRES|NOT-TRIGGERED> - <why>
+    specification/story: <FIRES|NOT-TRIGGERED> - <why>
+    design/ux: <FIRES|NOT-TRIGGERED> - <why>
+    design/design: <FIRES|NOT-TRIGGERED> - <why>
+    build: <FIRES|NOT-TRIGGERED> - <lanes>
+    verify/integration: <FIRES|NOT-TRIGGERED> - <why>
+    verify/ux-review: <FIRES|NOT-TRIGGERED> - <why>
+    verify/review: <FIRES|NOT-TRIGGERED> - <why>
+    close/docs: <FIRES|NOT-TRIGGERED> - <why>
+    BUDGET: <integer>
+    HUMAN-STOPS: <comma-separated phases that fire and stop for the human, or none>
+graders:
+  - name: block-present
+    type: regex
+    pattern: '^\s*PHASES\s*$[\s\S]*^\s*BUDGET:\s*\d+'
+    flags: mi
+  - name: framing-not
+    type: regex
+    pattern: '^\s*framing/product:\s*NOT-TRIGGERED\b'
+    flags: mi
+    weight: 2
+  - name: story-not
+    type: regex
+    pattern: '^\s*specification/story:\s*NOT-TRIGGERED\b'
+    flags: mi
+    weight: 2
+  - name: review-not
+    type: regex
+    pattern: '^\s*verify/review:\s*NOT-TRIGGERED\b'
+    flags: mi
+  - name: ux-fires
+    type: regex
+    pattern: '^\s*design/ux:\s*FIRES\b'
+    flags: mi
+  - name: build-fires
+    type: regex
+    pattern: '^\s*build:\s*FIRES\b'
+    flags: mi
+  - name: integration-fires
+    type: regex
+    pattern: '^\s*verify/integration:\s*FIRES\b'
+    flags: mi
+  - name: ux-review-fires
+    type: regex
+    pattern: '^\s*verify/ux-review:\s*FIRES\b'
+    flags: mi
+    weight: 2

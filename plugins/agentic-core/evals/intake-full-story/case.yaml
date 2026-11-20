@@ -1,0 +1,106 @@
+schema_version: "1.1"
+name: intake-full-story
+description: >
+  Intake on a new admin feature, where every phase must fire. Source: los-tres
+  run 2026-11-18-s3-1-admin-feeds (issue #26), intake budget 12. The issue text
+  is the outline as first written, before the story file existed. The balance to
+  the two short cases: an orchestrator tuned to skip must still open framing and
+  the story here.
+tags: [intake, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 40
+  timeout_seconds: 1500
+  allowed_tools: [Read, Glob, Grep, Skill]
+  prompt: |
+    You are in a repository bound to the .agentic network. A user request
+    follows. Load the `agentic-core:orchestrate-feature` skill and do the
+    reading and deciding of its Intake: bind, read what it tells you to read,
+    give every row of the project's Phases table a verdict for this request,
+    and derive the budget.
+
+    This is an evaluation. There is no shell, no tracker and no write access:
+    create no file, dispatch no agent, ask no question. Where intake would
+    read an issue from the tracker, the issue text is given below. Decide
+    from the request, the issue text, the repository and the profile.
+
+    Request: "start working on S3.1"
+
+    Issue #26 - S3.1 Admin manages networks, shops and feeds.
+    Epic: #11 E3 - Size M - Priority P0. Story file: none yet.
+    - As an admin, I add a network, a shop and a feed without a code change,
+      and a new feed starts unapproved.
+    - Acceptance outline:
+      - Create, edit and list networks, shops and feeds, with validation
+        (https URL, network required for an affiliate feed). A feed names its
+        network's field mapping (S3.5).
+      - A shop with offers cannot be deleted, only disabled.
+      - A feed URL may hold an API key: it is shown masked in lists and never
+        logged.
+      - Seeded demo rows remain and stay marked as demo.
+    - Tickets: #85 T3.1.1 create and edit actions (backend), #86 T3.1.2 forms
+      and lists with masked feed URL (frontend), #87 T3.1.3 role checks,
+      validation, URL never in logs (test).
+
+    End your reply with exactly this block and nothing after it. One line per
+    row, `FIRES` or `NOT-TRIGGERED` and then the clause you judged it on:
+
+    PHASES
+    ground-truth/recon: <FIRES|NOT-TRIGGERED> - <why>
+    framing/product: <FIRES|NOT-TRIGGERED> - <why>
+    specification/story: <FIRES|NOT-TRIGGERED> - <why>
+    design/ux: <FIRES|NOT-TRIGGERED> - <why>
+    design/design: <FIRES|NOT-TRIGGERED> - <why>
+    build: <FIRES|NOT-TRIGGERED> - <lanes>
+    verify/integration: <FIRES|NOT-TRIGGERED> - <why>
+    verify/ux-review: <FIRES|NOT-TRIGGERED> - <why>
+    verify/review: <FIRES|NOT-TRIGGERED> - <why>
+    close/docs: <FIRES|NOT-TRIGGERED> - <why>
+    BUDGET: <integer>
+    HUMAN-STOPS: <comma-separated phases that fire and stop for the human, or none>
+graders:
+  - name: block-present
+    type: regex
+    pattern: '^\s*PHASES\s*$[\s\S]*^\s*BUDGET:\s*\d+'
+    flags: mi
+  - name: framing-fires
+    type: regex
+    pattern: '^\s*framing/product:\s*FIRES\b'
+    flags: mi
+    weight: 2
+  - name: story-fires
+    type: regex
+    pattern: '^\s*specification/story:\s*FIRES\b'
+    flags: mi
+    weight: 2
+  - name: ux-fires
+    type: regex
+    pattern: '^\s*design/ux:\s*FIRES\b'
+    flags: mi
+  - name: design-fires
+    type: regex
+    pattern: '^\s*design/design:\s*FIRES\b'
+    flags: mi
+  - name: integration-fires
+    type: regex
+    pattern: '^\s*verify/integration:\s*FIRES\b'
+    flags: mi
+  - name: ux-review-fires
+    type: regex
+    pattern: '^\s*verify/ux-review:\s*FIRES\b'
+    flags: mi
+  - name: review-fires
+    type: regex
+    pattern: '^\s*verify/review:\s*FIRES\b'
+    flags: mi
+  - name: framing-is-a-stop
+    type: regex
+    pattern: '^\s*HUMAN-STOPS:.*framing'
+    flags: mi
+    weight: 2
+  - name: budget-plausible
+    type: regex
+    pattern: '^\s*BUDGET:\s*(9|1[0-5])\s*$'
+    flags: mi

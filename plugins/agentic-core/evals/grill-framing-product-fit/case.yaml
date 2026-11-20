@@ -1,0 +1,81 @@
+schema_version: "1.1"
+name: grill-framing-product-fit
+description: >
+  The grill at the framing stop of a story with two real scope decisions.
+  Source: los-tres run 2026-11-17-s5-9-product-fit, 02-product.md, OD-1 to OD-4.
+  On OD-1 and OD-2 the owner did not take the recommendation and answered in his
+  own words, so these are the decisions a looser grill must still ask.
+tags: [grill, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 40
+  timeout_seconds: 1500
+  allowed_tools: [Read, Glob, Grep, Skill]
+  prompt: |
+    You are the orchestrator of .agentic run `2026-11-17-s5-9-product-fit` in this repository, at
+    the framing human stop. The lane's artifact is
+    `agentic/runs/2026-11-17-s5-9-product-fit/02-product.md`.
+
+    Load the `agentic-core:grill-plan` skill and apply it to that artifact:
+    build the tree, sort every node, and write the first human round.
+
+    This is an evaluation. There is no shell and no write access: create no
+    file and dispatch no agent. Where the skill would first dispatch a fact
+    or lane-gap order, list it under a heading `Would dispatch first:` and
+    carry on with the nodes that do not depend on it.
+
+    Reply with the first human round exactly as the skill formats it - the
+    numbered questions, each with its recommendation, then the assumed list -
+    and nothing after it.
+graders:
+  - name: assumed-list-present
+    type: regex
+    pattern: 'Assumed unless you object'
+    flags: i
+  - name: every-question-has-a-recommendation
+    type: llm
+    criteria: |
+      Look only at the items labelled Q1, Q2, ... (the questions put to the human).
+      Ignore anything under "Would dispatch first": those questions go to a lane,
+      not to the human, and carry no recommendation by design.
+      PASS if every Q item is followed by a recommended answer that says whose
+      recommendation it is (the lane's or the orchestrator's).
+      FAIL if any Q item has no recommendation, or the reply has no Q item at all.
+  - name: asks-only
+    type: llm
+    criteria: |
+      The line after each question that begins with a recommendation (for example
+      "Yes - the lane's recommendation") is a recommendation, not an answer; do not
+      count it against the reply. Orders listed under "Would dispatch first" are
+      proposals, not actions.
+      PASS if the reply reports no completed action.
+      FAIL only if the reply says, as something already done, that an agent was
+      dispatched, a file was written, or a ruling was recorded in decisions.md.
+  - name: the-go-is-a-question
+    type: llm
+    weight: 2
+    criteria: |
+      PASS if approving the framing itself (S5.9 as one story, what comes next) is
+      one of the numbered questions.
+      It also passes if the reply says in words that the go is held until a named
+      dispatch or an earlier question returns: the skill asks a decision only once
+      what it hangs off is settled.
+      FAIL if the go appears in the assumed list, or is not mentioned at all.
+  - name: scope-decisions-reach-the-human
+    type: llm
+    weight: 2
+    criteria: |
+      The artifact's OD-1 (who sees the compatible-vehicles list and what it
+      covers) and OD-2 (what the product page shows when the selected car cannot be
+      read) decide scope and user-visible behaviour.
+      PASS if both OD-1 and OD-2 are numbered questions put to the human.
+      FAIL if either appears only in the assumed list, or is missing.
+  - name: has-an-assumed-item
+    type: llm
+    criteria: |
+      PASS if the assumed list holds at least one item drawn from the artifact
+      (for example where the no-fit link points, or that only counted fitments and
+      distinct vehicles are shown).
+      FAIL if the assumed list is empty or absent.

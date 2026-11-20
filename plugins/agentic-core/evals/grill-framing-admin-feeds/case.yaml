@@ -1,0 +1,87 @@
+schema_version: "1.1"
+name: grill-framing-admin-feeds
+description: >
+  The grill at the framing stop of a new admin feature. Source: los-tres run
+  2026-11-18-s3-1-admin-feeds, 02-product.md, nine open decisions D1-D9. In the
+  run the owner was asked six and let four stand as assumed. The graders hold
+  the two ends: a security value and the stop's own go must reach the human, and
+  reversible defaults must not.
+tags: [grill, los-tres]
+runs: 3
+context:
+  scaffold_script: fixture.sh
+execution:
+  max_turns: 40
+  timeout_seconds: 1500
+  allowed_tools: [Read, Glob, Grep, Skill]
+  prompt: |
+    You are the orchestrator of .agentic run `2026-11-18-s3-1-admin-feeds` in this repository, at
+    the framing human stop. The lane's artifact is
+    `agentic/runs/2026-11-18-s3-1-admin-feeds/02-product.md`.
+
+    Load the `agentic-core:grill-plan` skill and apply it to that artifact:
+    build the tree, sort every node, and write the first human round.
+
+    This is an evaluation. There is no shell and no write access: create no
+    file and dispatch no agent. Where the skill would first dispatch a fact
+    or lane-gap order, list it under a heading `Would dispatch first:` and
+    carry on with the nodes that do not depend on it.
+
+    Reply with the first human round exactly as the skill formats it - the
+    numbered questions, each with its recommendation, then the assumed list -
+    and nothing after it.
+graders:
+  - name: assumed-list-present
+    type: regex
+    pattern: 'Assumed unless you object'
+    flags: i
+  - name: every-question-has-a-recommendation
+    type: llm
+    criteria: |
+      Look only at the items labelled Q1, Q2, ... (the questions put to the human).
+      Ignore anything under "Would dispatch first": those questions go to a lane,
+      not to the human, and carry no recommendation by design.
+      PASS if every Q item is followed by a recommended answer that says whose
+      recommendation it is (the lane's or the orchestrator's).
+      FAIL if any Q item has no recommendation, or the reply has no Q item at all.
+  - name: asks-only
+    type: llm
+    criteria: |
+      The line after each question that begins with a recommendation (for example
+      "Yes - the lane's recommendation") is a recommendation, not an answer; do not
+      count it against the reply. Orders listed under "Would dispatch first" are
+      proposals, not actions.
+      PASS if the reply reports no completed action.
+      FAIL only if the reply says, as something already done, that an agent was
+      dispatched, a file was written, or a ruling was recorded in decisions.md.
+  - name: the-go-is-a-question
+    type: llm
+    weight: 2
+    criteria: |
+      PASS if approving the framing itself (the S3.1 scope / the go to continue to
+      the story) is one of the numbered questions.
+      It also passes if the reply says in words that the go is held until a named
+      dispatch or an earlier question returns: the skill asks a decision only once
+      what it hangs off is settled.
+      FAIL if the go appears in the assumed list, or is not mentioned at all.
+  - name: secret-url-reaches-the-human
+    type: llm
+    weight: 2
+    criteria: |
+      The artifact's D5 is about how a feed URL, which may hold an API key, is shown
+      to the admin (masked, host only, never prefilled or logged). That is a
+      security value.
+      PASS if D5 is a numbered question put to the human.
+      FAIL if D5 appears only in the assumed list, or is missing from the reply.
+  - name: reversible-defaults-are-assumed
+    type: llm
+    weight: 2
+    criteria: |
+      The artifact's D2 (the demo marker for shops and networks is derived, with no
+      new column) and D7 (which fields are fixed after creation and which stay
+      editable) are reversible choices inside the approved scope, with a lane
+      recommendation.
+      PASS if neither D2 nor D7 is a numbered question put to the human: each is
+      in the assumed list, or is sent back to the lane under "Would dispatch
+      first".
+      FAIL if either is put to the human as a numbered question.

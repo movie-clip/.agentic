@@ -11,7 +11,7 @@ What is wrong or missing in the network **right now**. Each item has an ID;
 - A gap kept on purpose stays listed, marked **by choice**, with the
   condition that would reopen it.
 
-Last reviewed: 2026-11-20, at v0.10.1. v0.10.0 is tagged as the known-good baseline.
+Last reviewed: 2026-11-20, at v0.10.2. v0.10.0 is tagged as the known-good baseline.
 
 ---
 
@@ -55,7 +55,7 @@ Counts are from the 24 closed runs in `corpus/` on 2026-11-20
 
 | ID | Problem | Evidence | Fix direction |
 |---|---|---|---|
-| TD-20 | **No run records what it cost.** The ledger counts dispatches and, from v0.10.1, carries the network version it started on (`network:`); it holds no tokens and no duration. Anthropic's harness guidance is to remove one component at a time and measure, and there is nothing to measure against. | `run_stats.py` reports dispatches, re-plans, rulings and gate FAILs from the ledgers; 272 slots in 24 runs carry no cost field. | Tokens and duration, once a source that is derived rather than typed is confirmed. |
+| TD-20 | **The orchestrator's own cost is unmeasured.** From v0.10.2 the stop hook writes each lane dispatch's tokens and duration to `<nn>-usage.json`, read from the lane's transcript, and `run_stats.py` reports them. The main session's requests are not in any lane transcript, and one session can span several runs. A slot is also left unmeasured when its transcript is gone or unreadable. | Backfill on 2026-11-20: 253 of 272 slots measured, 1,391 lane-minutes, 5.2M output tokens, 431M cache-read tokens. | Attribute main-session requests to a run by the ledger's first and last dispatch times. Read `measured` in the cost table before trusting a total. |
 | TD-21 | **Intake under-estimates two runs in three.** `ledger.py` stamps `intake:` from v0.10.1, so the estimate is on the record beside `spent`; nothing yet acts on the gap. | `run_stats.py`: intake 204, spent 272 (1.33x); 17 of 24 runs re-planned. The usual causes: design split the build into more dispatches than intake assumed, and human follow-ups after close. | Consider deriving the build budget after `design`, not at intake. |
 | TD-22 | **The grill sends the human about seven active rulings a run.** 264 rulings in 24 runs; 93 passed as assumed and 171 were asked, and the owner reports accepting the recommendation almost every time. `grill-plan` § 2 defaults an unsure node to a human decision. | `decisions.md` across the corpus; owner, 2026-11-20. | Find the decision classes accepted as recommended every time and move those to the assumed list. One class at a time, scored by TD-18's grill cases. |
 | TD-23 | **A dispatch is spent to discover the environment is down.** Lanes return `BLOCKED` or `PARTIAL` because Docker or the database is not running, or a permission prompt refused a write. | `2026-11-16-s5-8-filter-by-car` slots 11 and 12; `2026-11-18-s3-1-admin-feeds` slots 13 and 14. | A readiness command the profile declares and intake runs before the first build dispatch. |
@@ -83,7 +83,7 @@ worse than one you know is on trust.
 | The ledger header is coherent; `Open` holds only what is open | script — close-out sweep |
 | Planning artifacts carry a brief | script — `check_report.py`; usefulness unchecked |
 | Agent frontmatter parses; model and effort pinned | command + script — `claude plugin validate`, `check_agents` |
-| The validator, hooks and checks are correct | tests — `test_check_report.py` 228, `test_hooks.py` 34, `test_ledger.py` 61, `test_check_network_edit.py` 17, `test_pine_check.py` 55, `test_run_stats.py` 18 |
+| The validator, hooks and checks are correct | tests — `test_check_report.py` 228, `test_hooks.py` 41, `test_ledger.py` 61, `test_check_network_edit.py` 17, `test_pine_check.py` 55, `test_run_stats.py` 18, `test_usage.py` 18 |
 | A script change leaves the verdict on every real closed run unchanged | script — `replay_corpus.py` against `corpus/baseline.json`; local only, 24 runs |
 | An unfinished run is seen again | prose — intake lists every ledger not `CLOSED` and the human resumes, drops or leaves it |
 | A run survives a restart | the ledger on disk |
@@ -96,6 +96,7 @@ worse than one you know is on trust.
 | A pack section is read when needed | prose + `## Index` — TD-08 |
 | `scope` fences a work order | prose, by choice — TD-09 |
 | A run's intake estimate and network version are on record | script — `ledger.py` stamps `intake:` and `network:` on the first write and refuses to set either |
+| A lane dispatch's tokens and duration are on record | hook — `report_head_gate.py` at `SubagentStop` calls `usage.py`; it never holds a lane, so a missing file means unmeasured. Installed per repo, TD-14 |
 | A run's cost matches its plan | nothing — the 2x ceiling is the only stop; TD-20, TD-21 |
 | The orchestrator decides well | nothing — TD-18 |
 | The grill sends the right decisions to the human | nothing — TD-18, TD-22 |

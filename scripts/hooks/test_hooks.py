@@ -288,6 +288,66 @@ try:
 finally:
     _probe.unlink(missing_ok=True)
 
+print("D — the stop also records what the dispatch cost")
+
+def transcript(run_id, slot):
+    t = Path(tempfile.mkdtemp()) / "agent-x.jsonl"
+    use = {"input_tokens": 2, "output_tokens": 50,
+           "cache_read_input_tokens": 900, "cache_creation_input_tokens": 80}
+    rows = [{"type": "user", "timestamp": "2026-01-01T10:00:00.000Z",
+             "message": {"content": f"WORK ORDER {run_id}/{slot}\nlane: backend\n"}},
+            {"type": "assistant", "timestamp": "2026-01-01T10:01:00.000Z",
+             "message": {"id": "m1", "model": "claude-sonnet-5-5", "usage": use}},
+            {"type": "assistant", "timestamp": "2026-01-01T10:01:01.000Z",
+             "message": {"id": "m1", "model": "claude-sonnet-5-5", "usage": use}}]
+    t.write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
+    return t
+
+d = run_dir()
+(d / "run.md").write_text("# RUN x\nstatus: DISPATCHING\n", encoding="utf-8")
+art = d / "06-backend.md"
+art.write_text(BLOCK, encoding="utf-8")
+p = payload(head_for_text(art))
+p["agent_transcript_path"] = str(transcript(d.name, "06"))
+code, err = run(HEAD_GATE, p)
+use_file = d / "06-usage.json"
+check("a valid stop still passes", (code, err) == (0, ""), f"{code} {err}")
+check("and the slot's usage is written beside the head", use_file.is_file())
+got = json.loads(use_file.read_text(encoding="utf-8")) if use_file.is_file() else {}
+check("counted once per response, with the duration",
+      (got.get("requests"), got.get("output_tokens"), got.get("duration_s"))
+      == (1, 50, 61), str(got))
+
+use_file.unlink(missing_ok=True)
+p = payload("I finished the work, all good.")
+p["agent_transcript_path"] = str(transcript(d.name, "06"))
+code, err = run(HEAD_GATE, p)
+check("a lane with no head is held as before, and nothing is recorded",
+      code == 2 and not use_file.exists(), f"{code}")
+
+bad = Path(tempfile.mkdtemp()) / "agent-bad.jsonl"
+bad.write_bytes(b"\xff\xfe not a transcript {")
+p = payload(head_for_text(art))
+p["agent_transcript_path"] = str(bad)
+code, err = run(HEAD_GATE, p)
+check("an unreadable transcript does not hold or fail the lane",
+      (code, err) == (0, "") and not use_file.exists(), f"{code} {err}")
+
+p = payload(head_for_text(art))
+p["agent_transcript_path"] = str(Path(tempfile.gettempdir()) / "no-such.jsonl")
+code, err = run(HEAD_GATE, p)
+check("nor does a transcript that is not there", (code, err) == (0, ""),
+      f"{code} {err}")
+
+d2 = run_dir()
+art2 = d2 / "06-backend.md"
+art2.write_text(BLOCK, encoding="utf-8")
+p = payload(head_for_text(art2))
+p["agent_transcript_path"] = str(transcript(d2.name, "06"))
+code, err = run(HEAD_GATE, p)
+check("a folder with no run.md is not a run dir, so nothing is written there",
+      code == 0 and not (d2 / "06-usage.json").exists(), f"{code} {err}")
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

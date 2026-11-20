@@ -29,6 +29,17 @@ Columns, and where each comes from:
   CR        files in `cr/`
   gateFAIL  gate-lane rows with verdict FAIL or CHANGES_REQUESTED
   notDONE   rows whose status is PARTIAL, BLOCKED, REFUSED, LOST or INVALID
+
+The cost table reads the `<nn>-usage.json` files `usage.py` writes from the
+lanes' transcripts. It covers the lanes only - the orchestrator's own requests
+are not in them - and only the slots that have a file:
+
+  measured  slots with a usage file, of the Artifacts rows
+  min       wall-clock minutes those slots took, added up
+  out k     output tokens, thousands
+  write k   cache-write tokens, thousands
+  read M    cache-read tokens, millions
+  req       model requests
 """
 
 from __future__ import annotations
@@ -45,6 +56,27 @@ from check_report import (GATE_LANES, _budget_chain, _leading_int,  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 NOT_DONE = ("PARTIAL", "BLOCKED", "REFUSED", "LOST", "INVALID")
+USAGE_KEYS = ("duration_s", "output_tokens", "cache_creation_input_tokens",
+              "cache_read_input_tokens", "input_tokens", "requests")
+
+
+def slot_usage(run_dir: Path) -> dict[str, dict]:
+    """`<nn>-usage.json` by slot number. A file that will not parse is skipped."""
+    out: dict[str, dict] = {}
+    for p in run_dir.glob("*-usage.json"):
+        try:
+            rec = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(rec, dict):
+            out[p.name.split("-")[0]] = rec
+    return out
+
+
+def add_usage(recs: list[dict]) -> dict:
+    tot = {k: sum(r.get(k) or 0 for r in recs) for k in USAGE_KEYS}
+    tot["measured"] = len(recs)
+    return tot
 GATE_FAIL = ("FAIL", "CHANGES_REQUESTED")
 
 
@@ -74,6 +106,7 @@ def run_stats(ledger: Path) -> dict:
     total = len(re.findall(r"^## D-", dtext, re.M))
     assumed = len(re.findall(r"^ruling:\s*not objected", dtext, re.M | re.I))
     cr_dir = ledger.parent / "cr"
+    usage = slot_usage(ledger.parent)
     return {
         "project": _ledger_field(text, "project") or "?",
         "run": ledger.parent.name,
@@ -89,19 +122,24 @@ def run_stats(ledger: Path) -> dict:
         "gate_fail": sum(1 for r in arts if r[1] in GATE_LANES
                          and r[7].upper() in GATE_FAIL),
         "not_done": sum(1 for r in arts if r[6].upper() in NOT_DONE),
+        "usage": add_usage([usage[r[0]] for r in arts if r[0] in usage]),
         "rows": [{"lane": r[1], "agent": r[3], "model": r[4],
-                  "status": r[6].upper(), "verdict": r[7].upper()}
+                  "status": r[6].upper(), "verdict": r[7].upper(),
+                  "usage": usage.get(r[0])}
                  for r in arts],
     }
 
 
 def lane_table(runs: list[dict]) -> list[dict]:
     by: dict[str, Counter] = {}
+    cost: dict[str, list[dict]] = {}
     for run in runs:
         for row in run["rows"]:
             c = by.setdefault(row["lane"], Counter())
             c["n"] += 1
             c[row["status"]] += 1
+            if row.get("usage"):
+                cost.setdefault(row["lane"], []).append(row["usage"])
             if row["lane"] in GATE_LANES:
                 c["v:" + row["verdict"]] += 1
     out = []
@@ -112,8 +150,20 @@ def lane_table(runs: list[dict]) -> list[dict]:
             "pass": c["v:PASS"] if lane in GATE_LANES else None,
             "fail": (sum(c["v:" + v] for v in GATE_FAIL)
                      if lane in GATE_LANES else None),
+            "usage": add_usage(cost.get(lane, [])),
         })
     return out
+
+
+def _cost_cells(u: dict, per: int = 1) -> list:
+    """Minutes, output k, cache-write k, cache-read M, requests - or dashes."""
+    if not u["measured"]:
+        return [None] * 5
+    return [f"{u['duration_s'] / 60 / per:.1f}",
+            f"{u['output_tokens'] / 1e3 / per:.0f}",
+            f"{u['cache_creation_input_tokens'] / 1e3 / per:.0f}",
+            f"{u['cache_read_input_tokens'] / 1e6 / per:.1f}",
+            f"{u['requests'] / per:.0f}"]
 
 
 def _cell(v) -> str:
@@ -156,6 +206,9 @@ def main(argv: list[str]) -> int:
         "cr": total("cr"), "gate_fail": total("gate_fail"),
         "not_done": total("not_done"),
     }
+    all_usage = add_usage([row["usage"] for r in runs for row in r["rows"]
+                           if row["usage"]])
+    summary["usage"] = all_usage
     if as_json:
         for r in runs:
             del r["rows"]
@@ -194,6 +247,23 @@ def main(argv: list[str]) -> int:
     _print_table(["lane", "dispatches", "DONE", "notDONE", "PASS", "FAIL"],
                  [[ln["lane"], ln["dispatches"], ln["done"], ln["not_done"],
                    ln["pass"], ln["fail"]] for ln in lanes])
+
+    if not all_usage["measured"]:
+        print("\nno usage files - cost not measured (see usage.py)")
+        return 0
+    cost_heads = ["min", "out k", "write k", "read M", "req"]
+    print("\ncost by run - lanes only, measured slots only")
+    _print_table(["run", "measured"] + cost_heads,
+                 [[r["run"], f"{r['usage']['measured']}/{len(r['rows'])}"]
+                  + _cost_cells(r["usage"]) for r in runs])
+    print(f"\ntotal - {all_usage['measured']} of {summary['dispatches']} "
+          f"slots measured: " + ", ".join(
+              f"{v} {h}" for h, v in zip(cost_heads, _cost_cells(all_usage))))
+    print("\ncost by lane - average per measured dispatch")
+    _print_table(["lane", "measured"] + cost_heads,
+                 [[ln["lane"], ln["usage"]["measured"]]
+                  + _cost_cells(ln["usage"], max(ln["usage"]["measured"], 1))
+                  for ln in lanes])
     return 0
 
 

@@ -51,6 +51,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import check_report as cr  # noqa: E402
+import usage  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 LANE_DIR = ROOT / "plugins" / "agentic-core" / "agents"
@@ -118,6 +119,26 @@ def _hold(agent_id: str, retry: bool, lines: list[str]) -> None:
     sys.exit(2)
 
 
+def _record_usage(payload: dict, artifact: Path) -> None:
+    """Write `<nn>-usage.json` for this lane's slots. Never affects the gate.
+
+    The stop is the one moment the hook is handed the lane's transcript, so
+    the cost of the dispatch is read here and nowhere typed. It is recorded
+    before the artifact and head are judged: a lane held back and stopping
+    again rewrites the file with the larger numbers, and a lane released on a
+    bad head has still been paid for. Only into a real run dir, and any
+    failure is swallowed - a transcript this cannot read is a slot left
+    unmeasured, not a lane left hanging.
+    """
+    try:
+        transcript = payload.get("agent_transcript_path")
+        run_dir = artifact.parent
+        if transcript and (run_dir / "run.md").is_file():
+            usage.record(Path(transcript).expanduser(), run_dir)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def main() -> None:
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -158,6 +179,7 @@ def main() -> None:
             f"REPORT HEAD names artifact {raw!r}, which does not exist. Write "
             "the full report to your order's report_to path first; the head is "
             "a summary of it, not a replacement for it."])
+    _record_usage(payload, artifact)
     # The file exists but carries no REPORT line. Say what is in it: the old
     # message ("not a report file on disk") read as a path problem, and the
     # scout it held in run 2026-09-27-sort-potential-rules-by-frequency re-read

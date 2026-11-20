@@ -13,7 +13,7 @@ How the network gets better from here. Problems live in
   `next` and `blocked_on`, and that is the authority; a copy in this file is a
   second place to go stale. This file is for changes to the network itself.
 
-Last reviewed: 2026-11-20, at v0.10.1.
+Last reviewed: 2026-11-20, at v0.10.2.
 
 ---
 
@@ -45,10 +45,12 @@ undone in one command.
 ## 1 — Measure
 
 No behaviour changes. Everything here reads ledgers or adds a field.
+`run_stats.py` prints what is measured so far; run it before and after every
+change below.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 1c | Tokens and duration per dispatch, from a source that is derived rather than typed | TD-20 | confirmed where the numbers come from; built only then |
+| 1d | The orchestrator's own tokens per run, from the main session's transcript | TD-20 | a run's cost includes the session that dispatched it |
 
 ## 2 — Evals
 

@@ -434,6 +434,62 @@ code, err = run(HEAD_GATE, p)
 check("and so is a subagent that is not a lane", (code, err) == (0, ""),
       f"{code} {err}")
 
+print("G — the plugin's launcher runs these hooks only in a bound repo")
+
+LAUNCHER = HOOKS.parent.parent / "plugins" / "agentic-core" / "hooks" / "run.py"
+NETWORK_ROOT = HOOKS.parent.parent
+
+def launch(repo, name, payload):
+    env = {**os.environ, "CLAUDE_PROJECT_DIR": str(repo)}
+    p = subprocess.run([sys.executable, str(LAUNCHER), name],
+                       input=json.dumps(payload), capture_output=True,
+                       text=True, env=env)
+    return p.returncode, p.stderr
+
+def repo(bound=True, wired=""):
+    r = Path(tempfile.mkdtemp())
+    if bound:
+        (r / ".agentic.json").write_text(json.dumps(
+            {"agenticRoot": str(NETWORK_ROOT), "project": "t",
+             "projectDir": "agentic"}), encoding="utf-8")
+    if wired:
+        (r / ".claude").mkdir()
+        (r / ".claude" / "settings.json").write_text(json.dumps(
+            {"hooks": {"SubagentStop": [{"hooks": [
+                {"type": "command", "command": f"python x/{wired}"}]}]}}),
+            encoding="utf-8")
+    return r
+
+manifest = json.loads((LAUNCHER.parent / "hooks.json").read_text(encoding="utf-8"))
+named = {h["command"].split()[-1] for groups in manifest["hooks"].values()
+         for g in groups for h in g["hooks"]}
+check("every script the manifest names exists",
+      named and all((HOOKS / f"{n}.py").is_file() for n in named), str(named))
+
+code, err = launch(repo(), "report_head_gate", pre("no head"))
+check("in a bound repo the hook runs and its hold passes through",
+      code == 2 and "NO REPORT HEAD" in err, f"{code} {err}")
+code, err = launch(repo(bound=False), "report_head_gate", pre("no head"))
+check("in a repo with no .agentic.json it is silent", (code, err) == (0, ""),
+      f"{code} {err}")
+code, err = launch(repo(wired="report_head_gate.py"), "report_head_gate",
+                   pre("no head"))
+check("a repo that wires the script itself is not checked twice",
+      (code, err) == (0, ""), f"{code} {err}")
+code, err = launch(repo(wired="report_artifact_gate.py"), "report_head_gate",
+                   pre("no head"))
+check("but wiring one script does not silence the other", code == 2, f"{code}")
+code, err = launch(repo(), "no_such_hook", pre("no head"))
+check("an unknown script name is silent", (code, err) == (0, ""), f"{code} {err}")
+code, err = launch(repo(), "../../x", pre("no head"))
+check("and a name that is not a plain script name is refused quietly",
+      (code, err) == (0, ""), f"{code} {err}")
+sub = repo()
+(sub / "deep" / "er").mkdir(parents=True)
+code, err = launch(sub / "deep" / "er", "report_head_gate", pre("no head"))
+check("the binding is found from a folder below the repo root", code == 2,
+      f"{code} {err}")
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

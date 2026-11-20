@@ -25,13 +25,15 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 ├─ scripts/pine_check.py                  ← tradingview's Pine linter
 ├─ scripts/test_*.py                      ← pins each of the four above
 ├─ scripts/hooks/report_artifact_gate.py  ← PostToolUse: checks an artifact as it is written
-├─ scripts/hooks/report_head_gate.py      ← SubagentStop: no lane finishes on a bad head
+├─ scripts/hooks/report_head_gate.py      ← the handback: no lane delivers a bad head; the stop: usage is recorded
 ├─ scripts/hooks/network_edit_gate.py     ← Stop: says so when a network edit has no lint
 ├─ scripts/hooks/test_hooks.py            ← pins all three hooks' exit codes and bounds
 ├─ .claude/settings.json                  ← this repo's own session: plugins + the Stop hook
 ├─ .claude-plugin/marketplace.json        ← makes this dir a local marketplace
 ├─ plugins/agentic-core/                  ← project-AGNOSTIC layer
 │  ├─ .claude-plugin/plugin.json
+│  ├─ hooks/hooks.json                    ← wires the two report hooks in every bound repo
+│  ├─ hooks/run.py                        ← finds the network root from .agentic.json; silent elsewhere
 │  ├─ skills/
 │  │  ├─ orchestrate-feature/SKILL.md     ← the entry point; runs in the main session
 │  │  ├─ grill-plan/SKILL.md              ← human stops: questions to the lane, facts checked, then you

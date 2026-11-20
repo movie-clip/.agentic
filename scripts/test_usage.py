@@ -110,6 +110,19 @@ t = transcript([order("r", "01", None), reply("m1", None, 5)])
 check("entries with no timestamp still count, with no duration",
       usage.slots(t)[0]["duration_s"] is None)
 
+# A resumed lane gets its order by SendMessage, wrapped and annotated - seen
+# in run 2026-11-20-s3-7-catalogue-file, where slots 13, 14 and 15 were folded
+# into the slots their lanes had filled before.
+resumed = {"type": "user", "timestamp": "2026-01-01T11:00:00Z", "message": {
+    "content": "The coordinator sent a message while you were working:" + chr(10)
+               + "WORK ORDER r/13 — re-run of the review gate" + chr(10)}}
+t = transcript([order("r", "11", "2026-01-01T10:00:00Z"),
+                reply("m1", "2026-01-01T10:01:00Z", 5), resumed,
+                reply("m2", "2026-01-01T11:02:00Z", 7)])
+check("an order resumed by message, with words after the slot, opens its own slot",
+      [(s["slot"], s["output_tokens"]) for s in usage.slots(t)]
+      == [("11", 5), ("13", 7)], usage.slots(t))
+
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")
 sys.exit(1 if n_fail else 0)

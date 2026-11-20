@@ -33,6 +33,19 @@ is a hook that can hang a run, and the close-out sweep
 through -- a missing head file fails it, and so does an artifact whose block
 is not on its first line.
 
+Two events since Claude Code 2.1.329. A subagent there ends on a
+`SubagentHandback({message})` tool call: the stop payload carries no
+`last_assistant_message`, and an exit 2 at the stop no longer reaches the lane
+(probed 2026-11-20, TECH-DEBT TD-27). So this script is wired twice:
+
+- `PreToolUse`, matcher `SubagentHandback` -- the gate. The message is checked
+  before it is delivered; exit 2 rejects the call and the lane hands back
+  again. The same two-hold bound applies, and a clean pass saves the head.
+- `SubagentStop` -- the record. It is the one event handed the lane's
+  transcript, so usage is written here. After a handback it holds nothing.
+  On an older Claude Code, which still sends `last_assistant_message`, it is
+  the gate as before.
+
 Advisories ride along, and never cause a hold. This is the only place the `~`
 half of check_report.py reaches the two lanes with no Bash: the CLI is one
 they cannot run and report_artifact_gate.py drops the notes on purpose. A lane
@@ -56,6 +69,10 @@ import usage  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent.parent
 LANE_DIR = ROOT / "plugins" / "agentic-core" / "agents"
 MAX_BLOCKS = 2
+# Set at a stop that follows a SubagentHandback: the report is delivered, so a
+# refusal reaches nobody. The run records usage, saves a valid head, and is
+# otherwise silent.
+_LATE = False
 _STATE = Path(tempfile.gettempdir()) / "agentic-head-gate"
 # A counter is per-subagent state, dead the moment that subagent ends. Nothing
 # tells a hook when that happened, so they age out rather than accumulating one
@@ -110,6 +127,8 @@ def _head_block(message: str) -> str | None:
 
 def _hold(agent_id: str, retry: bool, lines: list[str]) -> None:
     """Refuse the stop, unless this subagent has already been held twice."""
+    if _LATE:
+        sys.exit(0)
     if (retry and not agent_id) or _blocks_so_far(agent_id) >= MAX_BLOCKS:
         print("REPORT HEAD still invalid after two attempts - letting this "
               "lane stop. The close-out sweep will fail on it.", file=sys.stderr)
@@ -206,8 +225,17 @@ def main() -> None:
         sys.exit(0)
 
     agent_id = payload.get("agent_id") or ""
-    head = _head_block(payload.get("last_assistant_message")
-                       or _handback(payload))
+    global _LATE
+    if payload.get("hook_event_name") == "PreToolUse":
+        if payload.get("tool_name") != "SubagentHandback":
+            sys.exit(0)
+        message = (payload.get("tool_input") or {}).get("message")
+        message = message if isinstance(message, str) else ""
+    else:
+        message = payload.get("last_assistant_message") or ""
+        if not message:
+            message, _LATE = _handback(payload), True
+    head = _head_block(message)
     if head is None:
         _hold(agent_id, retry, [
             "NO REPORT HEAD - PROTOCOL.md section 4 requires your final message "

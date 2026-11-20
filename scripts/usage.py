@@ -43,7 +43,7 @@ from pathlib import Path
 
 TOKEN_KEYS = ("input_tokens", "cache_creation_input_tokens",
               "cache_read_input_tokens", "output_tokens")
-ORDER = re.compile(r"^\s*WORK ORDER\s+(\S+)/(\d+)\s*$", re.M)
+ORDER = re.compile(r"^\s*WORK ORDER\s+(\S+)/(\d+)\b", re.M)
 
 
 def _order_in(entry: dict) -> tuple[str, str] | None:

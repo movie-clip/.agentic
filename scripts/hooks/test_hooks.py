@@ -388,8 +388,50 @@ p["agent_transcript_path"] = str(with_rows(
     [{"type": "user", "timestamp": "2026-01-01T11:00:00.000Z",
       "message": {"content": f"WORK ORDER {d.name}/06\nlane: backend\n"}}]))
 code, err = run(HEAD_GATE, p)
-check("an earlier slot's handback is not taken for this one",
-      code == 2 and "NO REPORT HEAD" in err and not head_file.exists(),
+check("an earlier slot's handback is not taken for this one, and a stop "
+      "after a handback holds nothing",
+      (code, err) == (0, "") and not head_file.exists(), f"{code} {err}")
+
+print("F — the handback itself is the gate")
+
+def pre(message, agent_id=None, tool="SubagentHandback"):
+    return {"hook_event_name": "PreToolUse", "tool_name": tool,
+            "agent_type": "agentic-core:engineer",
+            "agent_id": agent_id or f"t{os.getpid()}-{os.urandom(4).hex()}",
+            "tool_input": {"message": message}}
+
+d = run_dir()
+(d / "run.md").write_text("# RUN x\nstatus: DISPATCHING\n", encoding="utf-8")
+art = d / "06-backend.md"
+art.write_text(BLOCK, encoding="utf-8")
+head_file = d / "06-head.txt"
+good = head_for_text(art)
+
+code, err = run(HEAD_GATE, pre(good))
+check("a valid handback is delivered and its head saved",
+      (code, err) == (0, "") and head_file.is_file(), f"{code} {err}")
+head_file.unlink(missing_ok=True)
+
+code, err = run(HEAD_GATE, pre("All done, tests pass."))
+check("a handback with no head is rejected", code == 2 and "NO REPORT HEAD" in err,
+      f"{code} {err}")
+
+wrong = good.replace("status:", "status_x:", 1)
+code, err = run(HEAD_GATE, pre(wrong))
+check("so is one whose head does not match the artifact",
+      code == 2 and not head_file.exists(), f"{code} {err}")
+
+aid = f"t{os.getpid()}-pre"
+codes = [run(HEAD_GATE, pre("no head", aid))[0] for _ in range(3)]
+check("two rejections, then the handback goes through", codes == [2, 2, 0],
+      str(codes))
+
+code, err = run(HEAD_GATE, pre("no head", tool="Write"))
+check("any other tool is left alone", (code, err) == (0, ""), f"{code} {err}")
+p = pre("no head")
+p["agent_type"] = "general-purpose"
+code, err = run(HEAD_GATE, p)
+check("and so is a subagent that is not a lane", (code, err) == (0, ""),
       f"{code} {err}")
 
 n_fail = sum(1 for _, c, _ in results if not c)

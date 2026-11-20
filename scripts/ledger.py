@@ -30,6 +30,15 @@ typing it is copying a number the file can count, and the 18 edits above are
 what copying it cost. This is the rule `--emit-head` follows for the head's
 counts, one table over: derive it, do not write it.
 
+`network:` and `intake:` are not ops either, and are stamped once, on the
+first write that finds them missing. `network:` is the plugin version this
+script's own checkout declares - the version the run started on, which is what
+lets a run be compared with runs on another version. `intake:` is the budget
+intake derived: `budget:` as it stands, or the first `## Replans` row's old
+value if the run has already re-planned. Every re-plan rewrites `budget:`, so
+without the stamp a closed run reads `spent == budget` whatever happened, and
+the estimate survives only inside a prose row. Neither is ever rewritten.
+
 Rounds and Replans are deliberately absent. They are prose rows written a
 handful of times per run, and a flag for each would grow this surface past the
 thing it replaces.
@@ -59,9 +68,9 @@ class Usage(Exception):
 
 # The ledger header, in the order `protocol/orchestrator.md` section 1 writes
 # it. Used to place a field that is not in the file yet.
-HEADER_ORDER = ["request", "agentic_root", "project", "project_dir", "story",
-                "status", "phase", "plan", "budget", "spent", "blocked_on",
-                "next", "gates"]
+HEADER_ORDER = ["request", "agentic_root", "network", "project", "project_dir",
+                "story", "status", "phase", "plan", "budget", "intake", "spent",
+                "blocked_on", "next", "gates"]
 # `request`, `agentic_root` and `project_dir` are written once at intake and
 # never edited - `project_dir` in particular is the string every run path is
 # built from, as `agentic_root` is for the network's own files.
@@ -69,7 +78,9 @@ HEADER_ORDER = ["request", "agentic_root", "project", "project_dir", "story",
 # move.
 SETTABLE = {"status", "phase", "plan", "budget", "story", "blocked_on",
             "next", "gates"}
-DERIVED = {"spent"}
+DERIVED = {"spent", "network", "intake"}
+PLUGIN_JSON = (Path(__file__).resolve().parent.parent / "plugins"
+               / "agentic-core" / ".claude-plugin" / "plugin.json")
 PAD = 14                       # `agentic_root:` plus one space, the widest key
 
 TABLES = {
@@ -305,6 +316,34 @@ def derive_spent(lines: list[str]) -> int:
     return n
 
 
+def network_version() -> str | None:
+    """The plugin version this checkout declares, or None if it cannot be read."""
+    try:
+        m = re.search(r'"version"\s*:\s*"([^"]+)"',
+                      PLUGIN_JSON.read_text(encoding="utf-8"))
+    except OSError:
+        return None
+    return m.group(1) if m else None
+
+
+def stamp(lines: list[str]) -> None:
+    """Write `network:` and `intake:` if the ledger has neither yet.
+
+    Only ever adds. A field already there is the record of when the run
+    started and what intake derived, and a later write must not move it.
+    """
+    text = "\n".join(lines)
+    if cr._ledger_field(text, "network") is None:
+        version = network_version()
+        if version:
+            set_field(lines, "network", version)
+    if cr._ledger_field(text, "intake") is None:
+        original, _ = cr._budget_chain(cr._ledger_table(text, "Replans"))
+        original = original or cr._leading_int(cr._ledger_field(text, "budget"))
+        if original is not None:
+            set_field(lines, "intake", str(original))
+
+
 # -------------------------------------------------------------------- shell
 
 KNOWN = ("--row", "--next", "--set", "--phase", "--open", "--close")
@@ -348,6 +387,7 @@ def apply(lines: list[str], ops: list[tuple[str, str]]) -> None:
             n = 3 if value.strip().strip("|").count("|") == 2 else 2
             close_open(lines, *cells_of(value, n, "close"))
     derive_spent(lines)
+    stamp(lines)
     for op, value in ops:
         if op == "next":
             set_field(lines, "next", value)
@@ -357,9 +397,12 @@ def apply(lines: list[str], ops: list[tuple[str, str]]) -> None:
             name, _, val = value.partition("=")
             name, val = name.strip(), val.strip()
             if name in DERIVED:
-                raise Usage(f"`{name}` is derived from the Artifacts rows on "
-                            f"every write, not set - pass `--row` and it "
-                            f"follows")
+                if name == "spent":
+                    raise Usage("`spent` is derived from the Artifacts rows "
+                                "on every write, not set - pass `--row` and "
+                                "it follows")
+                raise Usage(f"`{name}` is stamped once by this script, not "
+                            f"set - it records what the run started with")
             if name not in SETTABLE:
                 raise Usage(f"`{name}` is not a settable header field - one "
                             f"of {', '.join(sorted(SETTABLE))}")

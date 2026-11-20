@@ -13,7 +13,7 @@ How the network gets better from here. Problems live in
   `next` and `blocked_on`, and that is the authority; a copy in this file is a
   second place to go stale. This file is for changes to the network itself.
 
-Last reviewed: 2026-11-20, at v0.10.0.
+Last reviewed: 2026-11-20, at v0.10.1.
 
 ---
 
@@ -48,8 +48,6 @@ No behaviour changes. Everything here reads ledgers or adds a field.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 1a | `scripts/run_stats.py`, read-only over ledgers: intake budget against spent, re-plans, rulings asked against assumed, change requests, gate FAILs, `PARTIAL`, `BLOCKED` and `LOST` slots, per run and in total | TD-20, TD-21 | one command prints the table for the corpus and for a live project |
-| 1b | Network version and intake budget as their own ledger header fields, written by `ledger.py` | TD-20, TD-21 | a run can be attributed to a version, and `spent` read against what intake derived |
 | 1c | Tokens and duration per dispatch, from a source that is derived rather than typed | TD-20 | confirmed where the numbers come from; built only then |
 
 ## 2 — Evals

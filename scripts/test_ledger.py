@@ -79,6 +79,7 @@ def raw(d):
 
 print("A - the write is surgical: endings, alignment, and nothing else moves")
 d = fixture()
+run(d, "--next", "prime")        # the first write stamps; section I covers it
 before = raw(d)
 code, out = run(d, "--next", "dispatch integration")
 after = raw(d)
@@ -235,6 +236,39 @@ code, out = run(Path(tempfile.mkdtemp()), "--next", "x")
 check("a directory with no ledger is refused", code == 2, out)
 code, out = run(d)
 check("no ops at all is refused rather than rewriting the file", code == 2, out)
+
+print("I - `network:` and `intake:` are stamped once and never moved")
+d = fixture()
+code, out = run(d, "--next", "x")
+after = raw(d)
+version = lg.network_version()
+check("the plugin version this checkout declares is readable", bool(version))
+check("the first write stamps `network:` with it",
+      f"network:      {version}" in after, after[:400])
+check("and `intake:` with the budget as intake derived it",
+      "intake:       4" in after, after[:400])
+order = [ln.split(":")[0] for ln in after.split("\r\n")[1:15] if ":" in ln]
+check("each lands where the header order puts it",
+      order.index("network") == order.index("agentic_root") + 1
+      and order.index("intake") == order.index("budget") + 1, order)
+check("and the stamped ledger is still consistent", code == 0, out)
+run(d, "--set", "budget=6 - re-planned")
+check("a later budget does not move `intake:`",
+      "intake:       4" in raw(d) and "budget:       6" in raw(d))
+check("and neither field is written twice",
+      raw(d).count("intake:") == 1 and raw(d).count("network:") == 1)
+code, out = run(d, "--set", "intake=9")
+check("setting one by hand is refused", code == 2 and "stamped once" in out,
+      out)
+d = fixture(MID + ["## Replans", "| plan | because | change |", "|---|---|---|",
+                   "| v2 | design split the build | budget 3 -> 4 |", ""])
+run(d, "--next", "x")
+check("a run that already re-planned gets the first row's old value",
+      "intake:       3" in raw(d), raw(d)[:400])
+d = fixture([ln for ln in MID if not ln.startswith("budget:")])
+run(d, "--next", "x")
+check("no budget to read means no `intake:`, not a guess",
+      "intake:" not in raw(d))
 
 n_fail = sum(1 for _, c, _ in results if not c)
 print(f"\n{len(results) - n_fail}/{len(results)} passed")

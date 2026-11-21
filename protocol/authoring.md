@@ -28,6 +28,8 @@ have", which it reports as `SHOULD_FIX` and never fails on alone.
 - **Adding a project** — the files a new project needs
 - **Wiring a tracker** — the `## Tracker` block, and what the repo needs
   before it
+- **Declaring readiness** — the optional `## Readiness` block: one command
+  that proves the environment is up
 
 ## The four-layer split
 
@@ -490,3 +492,21 @@ declares. No agent's `tools:` line holds `mcp__<server>__*`. The `build` row's
 human stop reads **yes**, because the go is the ruling a branch is created on.
 And no profile text restates the procedure or the limits in
 `orchestrator.md` § 8.
+
+## Declaring readiness
+
+Optional. A project whose build lanes or gates need something running — a
+database, a container stack — may say how to check it. The block goes in
+`phases.md`, after `## Phases`, and holds one command:
+
+```markdown
+## Readiness
+
+`<command>`: <what it proves, in one line>
+```
+
+The command exits 0 when the environment is up, starts what it can start by
+itself, and is cheap enough to run before every build. It is not the gate
+command: it proves the gate can run, not that it passes. When and how the
+orchestrator runs it is `orchestrator.md` § 3, and no profile text restates
+that.

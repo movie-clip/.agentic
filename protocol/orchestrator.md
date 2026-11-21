@@ -420,6 +420,23 @@ compacted, resumed or restarted session identical to a continuing one. Anything
 you carry between turns that is not in the ledger will not survive the run, so
 put it there or accept losing it.
 
+### Readiness is checked before the first build order
+
+A profile may carry a `## Readiness` block in `phases.md`
+(`authoring.md` § "Declaring readiness"): one command that exits 0 when the
+environment the build lanes and the gates need is up.
+
+- **When.** After the human's go on the build and before the first `build`
+  order. In a resumed session, again before its first `build` or `verify`
+  order: the environment does not survive a restart the way the ledger does.
+- **Exit 0:** dispatch.
+- **Anything else:** do not dispatch. Tell the human what the command printed,
+  set `status: BLOCKED` with `blocked_on:` naming the command, and stop.
+- **No block, or a run in which `build` does not fire:** no check.
+
+Running it is not a lane's work (§ 7): it edits no file and judges nothing. It
+is the check a lane would otherwise spend a dispatch to fail.
+
 ### Serial by default, and the exception is narrow
 
 One order at a time, and you read its head before you write the next one. The

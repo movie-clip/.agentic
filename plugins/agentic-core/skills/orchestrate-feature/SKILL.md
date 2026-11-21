@@ -134,7 +134,7 @@ disagrees with the plan.
 
 ```
 Head <nn>:
-- [ ] save to <run_dir>/<nn>-head.txt; check_report.py <artifact> --lane <lane> --head <head file> exits 0
+- [ ] <run_dir>/<nn>-head.txt is on disk (the hook saves it; write it yourself only when it is missing); check_report.py <artifact> --lane <lane> --head <head file> exits 0
 - [ ] ledger.py --row ... --next ...   (before reading anything else)
 - [ ] status and detail read against what the order asked
 - [ ] only the sections the counts point at are opened

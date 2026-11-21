@@ -1,0 +1,13 @@
+REPORT HEAD 2026-11-21-head-file-and-cr-path/01
+artifact:        C:\projects\investments\.agentic\runs\2026-11-21-head-file-and-cr-path\01-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          validate passed (0 errors); 3 files, 0 BLOCKING, 1 SHOULD_FIX; anchor: scripts/hooks/report_head_gate.py and check_report.py _cr_source/head_for (code, not prose); 1 UNVERIFIED premise
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           3
+headline:        Both wording edits pass authoring.md; claims match hook and checker code; one SHOULD_FIX to split the raised-by bullet.

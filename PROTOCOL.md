@@ -313,7 +313,7 @@ CHANGE REQUEST CR-<n> — <run id>
 lane:        <the lane that owns the fix>
 severity:    BLOCKING | SHOULD_FIX
 round:       <n> of 2
-raised by:   <path to the artifact that found it> § <section or finding id>
+raised by:   <the artifact that found it, as its file name in the run dir> § <section or finding id>
 scope fence: <the files this order may open and change>
 
 <the body — see the two cases below>
@@ -341,6 +341,9 @@ scope fence: <the files this order may open and change>
 - **`raised by` names a path inside the run**, never a quotation of it. A change
   request whose source cannot be opened is a claim rather than a relay, and
   `check_report.py` fails it.
+- **Write that path as the file name in the run dir** (`09-integration.md § risks`)
+  or as an absolute path. A path relative to the repo root
+  (`agentic/runs/<run-id>/09-integration.md`) is not found.
 - **Only `BLOCKING` holds the slice.** `SHOULD_FIX` is recorded in the ledger's
   `Open` table and reaches the human at close-out — through that table or not at
   all, and the check reads it.

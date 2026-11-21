@@ -1,0 +1,13 @@
+REPORT HEAD 2026-11-21-head-file-and-cr-path/02
+artifact:        C:\projects\investments\.agentic\runs\2026-11-21-head-file-and-cr-path\02-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          validate passed; 0 BLOCKING, 0 SHOULD_FIX across PROTOCOL.md, protocol/orchestrator.md, plugins/agentic-core/skills/orchestrate-feature/SKILL.md; anchor: report_head_gate.py and check_report.py _cr_so
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           2
+headline:        All three files pass authoring.md; the raised-by bullet split satisfies 01's SHOULD_FIX, and the other two files are unchanged since 01.

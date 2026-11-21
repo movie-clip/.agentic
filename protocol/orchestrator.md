@@ -606,7 +606,13 @@ engineer who needs it reads the specialist's own words rather than your summary.
 lane, whether or not that lane has `Bash`.** Where the head comes from is the
 only thing that varies:
 
-- **A lane returned a head** — transcribe it verbatim into `<run_dir>/<nn>-head.txt`
+- **`<run_dir>/<nn>-head.txt` is already on disk** — the handback hook saved it
+  when the lane's handback passed its check. Validate that file against the
+  artifact with `--head` and leave it as it is. Do not transcribe or derive
+  over it: that rewrites a head the hook has already measured, and `--emit-head`
+  replaces the lane's headline with a placeholder.
+- **A lane returned a head and no file was saved** — transcribe it verbatim into
+  `<run_dir>/<nn>-head.txt`
   and validate it against the artifact with `--head`. Transcribing is not
   deriving: the file is a copy of
   a claim until the script has measured it against the document.

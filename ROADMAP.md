@@ -66,11 +66,11 @@ Each item is one version.
 
 | # | Item | Closes | Done when |
 |---|---|---|---|
-| 3a | Built 2026-11-20 (v0.10.6): `plugins/agentic-core/hooks/hooks.json` ships the write check, the handback gate and the stop record through `hooks/run.py`, silent where no `.agentic.json` is found or the repo wires the same script itself. Remaining: the owner removes the three hook entries from each bound repo's `settings.json`, then one run is watched | TD-27 | a bound repo with no hook entries of its own still gets head files, usage files and a held bad handback |
-| 3b | CI running the gate command in `los-tres`, `los-tres-collector` and `tradingview`, as a work order in each | TD-26 | a red gate blocks the pull request |
+| 3a | Built 2026-11-20 (v0.10.6): `plugins/agentic-core/hooks/hooks.json` ships the write check, the handback gate and the stop record through `hooks/run.py`, silent where no `.agentic.json` is found or the repo wires the same script itself. Changeover done 2026-11-21: no bound repo's `settings.json` names either script any more (`los-tres` has run three times on the plugin's hooks). Remaining: watch the first run in each of the other five repos | TD-27 | a bound repo with no hook entries of its own still gets head files, usage files and a held bad handback |
+| 3b | `los-tres` and `los-tres-collector` have `.github/workflows/gate.yml` (delivered by runs, seen 2026-11-21). Remaining: the `tradingview` workflow as a work order there; the owner marks `gate` as a required check on `los-tres` `main` (the ruleset requires a pull request only). `los-tres-collector` is private on a free plan, where the host offers no required checks | TD-26 | a red gate blocks the pull request |
 | 3c | Built 2026-11-21 (v0.10.7): `orchestrator.md` § 3 runs the profile's `## Readiness` command before the first build order, and `los-tres` declares `npm run db:up`. Remaining: watch one run reach the build go, then add the block to `los-tres-collector` and the other projects that need a stack | TD-23 | Docker being down costs a sentence, not a dispatch |
 | 3d | Done 2026-11-20: `scripts/hooks/pre-commit` is installed in this repo's `.git/hooks` | TD-05 | an unlinted network edit cannot be committed |
-| 3e | The entry-point paragraph in `los-tres` and `los-tres-collector`, then one live test | TD-11 | a matching request opens a run, not `diagnosing-bugs` |
+| 3e | Done 2026-11-21: the paragraph is in `los-tres` and `los-tres-collector`. Two live tests in `los-tres` (one before the edit, one after, a headless session stopped after two turns) both loaded `orchestrate-feature` first | TD-11 | a matching request opens a run, not `diagnosing-bugs` |
 
 ## 4 — Optimise
 

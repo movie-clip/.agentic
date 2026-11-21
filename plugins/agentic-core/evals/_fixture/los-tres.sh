@@ -12,10 +12,10 @@ set -euo pipefail
 INV=/c/projects/investments
 commit=$1; run=$2; shift 2
 
-git clone --quiet --no-checkout "$INV/los-tres" .
+git clone --quiet --no-checkout "$INV/los-tres/client" .
 git checkout --quiet "$commit"
 rm -rf agentic
-cp -r "$INV/los-tres/agentic" agentic
+cp -r "$INV/los-tres/client/agentic" agentic
 rm -rf agentic/runs
 mkdir -p "agentic/runs/eval-$run"
 for f in "$@"; do

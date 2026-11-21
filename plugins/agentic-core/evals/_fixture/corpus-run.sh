@@ -18,10 +18,10 @@ INV=/c/projects/investments
 CORPUS=$INV/.agentic/corpus/los-tres/runs
 commit=$1; shift
 
-git clone --quiet --no-checkout "$INV/los-tres" .
+git clone --quiet --no-checkout "$INV/los-tres/client" .
 git checkout --quiet "$commit"
 rm -rf agentic
-cp -r "$INV/los-tres/agentic" agentic
+cp -r "$INV/los-tres/client/agentic" agentic
 rm -rf agentic/runs
 mkdir -p agentic/runs
 for f in "$@"; do

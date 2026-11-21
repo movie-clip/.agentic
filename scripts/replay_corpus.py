@@ -57,8 +57,23 @@ def current() -> dict:
     return {r.relative_to(CORPUS).as_posix(): sweep(r) for r in runs()}
 
 
+def project_name(project_dir: Path) -> str:
+    """The project's name from its binding, or its repo folder's name.
+
+    The folder is not the name: `los-tres` moved to `los-tres/client` on
+    2026-11-21 and its runs would have been filed under `client`.
+    """
+    repo = project_dir.resolve().parent
+    try:
+        binding = json.loads((repo / ".agentic.json").read_text(encoding="utf-8"))
+        name = str(binding.get("project") or "").strip()
+    except (OSError, ValueError, AttributeError):
+        name = ""
+    return name if re.fullmatch(r"[A-Za-z0-9._-]+", name) else repo.name
+
+
 def add(project_dir: Path) -> int:
-    name = project_dir.resolve().parent.name
+    name = project_name(project_dir)
     dest = CORPUS / name
     (dest / "runs").mkdir(parents=True, exist_ok=True)
     for f in PROFILE:

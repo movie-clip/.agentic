@@ -1,0 +1,13 @@
+REPORT HEAD 2026-11-21-example-path/01
+artifact:        C:\projects\investments\.agentic\runs\2026-11-21-example-path\01-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          protocol/orchestrator.md:312 judged against protocol/authoring.md (anchor: rule text; subject is not authoring.md or protocol-linter.md); 0 BLOCKING, 0 SHOULD_FIX; plugin validate passed; 0 UNVERIFIED
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         0
+skill_calls:     0
+risks:           2
+headline:        The orchestrator.md project_dir example now names portfolio and passes authoring.md; two eval fixtures still hard-code the los-tres path.

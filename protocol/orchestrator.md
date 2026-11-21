@@ -310,7 +310,7 @@ future session of yourself resuming this run.
 
 **`agentic_root` and `project_dir` are written once, resolved and absolute.**
 Record `C:\projects\investments\.agentic`, not `../.agentic`, and
-`C:\projects\investments\los-tres\agentic`, not `agentic`. Every `run_dir`,
+`C:\projects\investments\portfolio\agentic`, not `agentic`. Every `run_dir`,
 `report_to` and `inputs` path is then built by appending to those recorded
 strings, never by re-joining a relative fragment. Repeated relative-path
 arithmetic across a dozen work orders is how a run ends up dispatching against

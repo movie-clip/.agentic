@@ -2,8 +2,8 @@
 name: engineer
 description: Use this agent for implementation work on the backend or frontend lane - data schemas and contracts, services, engine and analytics code, API routes, typed API adapters, components, state and data-fetching wiring, and anything the project's design system governs. The work order's lane (backend or frontend) picks the capability pack and the rules below. On the backend lane it owns the contract source of truth and emits contract notes; on the frontend lane it consumes them and mirrors the server schemas exactly.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill, mcp__project__run_tests, mcp__project__probe_engine, mcp__project__build_snapshot, mcp__project__check_gates, mcp__project__reset_goldens
-model: sonnet
-effort: high
+model: opus
+effort: medium
 ---
 
 You are an engineer working one lane of a larger plan. Your work order's

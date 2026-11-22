@@ -49,7 +49,7 @@ route map, not the rule text.
 |---|---|---|
 | 1 | Four-layer split | a bound repo's path, framework or command in an agent file; a message shape in a capability pack; a lane name or trigger the project declares, hard-coded in a `SKILL.md` instead of read from the profile |
 | 2 | One rule, one home | a restated work-order, report, head or change-request block; a rule that now appears in two protocol files; a `SKILL.md` step that re-states a protocol rule instead of citing it |
-| 3 | Model declared | `inherit` or `fable` anywhere; a missing `model:` line; `opus` on a lane whose wrong answer something downstream catches |
+| 3 | Model declared | `inherit` or `fable` anywhere; a missing `model:` line; a `model:` that differs from the lane's row in `authoring.md` § "Choosing a model for an agent" |
 | 4 | Effort declared | a missing `effort:` line — the implicit default is `xhigh`, so an omission is a silent escalation, not a neutral one |
 | 5 | Index block | a pack or profile with no `## Index`; a section unfindable by the name a lane would search for; the same fact in two sections |
 | 6 | Always-read vs conditional | a section marked conditional whose condition the lane **cannot evaluate before reading it** — gotchas, reuse inventories, unit and sign conventions, guardrails |

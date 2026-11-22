@@ -42,12 +42,12 @@ Design rationale in [`ARCHITECTURE.md`](./ARCHITECTURE.md); plans in
 │     ├─ producer.md                sonnet/high    roadmap · epics · sequencing; drafts the story (STORY mode)
 │     ├─ quantitative-researcher.md opus/medium    formulas · trust classes · financial gate
 │     ├─ scout.md                   sonnet/medium  read-only recon
-│     ├─ tech-lead.md               opus/low       design pass + integration gate
-│     ├─ engineer.md                sonnet/high    backend and frontend lanes
-│     ├─ test-engineer.md           sonnet/medium
+│     ├─ tech-lead.md               opus/medium    design pass + integration gate
+│     ├─ engineer.md                opus/medium    backend and frontend lanes
+│     ├─ test-engineer.md           sonnet/high
 │     ├─ docs-engineer.md           sonnet/medium
 │     ├─ designer.md                sonnet/high    UX spec + design gate (screenshots)
-│     ├─ reviewer.md                sonnet/high    acceptance gate
+│     ├─ reviewer.md                opus/medium    acceptance gate
 │     └─ protocol-linter.md         opus/medium    authoring gate — network files vs authoring.md
 ├─ .agentic.json                          ← { agenticRoot: "." } — lets the linter bind here; no project
 └─ runs/<date>-<slug>/                    ← lint runs over edits to the network's own files

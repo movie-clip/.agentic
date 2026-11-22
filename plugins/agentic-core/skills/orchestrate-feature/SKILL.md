@@ -120,7 +120,8 @@ disagrees with the plan.
   have neither, `ground-truth` fires.
 - Take each agent's default model and effort. Escalate a single dispatch only
   on the evidence `authoring.md` § "Escalating a single dispatch" lists. Record
-  it as `opus↑`, and say why at close-out.
+  it with `↑` (`opus↑`, or `opus/high↑` for an effort override), and say why at
+  close-out.
 - Dispatch serially. The exception is § 3's three conditions; read-only lanes
   early in a run usually meet them. Send those orders in one message so they run
   in parallel.

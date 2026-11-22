@@ -110,27 +110,28 @@ means the lane silently runs on whatever the main session happens to be, so a
 ten-dispatch run quietly bills ten times at the orchestrator's tier and nothing
 in the run says so. **Never `fable`.**
 
-**Sonnet is the default**, and the ceiling for any lane that produces work
-something downstream can catch — which is most of them.
+**Sonnet is the default.** Opus goes to two kinds of lane.
 
-Opus is reserved for one situation, and it is worth stating as a test rather
-than a list:
+The first kind is found by a test:
 
 > **Would a wrong answer from this lane be caught by anything downstream —
 > a test, a gate, a validator, or the human approval step?**
-> If yes, Sonnet. If no, Opus.
+> If no, Opus.
 
-One lane is on Opus by exception, not by the test: `tech-lead` (see the table).
+The second kind is a lane the owner ruled worth the tier although it fails that
+test: its output is what the slice is judged on, or what every later lane
+builds on. The ruling of 2026-11-22 names three, to raise the quality of what
+ships at a higher cost per run.
 
-Frequency is the second term. A lane that runs on every dispatch multiplies its
-tier by the dispatch count; a lane that runs once per run, or only when the
-substance calls for it, pays the premium seldom. Highest consequence × lowest
-frequency is the profile that earns Opus.
+Frequency still counts: a lane that runs on every dispatch multiplies its tier
+by the dispatch count. Every Opus lane, by the test or by a ruling, has a row
+in this table, and an agent file's `model:` never differs from its row.
 
 | Model | Lanes | Why |
 |---|---|---|
-| `opus` | `quantitative-researcher`, `protocol-linter`, `tech-lead` | **The first two have no downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. `tech-lead` fails the test, since `integration` is followed by `review`, and is on Opus by the owner's ruling: its design pass fixes the contract every build lane then follows, and it pairs Opus with `low` effort so the tier, not the dial, carries the judgment. |
-| `sonnet` | `producer`, `designer`, `reviewer`, `engineer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
+| `opus` | `quantitative-researcher`, `protocol-linter` | **No downstream check.** A wrong formula is engineered perfectly, tested thoroughly, satisfies every acceptance criterion and passes every other gate; a wrongly passed agent file bills wrong on every dispatch for the rest of its life, and surfaces as a run that cost too much, never as a failure. Both are also the rarest lanes — quant runs only when the substance is mathematical, the linter only on an authoring order. |
+| `opus` | `tech-lead`, `engineer`, `reviewer` | **The owner's ruling (2026-11-22), not the test.** `tech-lead`'s design pass fixes the contract every build lane then follows, and it runs the integration gate. `engineer` writes the code that ships. `reviewer` is the last gate before the human, so what it misses arrives as accepted work. |
+| `sonnet` | `producer`, `designer`, `test-engineer`, `docs-engineer`, `scout` | Each produces work a later step can catch: a failing test, a gate verdict, `check_report.py`, or the human's approval. |
 | `haiku` | none today | Read-only retrieval where **both** halves are cheap: the claims are verifiable by opening the file they cite, *and* the report's own structure is simple enough that getting it wrong costs nothing. `scout` was the occupant and met the first half, never the second — see below. The tier stays because the criterion is sound; nothing currently qualifies. |
 
 **A report is not only its claims**, which is the half that is easy to miss when
@@ -150,18 +151,14 @@ other is only half-configured.
 an agent with no `effort:` line is not running "normally", it is running near
 the top of the range.
 
-**`medium` is this network's baseline.** Three levels are in use:
+**`medium` is this network's baseline, and its floor.** Two levels are in use:
 
 | Effort | Lanes | Why |
 |---|---|---|
-| `high` | `producer`, `designer`, `reviewer`, `engineer` | The lanes that **decide** something: where work belongs, what the user sees, whether it is acceptable, and the one that writes the code the contract describes. |
-| `low` | `tech-lead` | Opus at the lowest dial: the model tier buys the design and review judgment, and `low` keeps the report terse and the tool calls few. |
-| `medium` | `quantitative-researcher`, `protocol-linter`, `docs-engineer`, `test-engineer`, `scout` | Everything else. Applying, testing and retrieval all work against something another lane already fixed; the two no-downstream-check Opus lanes sit here because the tier, not the dial, is what buys their judgment. |
+| `high` | `producer`, `designer`, `test-engineer` | Sonnet lanes whose output the run leans on: where work belongs, what the user sees, and the tests that say the work is done. |
+| `medium` | `quantitative-researcher`, `protocol-linter`, `tech-lead`, `engineer`, `reviewer`, `docs-engineer`, `scout` | The five Opus lanes, where the tier and not the dial buys the judgment, and the two Sonnet lanes that apply or retrieve against something another lane already fixed. |
 
-`quantitative-researcher` and `protocol-linter` sit at `medium` **on the model
-tier, not on the effort dial**: they are the two lanes with no downstream
-check, and the tier is what buys their judgment. This is a deliberate trade — see the caveat
-below.
+No lane runs at `low`: the owner's ruling sets `medium` as the floor.
 
 `max` is not a default anywhere; it is the escalation for a lane the run has
 shown to be struggling, on the same evidence rule as a model
@@ -185,29 +182,28 @@ turns rather than depth. Leave it unset unless a lane demonstrably runs away —
 a turn cap that fires mid-task produces a truncated report, which is worse than
 an expensive one, and `status: PARTIAL` will not always catch it.
 
-### Why `review` and `ux-review` are on Sonnet
+### Why `ux-review` is on Sonnet
 
 `quant-audit` and `protocol-lint` are on Opus for the reason the model table
-gives — nothing downstream checks them. These two are different because
-something does: `ux-review` is followed by `review`, and `review` by the
-human's acceptance of the work itself. `integration` runs on `tech-lead`,
-which is on Opus by the owner's ruling, not by this reasoning.
+gives — nothing downstream checks them. `integration` and `review` are on Opus
+by the owner's ruling. `ux-review` is the one gate on Sonnet, because something
+does check it: it is followed by `review`, and `review` by the human's
+acceptance of the work itself.
 
 The second reason is the one to reuse when tiering a new gate. **A gate whose
 load-bearing checks sit on mechanisms is far less tier-sensitive than one
 leaning on the model noticing something.** `check_report.py` enforces the report
 shape, the head's counts and the brief's completeness; an acceptance criterion
 must name the observation that would prove it false; `gates.md` § 2 says what a
-gate must check against. These two have the most structure to lean on:
-`review` checks criteria that each name a falsifying observation, and
-`ux-review` checks a UX spec whose every check names the screenshot that would
-prove it false, with taste never blocking.
+gate must check against. `ux-review` has that structure to lean on: it checks a
+UX spec whose every check names the screenshot that would prove it false, with
+taste never blocking.
 
 ### Escalating a single dispatch
 
 The frontmatter is a **default, not a ceiling**. The orchestrator may override
-the model for one dispatch, and should when the run has produced evidence that
-the lane is out of its depth:
+the model or the effort for one dispatch, and should when the run has produced
+evidence that the lane is out of its depth:
 
 - a lane returned `BLOCKED` on something that is not a missing input,
 - a finding reaches its **second** change-request round, or

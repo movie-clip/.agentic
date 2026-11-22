@@ -249,14 +249,15 @@ none of it applies" is the rule it cites.
 **Model and effort are pinned in frontmatter on all ten, never `inherit`.**
 The policy is in `authoring.md`; the rationale is one test: *would a wrong
 answer from this lane be caught by anything downstream — a test, a gate, a
-validator, the human approval step?* If yes, Sonnet. If no, Opus. Only
+validator, the human approval step?* If no, Opus. Only
 `quantitative-researcher` and `protocol-linter` fail it. A wrong formula is
 engineered perfectly, tested thoroughly, satisfies every acceptance criterion
 and passes every other gate; a wrong `model:` line in an agent file bills wrong
-on every dispatch forever and shows up as nothing at all. `tech-lead` is also on
-Opus, by the owner's ruling rather than the test. `effort` is the second dial
-and is not the model — `high` for `designer`, `engineer`, `producer` and `reviewer`, `low`
-for `tech-lead`, `medium` for the rest, because the implicit default is `xhigh` and an omission is a silent
+on every dispatch forever and shows up as nothing at all. `tech-lead`, `engineer`
+and `reviewer` are also on Opus, by the owner's ruling of 2026-11-22 rather than
+the test. `effort` is the second dial and is not the model — `high` for
+`designer`, `producer` and `test-engineer`, `medium` for the rest, because the
+implicit default is `xhigh` and an omission is a silent
 escalation rather than a neutral one.
 
 ## 6. Why five gates

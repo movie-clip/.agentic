@@ -66,11 +66,11 @@ gates:        <every gate the project declares under `verify` — each a verdict
 |---|------|------|-------|-------|----------|--------|---------|
 | 01 | product | — | producer | sonnet | 01-delivery-brief.md | DONE | — |
 | 02 | quant | AUDIT | quantitative-researcher | opus | 02-quant-audit.md | DONE | PASS |
-| 03 | backend | — | engineer | opus↑ | 03-backend.md | DONE | — |
+| 03 | backend | — | engineer | opus/high↑ | 03-backend.md | DONE | — |
 
 `model` is the model the dispatch **actually ran on** — the agent file's default,
 or the override if you escalated. Record an effort override the same way
-(`sonnet/max↑`); an unoverridden dispatch needs only the model, since the agent
+(`opus/high↑`); an unoverridden dispatch needs only the model, since the agent
 file pins its effort. Mark an escalation with `↑`. Writing the default from
 memory rather than from the agent file is how this column becomes fiction; read
 it if you are unsure.
@@ -130,7 +130,7 @@ arrived. The budget was spent and the ledger has nothing to show for it.
 Write the row anyway:
 
 ```
-| 05 | frontend | — | engineer | sonnet | 05-frontend.md | LOST | — |
+| 05 | frontend | — | engineer | opus | 05-frontend.md | LOST | — |
 ```
 
 `LOST` is a ledger status, not a report status — no report exists to carry one.

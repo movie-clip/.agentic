@@ -1,0 +1,13 @@
+REPORT HEAD 2026-11-22-model-tiers/02
+artifact:        C:\projects\investments\.agentic\runs\2026-11-22-model-tiers\02-protocol-lint.md
+status:          DONE
+verdict:         PASS
+verification:    PASS
+detail:          validate passed (0 frontmatter errors); 0 BLOCKING, 0 SHOULD_FIX; all 4 findings of 01 satisfied; 10/10 agent frontmatters match both authoring.md tables; 2 UNVERIFIED; anchor: the ten agent files' fr
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         2
+skill_calls:     0
+risks:           3
+headline:        PASS: all four findings from 01 are fixed, the eight scope files have no new findings, and all ten agent frontmatters match both authoring.md tables.

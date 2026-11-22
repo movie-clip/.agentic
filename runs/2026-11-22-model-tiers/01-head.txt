@@ -1,0 +1,13 @@
+REPORT HEAD 2026-11-22-model-tiers/01
+artifact:        C:\projects\investments\.agentic\runs\2026-11-22-model-tiers\01-protocol-lint.md
+status:          DONE
+verdict:         FAIL
+verification:    PASS
+detail:          validate passed (0 frontmatter errors); 1 BLOCKING (rule 9), 3 SHOULD_FIX (rule 8); 10/10 agent frontmatters match both authoring.md tables; 0 leftover old values; 2 UNVERIFIED; anchor: the ten agent 
+changed:         0
+contract_notes:  0
+pack_corrections: 0
+handoff:         5
+skill_calls:     0
+risks:           4
+headline:        FAIL: all ten agent files match both tables, but authoring.md:164-167 (effort max for any lane) contradicts the new Opus-only effort override at :205-206.
